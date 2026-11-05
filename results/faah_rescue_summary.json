@@ -1,0 +1,9 @@
+{
+  "n_natural_inhibitors": 6,
+  "overlap_with_chembl": 0,
+  "baseline_median_p": 3.509e-05,
+  "loo_median_p": 0.329796,
+  "baseline_n_above_0.5": 0,
+  "loo_n_above_0.5": 1,
+  "interpretation": "Each compound is scored by a model that never saw it. The baseline column is a model trained on ChEMBL FAAH data alone; the LOO column adds only the other five natural inhibitors. Any large gain is attributable to those few curated literature actives, and shows the blind spot is a data-coverage problem rather than a limitation of the representation."
+}

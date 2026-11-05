@@ -1,0 +1,658 @@
+[
+  {
+    "target": "CB1",
+    "scope": "human",
+    "label_col": "label",
+    "n_compounds": 19871,
+    "n_active": 4311,
+    "active_rate": 0.2169,
+    "n_measured": 7220,
+    "measured_active_rate": 0.5971,
+    "n_scaffolds": 11711,
+    "decoy_matching": {
+      "actives": {
+        "n": 4311,
+        "mw_median": 456.4,
+        "mw_iqr": 133.2,
+        "clogp_median": 5.59,
+        "clogp_iqr": 2.17
+      },
+      "decoys": {
+        "n": 12651,
+        "mw_median": 444.3,
+        "mw_iqr": 125.2,
+        "clogp_median": 5.15,
+        "clogp_iqr": 2.1
+      },
+      "mw_median_gap": 12.1,
+      "clogp_median_gap": 0.44
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 3975,
+          "n_active": 863,
+          "active_rate": 0.2171,
+          "pr_auc": 0.9706,
+          "roc_auc": 0.9886,
+          "mcc": 0.9003,
+          "balanced_acc": 0.9426,
+          "ef_1pct": 4.61,
+          "ef_5pct": 4.61
+        },
+        "lightgbm": {
+          "n": 3975,
+          "n_active": 863,
+          "active_rate": 0.2171,
+          "pr_auc": 0.9762,
+          "roc_auc": 0.9908,
+          "mcc": 0.9142,
+          "balanced_acc": 0.9526,
+          "ef_1pct": 4.61,
+          "ef_5pct": 4.56
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 3905,
+          "n_active": 776,
+          "active_rate": 0.1987,
+          "pr_auc": 0.9494,
+          "roc_auc": 0.9812,
+          "mcc": 0.853,
+          "balanced_acc": 0.9147,
+          "ef_1pct": 5.03,
+          "ef_5pct": 4.98,
+          "pr_auc_gap_vs_random": 0.0212
+        },
+        "lightgbm": {
+          "n": 3905,
+          "n_active": 776,
+          "active_rate": 0.1987,
+          "pr_auc": 0.9605,
+          "roc_auc": 0.9842,
+          "mcc": 0.8903,
+          "balanced_acc": 0.9439,
+          "ef_1pct": 5.03,
+          "ef_5pct": 5.01,
+          "pr_auc_gap_vs_random": 0.0157
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "CB1",
+    "scope": "all",
+    "label_col": "label",
+    "n_compounds": 25594,
+    "n_active": 5774,
+    "active_rate": 0.2256,
+    "n_measured": 8824,
+    "measured_active_rate": 0.6544,
+    "n_scaffolds": 14878,
+    "decoy_matching": {
+      "actives": {
+        "n": 5774,
+        "mw_median": 458.4,
+        "mw_iqr": 136.5,
+        "clogp_median": 5.74,
+        "clogp_iqr": 2.09
+      },
+      "decoys": {
+        "n": 16770,
+        "mw_median": 433.5,
+        "mw_iqr": 127.7,
+        "clogp_median": 4.93,
+        "clogp_iqr": 2.16
+      },
+      "mw_median_gap": 24.9,
+      "clogp_median_gap": 0.81
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 5119,
+          "n_active": 1155,
+          "active_rate": 0.2256,
+          "pr_auc": 0.9705,
+          "roc_auc": 0.9902,
+          "mcc": 0.9032,
+          "balanced_acc": 0.9482,
+          "ef_1pct": 4.43,
+          "ef_5pct": 4.4
+        },
+        "lightgbm": {
+          "n": 5119,
+          "n_active": 1155,
+          "active_rate": 0.2256,
+          "pr_auc": 0.9745,
+          "roc_auc": 0.9896,
+          "mcc": 0.9192,
+          "balanced_acc": 0.9609,
+          "ef_1pct": 4.43,
+          "ef_5pct": 4.4
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 5105,
+          "n_active": 1173,
+          "active_rate": 0.2298,
+          "pr_auc": 0.9666,
+          "roc_auc": 0.9877,
+          "mcc": 0.8712,
+          "balanced_acc": 0.9193,
+          "ef_1pct": 4.35,
+          "ef_5pct": 4.34,
+          "pr_auc_gap_vs_random": 0.0039
+        },
+        "lightgbm": {
+          "n": 5105,
+          "n_active": 1173,
+          "active_rate": 0.2298,
+          "pr_auc": 0.9807,
+          "roc_auc": 0.9927,
+          "mcc": 0.9151,
+          "balanced_acc": 0.952,
+          "ef_1pct": 4.35,
+          "ef_5pct": 4.34,
+          "pr_auc_gap_vs_random": -0.0062
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "FAAH",
+    "scope": "human",
+    "label_col": "label",
+    "n_compounds": 5776,
+    "n_active": 1352,
+    "active_rate": 0.2341,
+    "n_measured": 1800,
+    "measured_active_rate": 0.7511,
+    "n_scaffolds": 4119,
+    "decoy_matching": {
+      "actives": {
+        "n": 1352,
+        "mw_median": 404.4,
+        "mw_iqr": 95.4,
+        "clogp_median": 4.72,
+        "clogp_iqr": 1.65
+      },
+      "decoys": {
+        "n": 3976,
+        "mw_median": 405.3,
+        "mw_iqr": 97.9,
+        "clogp_median": 4.67,
+        "clogp_iqr": 1.61
+      },
+      "mw_median_gap": 0.9,
+      "clogp_median_gap": 0.05
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 1156,
+          "n_active": 271,
+          "active_rate": 0.2344,
+          "pr_auc": 0.963,
+          "roc_auc": 0.9857,
+          "mcc": 0.9036,
+          "balanced_acc": 0.9518,
+          "ef_1pct": 4.27,
+          "ef_5pct": 4.27
+        },
+        "lightgbm": {
+          "n": 1156,
+          "n_active": 271,
+          "active_rate": 0.2344,
+          "pr_auc": 0.9692,
+          "roc_auc": 0.9886,
+          "mcc": 0.9076,
+          "balanced_acc": 0.9491,
+          "ef_1pct": 4.27,
+          "ef_5pct": 4.19
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 1118,
+          "n_active": 254,
+          "active_rate": 0.2272,
+          "pr_auc": 0.9423,
+          "roc_auc": 0.9843,
+          "mcc": 0.8444,
+          "balanced_acc": 0.9216,
+          "ef_1pct": 4.4,
+          "ef_5pct": 4.24,
+          "pr_auc_gap_vs_random": 0.0207
+        },
+        "lightgbm": {
+          "n": 1118,
+          "n_active": 254,
+          "active_rate": 0.2272,
+          "pr_auc": 0.9564,
+          "roc_auc": 0.9864,
+          "mcc": 0.9035,
+          "balanced_acc": 0.953,
+          "ef_1pct": 4.4,
+          "ef_5pct": 4.24,
+          "pr_auc_gap_vs_random": 0.0128
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "FAAH",
+    "scope": "human",
+    "label_col": "label_10um",
+    "n_compounds": 7393,
+    "n_active": 1766,
+    "active_rate": 0.2389,
+    "n_measured": 2198,
+    "measured_active_rate": 0.8035,
+    "n_scaffolds": 5166,
+    "decoy_matching": {
+      "actives": {
+        "n": 1766,
+        "mw_median": 398.8,
+        "mw_iqr": 99.0,
+        "clogp_median": 4.68,
+        "clogp_iqr": 1.65
+      },
+      "decoys": {
+        "n": 5195,
+        "mw_median": 400.5,
+        "mw_iqr": 99.1,
+        "clogp_median": 4.58,
+        "clogp_iqr": 1.74
+      },
+      "mw_median_gap": 1.7,
+      "clogp_median_gap": 0.1
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 1479,
+          "n_active": 354,
+          "active_rate": 0.2394,
+          "pr_auc": 0.9501,
+          "roc_auc": 0.9797,
+          "mcc": 0.8705,
+          "balanced_acc": 0.9369,
+          "ef_1pct": 4.18,
+          "ef_5pct": 4.12
+        },
+        "lightgbm": {
+          "n": 1479,
+          "n_active": 354,
+          "active_rate": 0.2394,
+          "pr_auc": 0.9544,
+          "roc_auc": 0.9831,
+          "mcc": 0.8925,
+          "balanced_acc": 0.9471,
+          "ef_1pct": 4.18,
+          "ef_5pct": 4.12
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 1547,
+          "n_active": 425,
+          "active_rate": 0.2747,
+          "pr_auc": 0.8792,
+          "roc_auc": 0.9167,
+          "mcc": 0.7644,
+          "balanced_acc": 0.8582,
+          "ef_1pct": 3.64,
+          "ef_5pct": 3.59,
+          "pr_auc_gap_vs_random": 0.0709
+        },
+        "lightgbm": {
+          "n": 1547,
+          "n_active": 425,
+          "active_rate": 0.2747,
+          "pr_auc": 0.8946,
+          "roc_auc": 0.9314,
+          "mcc": 0.8006,
+          "balanced_acc": 0.8771,
+          "ef_1pct": 3.64,
+          "ef_5pct": 3.59,
+          "pr_auc_gap_vs_random": 0.0598
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "FAAH",
+    "scope": "all",
+    "label_col": "label",
+    "n_compounds": 10247,
+    "n_active": 2371,
+    "active_rate": 0.2314,
+    "n_measured": 3315,
+    "measured_active_rate": 0.7152,
+    "n_scaffolds": 6745,
+    "decoy_matching": {
+      "actives": {
+        "n": 2371,
+        "mw_median": 393.3,
+        "mw_iqr": 95.2,
+        "clogp_median": 4.63,
+        "clogp_iqr": 1.74
+      },
+      "decoys": {
+        "n": 6932,
+        "mw_median": 393.6,
+        "mw_iqr": 96.4,
+        "clogp_median": 4.54,
+        "clogp_iqr": 1.79
+      },
+      "mw_median_gap": 0.3,
+      "clogp_median_gap": 0.09
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 2050,
+          "n_active": 475,
+          "active_rate": 0.2317,
+          "pr_auc": 0.9664,
+          "roc_auc": 0.9902,
+          "mcc": 0.8917,
+          "balanced_acc": 0.9455,
+          "ef_1pct": 4.32,
+          "ef_5pct": 4.27
+        },
+        "lightgbm": {
+          "n": 2050,
+          "n_active": 475,
+          "active_rate": 0.2317,
+          "pr_auc": 0.973,
+          "roc_auc": 0.9921,
+          "mcc": 0.914,
+          "balanced_acc": 0.9587,
+          "ef_1pct": 4.32,
+          "ef_5pct": 4.27
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 1910,
+          "n_active": 315,
+          "active_rate": 0.1649,
+          "pr_auc": 0.9471,
+          "roc_auc": 0.9845,
+          "mcc": 0.8571,
+          "balanced_acc": 0.9208,
+          "ef_1pct": 6.06,
+          "ef_5pct": 5.94,
+          "pr_auc_gap_vs_random": 0.0193
+        },
+        "lightgbm": {
+          "n": 1910,
+          "n_active": 315,
+          "active_rate": 0.1649,
+          "pr_auc": 0.9622,
+          "roc_auc": 0.9866,
+          "mcc": 0.9014,
+          "balanced_acc": 0.9519,
+          "ef_1pct": 6.06,
+          "ef_5pct": 6.0,
+          "pr_auc_gap_vs_random": 0.0108
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "FAAH",
+    "scope": "all",
+    "label_col": "label_10um",
+    "n_compounds": 12697,
+    "n_active": 3013,
+    "active_rate": 0.2373,
+    "n_measured": 3914,
+    "measured_active_rate": 0.7698,
+    "n_scaffolds": 8219,
+    "decoy_matching": {
+      "actives": {
+        "n": 3013,
+        "mw_median": 389.4,
+        "mw_iqr": 95.5,
+        "clogp_median": 4.59,
+        "clogp_iqr": 1.75
+      },
+      "decoys": {
+        "n": 8783,
+        "mw_median": 391.4,
+        "mw_iqr": 97.1,
+        "clogp_median": 4.47,
+        "clogp_iqr": 1.8
+      },
+      "mw_median_gap": 2.0,
+      "clogp_median_gap": 0.12
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 2540,
+          "n_active": 603,
+          "active_rate": 0.2374,
+          "pr_auc": 0.9614,
+          "roc_auc": 0.9865,
+          "mcc": 0.8762,
+          "balanced_acc": 0.9386,
+          "ef_1pct": 4.21,
+          "ef_5pct": 4.21
+        },
+        "lightgbm": {
+          "n": 2540,
+          "n_active": 603,
+          "active_rate": 0.2374,
+          "pr_auc": 0.9665,
+          "roc_auc": 0.9855,
+          "mcc": 0.8899,
+          "balanced_acc": 0.9437,
+          "ef_1pct": 4.21,
+          "ef_5pct": 4.21
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 2502,
+          "n_active": 532,
+          "active_rate": 0.2126,
+          "pr_auc": 0.9142,
+          "roc_auc": 0.9771,
+          "mcc": 0.81,
+          "balanced_acc": 0.8952,
+          "ef_1pct": 4.7,
+          "ef_5pct": 4.51,
+          "pr_auc_gap_vs_random": 0.0472
+        },
+        "lightgbm": {
+          "n": 2502,
+          "n_active": 532,
+          "active_rate": 0.2126,
+          "pr_auc": 0.9302,
+          "roc_auc": 0.9773,
+          "mcc": 0.8538,
+          "balanced_acc": 0.9251,
+          "ef_1pct": 4.7,
+          "ef_5pct": 4.59,
+          "pr_auc_gap_vs_random": 0.0363
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "TRPV1",
+    "scope": "human",
+    "label_col": "label",
+    "n_compounds": 12610,
+    "n_active": 3044,
+    "active_rate": 0.2414,
+    "n_measured": 3605,
+    "measured_active_rate": 0.8444,
+    "n_scaffolds": 7670,
+    "decoy_matching": {
+      "actives": {
+        "n": 3044,
+        "mw_median": 447.6,
+        "mw_iqr": 121.1,
+        "clogp_median": 4.84,
+        "clogp_iqr": 1.33
+      },
+      "decoys": {
+        "n": 9005,
+        "mw_median": 446.5,
+        "mw_iqr": 117.0,
+        "clogp_median": 4.81,
+        "clogp_iqr": 1.39
+      },
+      "mw_median_gap": 1.1,
+      "clogp_median_gap": 0.03
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 2522,
+          "n_active": 609,
+          "active_rate": 0.2415,
+          "pr_auc": 0.9898,
+          "roc_auc": 0.9962,
+          "mcc": 0.9545,
+          "balanced_acc": 0.9767,
+          "ef_1pct": 4.14,
+          "ef_5pct": 4.14
+        },
+        "lightgbm": {
+          "n": 2522,
+          "n_active": 609,
+          "active_rate": 0.2415,
+          "pr_auc": 0.9928,
+          "roc_auc": 0.9967,
+          "mcc": 0.9576,
+          "balanced_acc": 0.9769,
+          "ef_1pct": 4.14,
+          "ef_5pct": 4.14
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 2625,
+          "n_active": 687,
+          "active_rate": 0.2617,
+          "pr_auc": 0.9579,
+          "roc_auc": 0.9878,
+          "mcc": 0.8575,
+          "balanced_acc": 0.9159,
+          "ef_1pct": 3.82,
+          "ef_5pct": 3.73,
+          "pr_auc_gap_vs_random": 0.0319
+        },
+        "lightgbm": {
+          "n": 2625,
+          "n_active": 687,
+          "active_rate": 0.2617,
+          "pr_auc": 0.9729,
+          "roc_auc": 0.9924,
+          "mcc": 0.9045,
+          "balanced_acc": 0.9461,
+          "ef_1pct": 3.82,
+          "ef_5pct": 3.79,
+          "pr_auc_gap_vs_random": 0.0199
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  },
+  {
+    "target": "TRPV1",
+    "scope": "all",
+    "label_col": "label",
+    "n_compounds": 15315,
+    "n_active": 3715,
+    "active_rate": 0.2426,
+    "n_measured": 4331,
+    "measured_active_rate": 0.8578,
+    "n_scaffolds": 9143,
+    "decoy_matching": {
+      "actives": {
+        "n": 3715,
+        "mw_median": 451.6,
+        "mw_iqr": 122.0,
+        "clogp_median": 4.82,
+        "clogp_iqr": 1.33
+      },
+      "decoys": {
+        "n": 10984,
+        "mw_median": 450.4,
+        "mw_iqr": 116.5,
+        "clogp_median": 4.79,
+        "clogp_iqr": 1.41
+      },
+      "mw_median_gap": 1.2,
+      "clogp_median_gap": 0.03
+    },
+    "splits": {
+      "random": {
+        "random_forest": {
+          "n": 3063,
+          "n_active": 743,
+          "active_rate": 0.2426,
+          "pr_auc": 0.9852,
+          "roc_auc": 0.9942,
+          "mcc": 0.9432,
+          "balanced_acc": 0.972,
+          "ef_1pct": 4.12,
+          "ef_5pct": 4.12
+        },
+        "lightgbm": {
+          "n": 3063,
+          "n_active": 743,
+          "active_rate": 0.2426,
+          "pr_auc": 0.9892,
+          "roc_auc": 0.9951,
+          "mcc": 0.9548,
+          "balanced_acc": 0.9785,
+          "ef_1pct": 4.12,
+          "ef_5pct": 4.12
+        }
+      },
+      "scaffold": {
+        "random_forest": {
+          "n": 3013,
+          "n_active": 685,
+          "active_rate": 0.2273,
+          "pr_auc": 0.9687,
+          "roc_auc": 0.9918,
+          "mcc": 0.8748,
+          "balanced_acc": 0.9242,
+          "ef_1pct": 4.4,
+          "ef_5pct": 4.34,
+          "pr_auc_gap_vs_random": 0.0165
+        },
+        "lightgbm": {
+          "n": 3013,
+          "n_active": 685,
+          "active_rate": 0.2273,
+          "pr_auc": 0.9831,
+          "roc_auc": 0.9948,
+          "mcc": 0.9005,
+          "balanced_acc": 0.9426,
+          "ef_1pct": 4.4,
+          "ef_5pct": 4.4,
+          "pr_auc_gap_vs_random": 0.0061
+        }
+      }
+    },
+    "selected_model": "lightgbm"
+  }
+]

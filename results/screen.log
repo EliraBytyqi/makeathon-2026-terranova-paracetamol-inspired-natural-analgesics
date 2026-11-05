@@ -1,0 +1,11 @@
+﻿library: 145,380 unique plant compounds
+models in use:
+   CB1    lightgbm       scope=human label=label      scaffold PR-AUC=0.9605
+   FAAH   lightgbm       scope=human label=label_10um scaffold PR-AUC=0.8946
+   TRPV1  lightgbm       scope=human label=label      scaffold PR-AUC=0.9729
+
+leakage control: 216 library compounds appear in ChEMBL training data and are held out as positive controls
+novel compounds to screen: 145,164
+
+scoring novel compounds...
+   featurizing 145,164 compounds...

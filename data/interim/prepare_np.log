@@ -1,0 +1,59 @@
+﻿loaded 558,566 compound-organism pairs
+152,414 unique raw SMILES -> standardizing...
+   25,000/152,414
+   50,000/152,414
+   75,000/152,414
+   100,000/152,414
+   125,000/152,414
+   150,000/152,414
+standardized OK: 145,402
+rejected:
+   too_large                              6,608
+   too_small                              214
+   mw_too_high                            115
+   disallowed_element:Si                  40
+   disallowed_element:As                  6
+   disallowed_element:B                   3
+   disallowed_element:Mn                  3
+   disallowed_element:K                   2
+   disallowed_element:Ca                  2
+   disallowed_element:Ge                  2
+   disallowed_element:Mg                  2
+   disallowed_element:Na                  2
+pairs surviving standardization: 545,656
+
+collapsing to unique compounds...
+unique compounds: 145,380
+tier
+plant_background    128651
+pain_seed            16729
+
+profiling physicochemistry and reactive-metabolite alerts...
+   25,000/145,380
+   50,000/145,380
+   75,000/145,380
+   100,000/145,380
+   125,000/145,380
+
+wrote C:\Users\fjoll\OneDrive\Desktop\terranova\data\processed\np_library.csv  shape=(145380, 38)
+
+--- reactive alert prevalence in plant chemical space ---
+compounds with >=1 alert : 41.4%
+compounds with severity 3: 0.6%
+PAINS-flagged            : 9.1%
+CNS-like physchem        : 27.2%
+
+most common alerts:
+reactive_alerts
+michael_acceptor_ester     26076
+michael_acceptor_enone     17002
+catechol                    9449
+epoxide                     7927
+furan                       7330
+alpha_methylene_lactone     6273
+aldehyde                    4796
+hydroquinone                1059
+para_quinone                 619
+terminal_alkyne              382
+aniline_primary              325
+thiophene                    243

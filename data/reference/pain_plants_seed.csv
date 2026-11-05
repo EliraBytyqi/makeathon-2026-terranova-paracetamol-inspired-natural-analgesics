@@ -1,0 +1,51 @@
+genus,species,family,common_name,traditional_pain_use,relevant_target_hypothesis,evidence_note
+Capsicum,Capsicum annuum,Solanaceae,chili pepper,topical counterirritant for neuropathic and musculoskeletal pain,TRPV1,capsaicin is the canonical TRPV1 agonist; basis of licensed topical analgesics
+Capsicum,Capsicum frutescens,Solanaceae,tabasco pepper,topical analgesic rubefacient,TRPV1,capsaicinoid source
+Curcuma,Curcuma longa,Zingiberaceae,turmeric,anti-inflammatory and analgesic in Ayurveda,TRPV1;COX,curcumin reported to inhibit capsaicin-evoked TRPV1 currents
+Zingiber,Zingiber officinale,Zingiberaceae,ginger,analgesic and anti-inflammatory; muscle soreness,TRPV1,gingerols and shogaols are vanilloid-type TRPV1 agonists
+Piper,Piper nigrum,Piperaceae,black pepper,warming analgesic in traditional medicine,TRPV1,piperine is a TRPV1 agonist
+Piper,Piper longum,Piperaceae,long pepper,analgesic and anti-inflammatory,TRPV1,piperine-type amides
+Syzygium,Syzygium aromaticum,Myrtaceae,clove,dental analgesic,TRPV1,eugenol is a partial TRPV1 agonist and competitive capsaicin antagonist
+Salix,Salix alba,Salicaceae,white willow,classical analgesic and antipyretic bark,COX,salicin is the historical precursor of salicylate analgesics
+Cannabis,Cannabis sativa,Cannabaceae,cannabis,analgesic in traditional and modern use,CB1;TRPV1,phytocannabinoids engage CB1 and modulate TRPV1
+Silybum,Silybum marianum,Asteraceae,milk thistle,hepatoprotective; used alongside analgesics,FAAH,silybin reported as a FAAH inhibitor; hepatoprotection is relevant to our safety axis
+Glycine,Glycine max,Fabaceae,soybean,dietary isoflavone source,FAAH,genistein and daidzein reported as FAAH inhibitors
+Trifolium,Trifolium pratense,Fabaceae,red clover,traditional anti-inflammatory,FAAH,biochanin A source
+Eriodictyon,Eriodictyon californicum,Boraginaceae,yerba santa,traditional use for pain and respiratory complaints,TRPV1,eriodictyol reported to block capsaicin-evoked responses
+Myristica,Myristica fragrans,Myristicaceae,nutmeg,analgesic and anti-inflammatory in traditional use,FAAH,licarin A reported as a FAAH inhibitor
+Dracaena,Dracaena cochinchinensis,Asparagaceae,dragon's blood,traditional use for pain and wounds,TRPV1,loureirin B reported to inhibit TRPV1
+Harpagophytum,Harpagophytum procumbens,Pedaliaceae,devil's claw,arthritic and low back pain,COX,harpagoside-containing iridoid glycosides
+Boswellia,Boswellia serrata,Burseraceae,indian frankincense,joint pain and inflammation,COX;TRPV1,boswellic acids
+Corydalis,Corydalis yanhusuo,Papaveraceae,yan hu suo,classical Chinese analgesic herb,other,tetrahydropalmatine-type alkaloids with antinociceptive activity
+Angelica,Angelica sinensis,Apiaceae,dong quai,analgesic in Chinese medicine,other,ligustilide-type phthalides
+Eucalyptus,Eucalyptus globulus,Myrtaceae,eucalyptus,topical analgesic and counterirritant,TRPV1;TRPM8,cineole-containing essential oil
+Mentha,Mentha piperita,Lamiaceae,peppermint,topical analgesic and counterirritant,TRPM8;TRPV1,menthol-containing essential oil
+Rosmarinus,Rosmarinus officinalis,Lamiaceae,rosemary,topical anti-inflammatory,TRPV1,carnosol and rosmarinic acid
+Salvia,Salvia miltiorrhiza,Lamiaceae,danshen,used for pain and circulation,other,tanshinone diterpenes
+Scutellaria,Scutellaria baicalensis,Lamiaceae,baikal skullcap,anti-inflammatory,FAAH,baicalein and flavone scaffolds related to FAAH-inhibiting flavonoids
+Withania,Withania somnifera,Solanaceae,ashwagandha,anti-inflammatory and analgesic adaptogen,other,withanolides
+Tanacetum,Tanacetum parthenium,Asteraceae,feverfew,migraine prophylaxis,TRPV1,parthenolide interacts with TRP channels
+Zanthoxylum,Zanthoxylum bungeanum,Rutaceae,sichuan pepper,local anaesthetic tingling; toothache,TRPV1,sanshool alkylamides
+Echinacea,Echinacea purpurea,Asteraceae,coneflower,traditional anti-inflammatory,CB1,alkylamides reported to bind cannabinoid receptors
+Acmella,Acmella oleracea,Asteraceae,toothache plant,local analgesic for toothache,TRPV1,spilanthol alkylamide
+Humulus,Humulus lupulus,Cannabaceae,hops,sedative and anti-inflammatory,CB1,prenylflavonoids; Cannabaceae relative of Cannabis
+Lavandula,Lavandula angustifolia,Lamiaceae,lavender,analgesic and anxiolytic aromatherapy,other,linalool-containing essential oil
+Matricaria,Matricaria chamomilla,Asteraceae,chamomile,anti-inflammatory and antispasmodic,other,apigenin and bisabolol
+Ginkgo,Ginkgo biloba,Ginkgoaceae,ginkgo,used for neuropathic complaints,other,flavonol glycosides and terpene lactones
+Camellia,Camellia sinensis,Theaceae,tea,anti-inflammatory dietary source,FAAH,catechins and flavonols including kaempferol
+Allium,Allium sativum,Amaryllidaceae,garlic,traditional anti-inflammatory,TRPV1;TRPA1,allicin and organosulfur compounds
+Nigella,Nigella sativa,Ranunculaceae,black cumin,analgesic and anti-inflammatory,TRPV1,thymoquinone
+Crocus,Crocus sativus,Iridaceae,saffron,analgesic and antidepressant traditional use,other,crocin and safranal
+Uncaria,Uncaria tomentosa,Rubiaceae,cat's claw,arthritic pain,other,oxindole alkaloids
+Petasites,Petasites hybridus,Asteraceae,butterbur,migraine prophylaxis,TRPV1,petasin sesquiterpenes
+Arnica,Arnica montana,Asteraceae,arnica,topical for bruising and muscle pain,other,sesquiterpene lactones
+Hypericum,Hypericum perforatum,Hypericaceae,st john's wort,neuropathic pain adjunct,CB1,hyperforin modulates ion channels
+Valeriana,Valeriana officinalis,Caprifoliaceae,valerian,sedative and antispasmodic,other,valepotriates
+Aconitum,Aconitum carmichaelii,Ranunculaceae,monkshood,classical analgesic used only after processing,other,diterpene alkaloids; highly toxic parent compounds
+Papaver,Papaver somniferum,Papaveraceae,opium poppy,canonical analgesic source,opioid,benchmark analgesic chemistry outside our target panel
+Stephania,Stephania tetrandra,Menispermaceae,han fang ji,analgesic and anti-inflammatory,other,tetrandrine bisbenzylisoquinoline
+Sinomenium,Sinomenium acutum,Menispermaceae,qing feng teng,rheumatic pain,other,sinomenine
+Clematis,Clematis chinensis,Ranunculaceae,wei ling xian,rheumatic pain,other,triterpene saponins
+Gentiana,Gentiana macrophylla,Gentianaceae,qin jiao,rheumatic pain,other,gentiopicroside iridoids
+Ligusticum,Ligusticum chuanxiong,Apiaceae,chuanxiong,headache and pain in Chinese medicine,other,ligustilide and tetramethylpyrazine
+Vitex,Vitex agnus-castus,Lamiaceae,chaste tree,pelvic pain,other,iridoids and flavonoids

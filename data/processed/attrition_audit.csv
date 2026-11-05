@@ -1,0 +1,12 @@
+step,rows
+raw activity records,58394
+has SMILES,58287
+"assay_type in {B,F}",57214
+"standard_type in {IC50,EC50,Ki,Kd}",35510
+units == nM,32574
+has numeric value,32386
+value > 0,32386
+no data_validity_comment,31854
+"relation in {=, >, >=}",31510
+"pactivity in plausible range [2, 12]",31510
+structure standardized,31271

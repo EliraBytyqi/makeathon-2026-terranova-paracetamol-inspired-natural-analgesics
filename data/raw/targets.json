@@ -1,0 +1,89 @@
+{
+  "TRPV1": {
+    "human": [
+      {
+        "target_chembl_id": "CHEMBL4794",
+        "pref_name": "Transient receptor potential cation channel subfamily V member 1",
+        "organism": "Homo sapiens",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "Q8NER1"
+      }
+    ],
+    "rat": [
+      {
+        "target_chembl_id": "CHEMBL5102",
+        "pref_name": "Transient receptor potential cation channel subfamily V member 1",
+        "organism": "Rattus norvegicus",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "O35433"
+      }
+    ],
+    "mouse": [
+      {
+        "target_chembl_id": "CHEMBL1781864",
+        "pref_name": "Transient receptor potential cation channel subfamily V member 1",
+        "organism": "Mus musculus",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "Q704Y3"
+      }
+    ]
+  },
+  "CB1": {
+    "human": [
+      {
+        "target_chembl_id": "CHEMBL218",
+        "pref_name": "Cannabinoid receptor 1",
+        "organism": "Homo sapiens",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "P21554"
+      }
+    ],
+    "rat": [
+      {
+        "target_chembl_id": "CHEMBL3571",
+        "pref_name": "Cannabinoid receptor 1",
+        "organism": "Rattus norvegicus",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "P20272"
+      }
+    ],
+    "mouse": [
+      {
+        "target_chembl_id": "CHEMBL3037",
+        "pref_name": "Cannabinoid receptor 1",
+        "organism": "Mus musculus",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "P47746"
+      }
+    ]
+  },
+  "FAAH": {
+    "human": [
+      {
+        "target_chembl_id": "CHEMBL2243",
+        "pref_name": "Fatty-acid amide hydrolase 1",
+        "organism": "Homo sapiens",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "O00519"
+      }
+    ],
+    "rat": [
+      {
+        "target_chembl_id": "CHEMBL3229",
+        "pref_name": "Fatty-acid amide hydrolase 1",
+        "organism": "Rattus norvegicus",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "P97612"
+      }
+    ],
+    "mouse": [
+      {
+        "target_chembl_id": "CHEMBL3455",
+        "pref_name": "Fatty-acid amide hydrolase 1",
+        "organism": "Mus musculus",
+        "target_type": "SINGLE PROTEIN",
+        "accession": "O08914"
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+target,scope,compounds,active_1uM,inactive_10uM,ambiguous,active_rate,active_10uM_cut
+CB1,human,9034,4311,2909,1814,0.597,5601
+CB1,all,10953,6067,3197,2289,0.655,7653
+FAAH,human,2271,1352,448,471,0.751,1766
+FAAH,all,4257,2893,986,1100,0.746,3673
+TRPV1,human,4172,3044,561,567,0.844,3511
+TRPV1,all,5042,4185,639,926,0.868,4915

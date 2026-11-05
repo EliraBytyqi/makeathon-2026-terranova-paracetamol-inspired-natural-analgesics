@@ -1,0 +1,30 @@
+compound_name,target,interaction,assay_format,species,value_type,value_uM,source_note,confidence
+Kaempferol,FAAH,inhibition,AEA hydrolysis,human,Ki,5.0,"Thors et al. 2008, competitive inhibition; a separate review table reports IC50 ~1.06 uM",medium
+Kaempferol,FAAH,inhibition,AEA hydrolysis,human,IC50,1.06,"review table value; original paper reports Ki 5 uM - values disagree, treat with caution",low
+Genistein,FAAH,inhibition,AEA hydrolysis,human,IC50,1.3,"Zada et al. 2022 Pharmacol Res Perspect; earlier work reports Ki 8 uM",medium
+Genistein,FAAH,inhibition,AEA hydrolysis,human,Ki,8.0,"earlier competitive-inhibition study",medium
+Biochanin A,FAAH,inhibition,AEA hydrolysis,human,IC50,2.4,"human enzyme; same study reports mouse 1.8 and rat 1.4 uM",high
+Biochanin A,FAAH,inhibition,AEA hydrolysis,human,IC50,2.1,"Zada et al. 2022",high
+Daidzein,FAAH,inhibition,AEA hydrolysis,human,IC50,14.0,"weaker isoflavone; rodent values lower (mouse 4.4, rat 2.5 uM)",medium
+7-Hydroxyflavone,FAAH,inhibition,AEA hydrolysis,human,IC50,2.04,"flavone scaffold SAR series",medium
+Licarin A,FAAH,inhibition,AEA hydrolysis,human,IC50,7.02,"neolignan from Myristica fragrans; reported 7.02 +/- 2.02 uM",medium
+Silybin,FAAH,inhibition,AEA hydrolysis,human,IC50,5.08,"flavonolignan from Silybum marianum; 5.08 +/- 0.08 uM",medium
+N-benzyl-linoleamide,FAAH,inhibition,AEA hydrolysis,human,IC50,7.2,"fatty acid amide analogue",medium
+Eriodictyol,TRPV1,inhibition,calcium imaging,rat,IC50,0.044,"blocks capsaicin-evoked calcium influx; a related study reports IC50 47 nM for RTX binding displacement",medium
+Curcumin,TRPV1,inhibition,patch clamp,rat,IC50,0.067,"reduces capsaicin-induced currents in trigeminal neurons and TRPV1-HEK293",medium
+Loureirin B,TRPV1,inhibition,patch clamp,rat,IC50,4.13,"from Dracaena dragon's blood resin",medium
+Cannabidiol,TRPV1,activation+desensitisation,calcium imaging,human,EC50,1.0,"activates then desensitises; desensitisation IC50 0.6 uM - agonist not blocker",high
+6-Gingerol,TRPV1,activation,calcium imaging,rat,EC50,4.55,"vanilloid-type agonist from Zingiber officinale",high
+Capsaicin,TRPV1,activation,calcium imaging,rat,EC50,0.712,"canonical TRPV1 agonist - positive control",high
+Resiniferatoxin,TRPV1,activation,binding,rat,Ki,0.0002,"ultrapotent vanilloid agonist - positive control",high
+Capsazepine,TRPV1,inhibition,calcium imaging,rat,IC50,0.42,"competitive TRPV1 antagonist - positive control",high
+Eugenol,TRPV1,partial activation,patch clamp,rat,EC50,300.0,"weak partial agonist and competitive capsaicin antagonist; very low potency",medium
+Piperine,TRPV1,activation,calcium imaging,human,EC50,37.9,"pungent amide from Piper nigrum",medium
+Delta-9-THC,CB1,activation,binding,human,Ki,0.0407,"canonical phytocannabinoid CB1 partial agonist - positive control",high
+Cannabidiol,CB1,weak binding,binding,human,Ki,4.35,"low CB1 affinity; acts largely through other mechanisms",high
+Anandamide,CB1,activation,binding,human,Ki,0.089,"endogenous ligand - positive control and FAAH substrate",high
+AM404,TRPV1,activation,calcium imaging,rat,EC50,2.0,"paracetamol metabolite; project motivation compound",medium
+AM404,CB1,weak binding,binding,rat,Ki,1.76,"weak direct CB1 affinity; acts mainly as anandamide reuptake/FAAH modulator",medium
+URB597,FAAH,inhibition,AEA hydrolysis,rat,IC50,0.0046,"reference synthetic FAAH inhibitor - positive control",high
+PF-3845,FAAH,inhibition,AEA hydrolysis,human,IC50,0.23,"reference covalent FAAH inhibitor - positive control",high
+Rimonabant,CB1,inverse agonism,binding,human,Ki,0.00193,"reference CB1 antagonist/inverse agonist - positive control",high

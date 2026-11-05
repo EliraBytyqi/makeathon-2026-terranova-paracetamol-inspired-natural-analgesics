@@ -1,0 +1,91 @@
+﻿
+== TRPV1 / human / CHEMBL4794  [cached 10753 records]
+
+== TRPV1 / rat / CHEMBL5102  [cached 4529 records]
+
+== TRPV1 / mouse / CHEMBL1781864  [cached 50 records]
+
+== CB1 / human / CHEMBL218
+      total records: 25853
+      page 1/26 (offset 3000, 1000 recs)
+      page 2/26 (offset 2000, 1000 recs)
+      page 3/26 (offset 0, 1000 recs)
+      page 4/26 (offset 1000, 1000 recs)
+      page 5/26 (offset 4000, 1000 recs)
+      page 6/26 (offset 5000, 1000 recs)
+      page 7/26 (offset 6000, 1000 recs)
+      page 8/26 (offset 7000, 1000 recs)
+      page 9/26 (offset 8000, 1000 recs)
+      page 10/26 (offset 9000, 1000 recs)
+      page 11/26 (offset 10000, 1000 recs)
+      page 12/26 (offset 11000, 1000 recs)
+      page 13/26 (offset 12000, 1000 recs)
+      page 14/26 (offset 13000, 1000 recs)
+      page 15/26 (offset 14000, 1000 recs)
+      page 16/26 (offset 15000, 1000 recs)
+      page 17/26 (offset 16000, 1000 recs)
+      page 18/26 (offset 17000, 1000 recs)
+      page 19/26 (offset 18000, 1000 recs)
+      page 20/26 (offset 19000, 1000 recs)
+      page 21/26 (offset 21000, 1000 recs)
+      page 22/26 (offset 20000, 1000 recs)
+      page 23/26 (offset 22000, 1000 recs)
+      page 24/26 (offset 23000, 1000 recs)
+      page 25/26 (offset 25000, 853 recs)
+      page 26/26 (offset 24000, 1000 recs)
+   -> 25853 activity records
+
+== CB1 / rat / CHEMBL3571
+      total records: 3706
+      page 1/4 (offset 2000, 1000 recs)
+      page 2/4 (offset 3000, 706 recs)
+      page 3/4 (offset 0, 1000 recs)
+      page 4/4 (offset 1000, 1000 recs)
+   -> 3706 activity records
+
+== CB1 / mouse / CHEMBL3037
+      total records: 1243
+      page 1/2 (offset 1000, 243 recs)
+      page 2/2 (offset 0, 1000 recs)
+   -> 1243 activity records
+
+== FAAH / human / CHEMBL2243
+      total records: 5799
+      page 1/6 (offset 3000, 1000 recs)
+      page 2/6 (offset 2000, 1000 recs)
+      page 3/6 (offset 0, 1000 recs)
+      page 4/6 (offset 1000, 1000 recs)
+      page 5/6 (offset 4000, 1000 recs)
+      page 6/6 (offset 5000, 799 recs)
+   -> 5799 activity records
+
+== FAAH / rat / CHEMBL3229
+      total records: 4362
+      page 1/5 (offset 2000, 1000 recs)
+      page 2/5 (offset 0, 1000 recs)
+      page 3/5 (offset 1000, 1000 recs)
+      page 4/5 (offset 3000, 1000 recs)
+      page 5/5 (offset 4000, 362 recs)
+   -> 4362 activity records
+
+== FAAH / mouse / CHEMBL3455
+      total records: 2099
+      page 1/3 (offset 2000, 99 recs)
+      page 2/3 (offset 1000, 1000 recs)
+      page 3/3 (offset 0, 1000 recs)
+   -> 2099 activity records
+
+wrote C:\Users\fjoll\OneDrive\Desktop\terranova\data\raw\chembl_activities_raw.csv  shape=(58394, 27)
+
+records per target/organism:
+target_name  target_organism_group
+CB1          human                    25853
+             mouse                     1243
+             rat                       3706
+FAAH         human                     5799
+             mouse                     2099
+             rat                       4362
+TRPV1        human                    10753
+             mouse                       50
+             rat                       4529
+dtype: int64

@@ -1,0 +1,10 @@
+﻿1,840,711 candidate molecules in ChEMBL
+fetching 60 pages of 1000 spread across the range
+   10/60 pages
+   20/60 pages
+   30/60 pages
+   40/60 pages
+   50/60 pages
+   60/60 pages
+fetched 60,000 molecule records
+wrote C:\Users\fjoll\OneDrive\Desktop\terranova\data\raw\decoy_pool.csv  shape=(59923, 5)

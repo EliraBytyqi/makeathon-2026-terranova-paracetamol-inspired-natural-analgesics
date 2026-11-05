@@ -1,0 +1,27 @@
+{
+  "n": 462,
+  "positive_rate": 0.5065,
+  "n_scaffolds": 331,
+  "splits": {
+    "scaffold_5x": {
+      "pr_auc": 0.9082,
+      "roc_auc": 0.8892,
+      "mcc": 0.6656,
+      "balanced_acc": 0.8332,
+      "pr_auc_sd": 0.0304,
+      "roc_auc_sd": 0.0235,
+      "mcc_sd": 0.0429,
+      "balanced_acc_sd": 0.0203
+    },
+    "random_5x": {
+      "pr_auc": 0.9051,
+      "roc_auc": 0.9029,
+      "mcc": 0.6783,
+      "balanced_acc": 0.8387,
+      "pr_auc_sd": 0.0467,
+      "roc_auc_sd": 0.0438,
+      "mcc_sd": 0.098,
+      "balanced_acc_sd": 0.0491
+    }
+  }
+}

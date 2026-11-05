@@ -1,0 +1,7 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Empty local clone of this repo
+makeathon-2026-terranova-paracetamol-inspired-natural-analgesics/
