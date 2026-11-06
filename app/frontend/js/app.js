@@ -112,6 +112,7 @@
       models: renderModels,
       safety: renderSafety,
       screen: renderScreen,
+      decoder: renderDecoder,
     }[view];
     if (fn) fn();
   }
@@ -729,6 +730,272 @@
     }
   }
 
+  /* ------------------------------------------------------------ 07 decoder */
+  let glossaryCat = "";
+  let glossaryQ = "";
+
+  const MODEL_PURPOSE = [
+    { file: "TRPV1_human_label.pkl", task: "P(acts on TRPV1)", rows: "Human TRPV1 measurements", thr: "1 µM" },
+    { file: "TRPV1_all_label.pkl", task: "P(acts on TRPV1)", rows: "+ rat and mouse", thr: "1 µM" },
+    { file: "CB1_human_label.pkl", task: "P(acts on CB1)", rows: "Human CB1 measurements", thr: "1 µM" },
+    { file: "CB1_all_label.pkl", task: "P(acts on CB1)", rows: "+ rat and mouse", thr: "1 µM" },
+    { file: "FAAH_human_label.pkl", task: "P(acts on FAAH)", rows: "Human FAAH measurements", thr: "1 µM" },
+    { file: "FAAH_all_label.pkl", task: "P(acts on FAAH)", rows: "+ rat and mouse", thr: "1 µM" },
+    { file: "FAAH_human_label_10um.pkl", task: "P(acts on FAAH)", rows: "Human FAAH measurements", thr: "10 µM" },
+    { file: "FAAH_all_label_10um.pkl", task: "P(acts on FAAH)", rows: "+ rat and mouse", thr: "10 µM" },
+    { file: "dili.pkl", task: "P(causes liver injury)", rows: "462 marketed drugs (TDC)", thr: "n/a — given label" },
+  ];
+
+  let decoderBound = false;
+  async function renderDecoder() {
+    renderGlossary();
+    if (!decoderBound) {
+      decoderBound = true;
+      $("#g-q").addEventListener("input", (e) => {
+        glossaryQ = e.target.value.trim().toLowerCase();
+        renderGlossary();
+      });
+      $$("#view-decoder [data-gcat]").forEach((b) => {
+        b.addEventListener("click", () => {
+          glossaryCat = b.dataset.gcat;
+          $$("#view-decoder [data-gcat]").forEach((x) =>
+            x.setAttribute("aria-pressed", String(x === b)));
+          renderGlossary();
+        });
+      });
+    }
+
+    $("#model-purpose-table").innerHTML = `<div class="table-wrap"><table>
+      <thead><tr>
+        <th scope="col">File</th><th scope="col">Predicts</th>
+        <th scope="col">Trained on</th><th scope="col">Positive threshold</th>
+      </tr></thead><tbody>
+      ${MODEL_PURPOSE.map((m) => `<tr>
+        <th scope="row" class="mono" style="font-weight:500">${esc(m.file)}</th>
+        <td>${esc(m.task)}</td>
+        <td class="card-note">${esc(m.rows)} <span class="dim">+ 3 decoys per active</span></td>
+        <td>${esc(m.thr)}</td>
+      </tr>`).join("")}
+      </tbody></table></div>`;
+
+    try {
+      const v = await api("/api/interpretation");
+      const m = await api("/api/models");
+      renderConclusions(v, m);
+      renderAttacks(v, m);
+    } catch (e) { errorBox($("#conclusions"), e); }
+  }
+
+  function renderGlossary() {
+    const all = window.GLOSSARY || [];
+    const rows = all.filter((g) => {
+      if (glossaryCat && g.cat !== glossaryCat) return false;
+      if (!glossaryQ) return true;
+      return (g.term + " " + g.plain + " " + g.ml).toLowerCase().indexOf(glossaryQ) >= 0;
+    });
+    if (!rows.length) {
+      $("#glossary-table").innerHTML = '<div class="empty">No terms match that search.</div>';
+      return;
+    }
+    $("#glossary-table").innerHTML = `<div class="table-wrap">
+      <table><thead><tr>
+        <th scope="col" style="min-width:150px">Term</th>
+        <th scope="col" style="min-width:250px">What it means</th>
+        <th scope="col" style="min-width:260px">The ML equivalent</th>
+      </tr></thead><tbody>
+      ${rows.map((g) => `<tr>
+        <th scope="row" style="font-weight:600">${esc(g.term)}
+          <div><span class="badge" style="margin-top:4px">${esc(g.cat)}</span></div></th>
+        <td class="card-note">${g.plain}</td>
+        <td class="card-note">${g.ml}</td>
+      </tr>`).join("")}
+      </tbody></table></div>
+      <p class="card-note" style="margin-top:9px">${rows.length} of ${all.length} terms.</p>`;
+  }
+
+  function claim(n, verdict, title, body, evidence) {
+    const cls = verdict === "supported" ? "callout-good"
+      : verdict === "partial" ? "callout-warning" : "callout-critical";
+    const badge = verdict === "supported" ? '<span class="badge badge-good">supported</span>'
+      : verdict === "partial" ? '<span class="badge badge-warning">supported with a caveat</span>'
+      : '<span class="badge badge-critical">not supported</span>';
+    return `<div class="callout ${cls}" style="margin-bottom:14px">
+      <h4>${n}. ${esc(title)} ${badge}</h4>
+      <p class="card-note" style="margin-bottom:8px">${body}</p>
+      ${evidence ? `<dl class="kv" style="margin-top:8px">${evidence}</dl>` : ""}
+    </div>`;
+  }
+  const ev = (pairs) => pairs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join("");
+
+  function renderConclusions(v, m) {
+    const c = v.controls || {};
+    const a = c.measured_active || {};
+    const i = c.measured_inactive || {};
+    const d = v.domain || {};
+    const en = v.enrichment || {};
+    const disc = v.discrimination || {};
+    const rescue = (m.faah_rescue || {}).summary || {};
+    const probes = m.dili_probes || [];
+    const para = probes.find((p) => p.name === "paracetamol") || {};
+    const kaem = probes.find((p) => p.name === "kaempferol") || {};
+
+    $("#conclusions").innerHTML = [
+      claim(1, "supported",
+        "The models separate known actives from known inactives",
+        `Of the ${int(c.total_held_out)} library compounds removed for leakage control,
+         ${int(c.matched_in_curated_table)} appear in the curated activity table — and
+         <strong>most of those were measured <em>inactive</em></strong>, not active. Split
+         by what the data actually says, the separation is clean.
+         <br><br><strong>What it does not establish:</strong> these compounds were in
+         training. This is a memorisation check that confirms the pipeline is wired up
+         correctly — not evidence of generalisation.`,
+        ev([
+          ["Measured active", `n = ${int(a.n)} · median score <strong>${num(a.median_score, 4)}</strong> · ${a.above_90 || 0}/${int(a.n)} above 0.9`],
+          ["Measured inactive", `n = ${int(i.n)} · median score <strong>${num(i.median_score, 4)}</strong> · ${i.above_50 || 0}/${int(i.n)} above 0.5`],
+        ])),
+
+      claim(2, "supported",
+        "The decoys fixed the everything-is-active failure",
+        `This was the specific risk of training on 84%-positive data: a model that
+         returns high probabilities across the whole library, producing a ranking driven
+         by noise. It did not happen. The score distributions are sharply peaked near
+         zero with a thin tail, which is what a discriminating ranker looks like.`,
+        ev(Object.keys(disc).map((t) => [t,
+          `median <strong>${Number(disc[t].median).toExponential(1)}</strong> ·
+           99th pct ${num(disc[t].p99, 3)} ·
+           ${(disc[t].frac_above_half * 100).toFixed(2)}% above 0.5`]))),
+
+      claim(3, "partial",
+        "The shortlist is enriched in traditional pain plants",
+        `Compounds from the hand-curated ethnopharmacology seed list make up
+         ${((en.library_base_rate || 0) * 100).toFixed(1)}% of the library but
+         <strong>${((en.shortlist_rate || 0) * 100).toFixed(0)}% of the shortlist</strong> —
+         a ${en.fold}× enrichment. The base rate is identical in the filtered pool the
+         shortlist was drawn from, so this is not an artefact of the safety filters.
+         <br><br><strong>The caveat, and it is a real one:</strong> this is partly
+         circular. Those plants were put on the seed list <em>because</em> they have
+         documented pain use, and their compounds (capsaicinoids, cannabinoids,
+         sanshools) are chemically close to the known ligands in ChEMBL. The models are
+         rediscovering a relationship the seed list already encodes. Treat it as a
+         consistency check, not as independent validation.`,
+        ev([
+          ["Library base rate", `${((en.library_base_rate || 0) * 100).toFixed(2)}%`],
+          ["Eligible pool", `${int(en.eligible_pool)} compounds, ${((en.eligible_base_rate || 0) * 100).toFixed(2)}% seed`],
+          ["Shortlist", `${((en.shortlist_rate || 0) * 100).toFixed(0)}% seed`],
+          ["Enrichment", `<strong>${en.fold}×</strong>`],
+        ])),
+
+      claim(4, "supported",
+        "The FAAH blind spot is a data-coverage problem, not a representation problem",
+        `This is the strongest methodological result in the project, and the one most
+         worth presenting. Six known plant FAAH inhibitors, none in ChEMBL's FAAH set.
+         Each is scored by a model that never saw it. Adding just five curated literature
+         actives moves the median prediction by four orders of magnitude.
+         <br><br><strong>Why it matters:</strong> it cleanly separates two hypotheses
+         that usually get confused — "the features cannot express this chemistry" versus
+         "the training set has never seen this chemistry". It is the latter, and that is
+         fixable with data rather than with a new architecture.`,
+        ev([
+          ["Median p, ChEMBL-only model", `<strong>${Number(rescue.baseline_median_p).toExponential(1)}</strong>`],
+          ["Median p, +5 literature actives", `<strong>${num(rescue.loo_median_p, 3)}</strong>`],
+          ["Overlap with ChEMBL FAAH set", `${rescue.overlap_with_chembl} compounds`],
+        ])),
+
+      claim(5, "not",
+        "The DILI model cannot be used as a safety filter",
+        `It misses the project's own index compound. Paracetamol and isoniazid — two of
+         the most famous hepatotoxins in medicine — are absent from the training
+         benchmark entirely, and the model calls paracetamol low-risk. Worse, it is
+         <em>confidently wrong in the other direction</em> on natural products: kaempferol
+         scores ${num(kaem.p_dili, 2)} at an applicability domain of only
+         ${num(kaem.ad, 2)}, meaning that score is extrapolation dressed up as a
+         prediction.
+         <br><br><strong>The project handles this correctly</strong> by weighting it at
+         0.30 against the structural alerts, which do flag paracetamol at maximum
+         severity. Keeping a model you have shown to be unreliable, at a reduced weight,
+         with the reason documented, is a better answer than deleting it or trusting it.`,
+        ev([
+          ["paracetamol", `p = ${num(para.p_dili, 3)} <span class="dim">(absent from benchmark)</span>`],
+          ["kaempferol", `p = ${num(kaem.p_dili, 3)} at AD ${num(kaem.ad, 2)} <span class="dim">(extrapolation)</span>`],
+          ["Weight in composite", "0.30, versus an exponential penalty on alerts"],
+        ])),
+
+      claim(6, "partial",
+        "One fifth of the library is outside the models' competence",
+        `The applicability domain is doing real work rather than decorating the output.
+         A median max-similarity of ${num(d.median_ad, 2)} means the typical plant
+         compound is only loosely related to anything in the training set — which is the
+         expected consequence of training on synthetic drug chemistry and deploying on
+         plant chemistry.
+         <br><br><strong>Read this as a scope limit:</strong> for ${int(d.extrapolating)}
+         compounds the model is guessing, and the shortlist correctly excludes them.`,
+        ev([
+          ["In domain", `${int(d.in_domain)} (${((d.in_domain_rate || 0) * 100).toFixed(1)}%)`],
+          ["Extrapolating", `${int(d.extrapolating)} (${(100 - (d.in_domain_rate || 0) * 100).toFixed(1)}%)`],
+          ["Median max-similarity", num(d.median_ad, 3)],
+        ])),
+    ].join("");
+  }
+
+  function renderAttacks(v, m) {
+    const metrics = (m.metrics || []).filter((r) => r.split === "scaffold");
+    const weakest = metrics.length
+      ? metrics.reduce((a, b) => (a.pr_auc < b.pr_auc ? a : b)) : null;
+    const en = v.enrichment || {};
+
+    const items = [
+      {
+        q: "Your scaffold-split PR-AUC is 0.88–0.98. That is too good. What is inflating it?",
+        a: `<strong>The decoys are easy negatives.</strong> They are random drug-like
+            molecules, so the model is mostly separating "real ligand" from "arbitrary
+            molecule" — a much easier task than ranking among plausible candidates, which
+            is what the screen actually faces. The honest answer is that these numbers are
+            an upper bound on screening performance.
+            ${weakest ? `The most realistic row in the table is
+            <code>${esc(weakest.target)}/${esc(weakest.scope)}/${esc(weakest.label)}</code>
+            at PR-AUC ${num(weakest.pr_auc)}, because the 10 µM threshold forces the
+            hardest discrimination.` : ""}`,
+      },
+      {
+        q: "Isn't the seed-list enrichment circular?",
+        a: `<strong>Partly, yes — concede it.</strong> Those plants are on the list because
+            they have documented pain use, and their chemistry resembles the known ligands
+            in training. The ${en.fold}× enrichment shows the pipeline is internally
+            consistent, not that it discovered anything. The genuinely interesting rows are
+            the ${Math.round((1 - (en.shortlist_rate || 0)) * 50)} background-tier compounds
+            that reached the shortlist without any traditional-use prior.`,
+      },
+      {
+        q: "You label 60,000 molecules inactive without measuring them. Isn't that made up?",
+        a: `It is an assumption, stated as one. Real screening hit rates are well under 1%,
+            so a random drug-like molecule is overwhelmingly likely to be inactive against
+            any given target. They are labelled <code>presumed_inactive</code> rather than
+            <code>inactive</code>, so every result can be re-derived without them. The
+            alternative — training on 84%-positive data — is demonstrably worse.`,
+      },
+      {
+        q: "Have you tested any of this in a lab?",
+        a: `<strong>No, and nothing here claims otherwise.</strong> There is no prospective
+            validation. Every number is a computational prediction over compounds that have
+            not been assayed by this project. The deliverable is a ranked, filtered,
+            provenance-tracked hypothesis list for someone with a lab — not a result.`,
+      },
+      {
+        q: "Your positive controls were in the training data. What does recovering them prove?",
+        a: `That the pipeline is wired up correctly — featurisation, model loading, scoring
+            and ranking all work end to end. It is a smoke test, not a performance claim,
+            and it is reported separately from the screen for exactly that reason. The
+            generalisation claim rests on the scaffold split and the FAAH rescue, not on
+            these.`,
+      },
+    ];
+
+    $("#attacks").innerHTML = items.map((it, n) => `<div class="callout" style="margin-bottom:12px">
+      <h4>${n + 1}. ${esc(it.q)}</h4>
+      <p class="card-note">${it.a}</p>
+    </div>`).join("");
+  }
+
   /* --------------------------------------------------------------- modal */
   function wireRowClicks(root) {
     $$("tr.clickable", root).forEach((tr) => {
@@ -875,7 +1142,7 @@
 
     checkArtefacts();
     const initial = location.hash.slice(1);
-    go(["overview", "science", "data", "models", "safety", "screen"].indexOf(initial) >= 0
+    go(["overview", "science", "data", "models", "safety", "screen", "decoder"].indexOf(initial) >= 0
        ? initial : "overview");
   }
 

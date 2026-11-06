@@ -28,6 +28,7 @@
       <button class="nav-btn" data-view="models"><span class="nav-num">04</span> Models</button>
       <button class="nav-btn" data-view="safety"><span class="nav-num">05</span> Safety layers</button>
       <button class="nav-btn" data-view="screen"><span class="nav-num">06</span> Screen explorer</button>
+      <button class="nav-btn" data-view="decoder"><span class="nav-num">07</span> ML decoder</button>
     </nav>
 
     <div class="sidebar-foot">
@@ -557,6 +558,126 @@
         <div id="dist-chart" style="margin-top:12px"></div>
       </div>
     </section>
+    <!-- ============================================================ 07 -->
+    <section class="view" id="view-decoder" aria-labelledby="h-decoder">
+      <div class="view-head">
+        <div class="eyebrow">ML decoder</div>
+        <h1 id="h-decoder">This project, in terms you already know</h1>
+        <p class="lede">
+          Written for an ML engineer with no biology background. Every piece of
+          chemistry here maps onto something standard — grouped splits, negative
+          sampling, OOD detection, lift@k. The domain words are the only new part.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>The task in one paragraph</h2>
+        <p class="card-note">
+          We have <strong>three binary classifiers</strong>, one per protein target. Input
+          is a molecule; output is P(this molecule acts on this protein). Training labels
+          come from a public database of lab measurements, where a continuous potency
+          value is thresholded into active/inactive. We then run inference over
+          <strong>145,164 unlabelled molecules</strong> found in plants and rank them.
+          A fourth classifier predicts liver toxicity, and a rule-based filter removes
+          molecules containing substructures known to cause it. The final ranking is a
+          hand-weighted reranker over all of it.
+        </p>
+        <div class="grid grid-3" style="margin-top:16px">
+          <div class="pathway-arm">
+            <h4>It is a retrieval problem</h4>
+            <p class="card-note">
+              Not accuracy. We hand a chemist the top 50 of 145k and they test those. Only
+              the head of the ranking is ever seen, which is why every metric is
+              PR-AUC and lift@k rather than accuracy or ROC.
+            </p>
+          </div>
+          <div class="pathway-arm">
+            <h4>The test set is deliberately OOD</h4>
+            <p class="card-note">
+              Training data is synthetic drug chemistry; inference data is plant
+              chemistry. They barely overlap. So the evaluation uses a
+              <em>grouped</em> split on molecular core structure, and every prediction
+              carries a novelty score.
+            </p>
+          </div>
+          <div class="pathway-arm">
+            <h4>Labels are badly biased</h4>
+            <p class="card-note">
+              The source database is built from published papers, and people publish what
+              worked. The raw positive rate is 84%. That is publication bias, not
+              base rate, and it is the single biggest data problem in the project.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Glossary</h2>
+            <p class="card-note">
+              Every domain term used anywhere in this dashboard, with its closest
+              machine-learning equivalent. Search or filter by category.
+            </p>
+          </div>
+        </div>
+        <div class="filters" style="box-shadow:none;margin-bottom:12px">
+          <div class="field">
+            <label for="g-q">Search</label>
+            <input type="search" id="g-q" placeholder="e.g. scaffold, IC50, PAINS…">
+          </div>
+          <div class="seg" role="group" aria-label="Filter glossary by category">
+            <button type="button" data-gcat="" aria-pressed="true">All</button>
+            <button type="button" data-gcat="representation" aria-pressed="false">Molecules</button>
+            <button type="button" data-gcat="pharmacology" aria-pressed="false">Pharmacology</button>
+            <button type="button" data-gcat="data" aria-pressed="false">Data</button>
+            <button type="button" data-gcat="evaluation" aria-pressed="false">Evaluation</button>
+            <button type="button" data-gcat="safety" aria-pressed="false">Safety</button>
+          </div>
+        </div>
+        <div id="glossary-table"></div>
+      </div>
+
+      <div class="card">
+        <h2>What each model is for</h2>
+        <p class="card-note">
+          Nine pickles in <code>models/</code>. Eight are target classifiers, one is the
+          toxicity model. They differ only in which rows of the same table they were
+          trained on.
+        </p>
+        <div id="model-purpose-table" style="margin-top:12px"></div>
+        <div class="callout">
+          <strong>Why two scopes.</strong> <code>human</code> trains only on human-protein
+          measurements; <code>all</code> adds rat and mouse. More data versus a cleaner
+          label — the classic trade. Both are trained and reported rather than picking one
+          on a hunch.
+          <br><br>
+          <strong>Why FAAH has two label sets.</strong> The decision threshold on the
+          continuous potency value is normally 1 µM. The plant compounds we are hunting sit
+          at 1–15 µM, so a 1 µM threshold labels almost all of them negative — training the
+          model to reject precisely the chemistry we want. The <code>label_10um</code>
+          variant moves the threshold. This is threshold selection driven by the
+          deployment distribution, not by the training distribution.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>What these numbers actually support</h2>
+        <p class="card-note">
+          Five claims the evidence carries, and what each one does <em>not</em> establish.
+        </p>
+        <div id="conclusions" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card callout-warning">
+        <h2>What a reviewer will attack first</h2>
+        <p class="card-note">
+          If you present this, expect these five. Each is a real limitation, and having
+          the answer ready is worth more than hoping nobody asks.
+        </p>
+        <div id="attacks" style="margin-top:14px"></div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -571,6 +692,7 @@
 </div>
 
 <script src="js/charts.js"></script>
+<script src="js/glossary.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -230,6 +230,98 @@ def compound_references(inchikey: str) -> list[str]:
     return out
 
 
+@lru_cache(maxsize=1)
+def interpretation() -> dict:
+    """Evidence behind the claims on the ML-decoder view.
+
+    Computed rather than written down, so the page cannot drift from the data.
+
+    The subtlety worth knowing: the 216 "positive controls" are library compounds
+    that appeared *anywhere* in training, which includes compounds that were
+    measured and found INACTIVE. Scoring them as one group understates the
+    models badly, so they are split by what the curated table actually says
+    about them.
+    """
+    out: dict[str, Any] = {}
+    df = screen()
+    sl = shortlist()
+    pc = positive_controls()
+
+    # --- applicability domain ------------------------------------------
+    if len(df):
+        out["domain"] = {
+            "total": int(len(df)),
+            "in_domain": int((df["in_domain"] == 1).sum()),
+            "extrapolating": int((df["in_domain"] == 0).sum()),
+            "in_domain_rate": round(float((df["in_domain"] == 1).mean()), 4),
+            "median_ad": round(float(df["ad_best"].median()), 3),
+        }
+
+        # --- is the model discriminating, or calling everything active? ---
+        disc = {}
+        for t in TARGETS:
+            col = f"p_{t}"
+            if col not in df.columns:
+                continue
+            v = pd.to_numeric(df[col], errors="coerce").dropna()
+            if not len(v):
+                continue
+            disc[t] = {
+                "median": float(v.median()),
+                "p99": round(float(v.quantile(0.99)), 4),
+                "frac_above_half": round(float((v > 0.5).mean()), 4),
+            }
+        out["discrimination"] = disc
+
+        # --- tier enrichment, against the pool the shortlist was drawn from ---
+        eligible = df[(df["in_domain"] == 1)
+                      & (df["max_alert_severity"].fillna(0) < 3)
+                      & (df["n_pains"].fillna(0) == 0)]
+        base = float((df["tier"] == "pain_seed").mean()) if len(df) else 0.0
+        elig_base = float((eligible["tier"] == "pain_seed").mean()) if len(eligible) else 0.0
+        short = float((sl["tier"] == "pain_seed").mean()) if len(sl) else 0.0
+        out["enrichment"] = {
+            "library_base_rate": round(base, 4),
+            "eligible_pool": int(len(eligible)),
+            "eligible_base_rate": round(elig_base, 4),
+            "shortlist_rate": round(short, 4),
+            "fold": round(short / elig_base, 2) if elig_base else None,
+        }
+
+    # --- positive controls, split by their TRAINING label ----------------
+    agg_path = PROC / "bioactivity_aggregated.csv"
+    if len(pc) and agg_path.exists():
+        agg = pd.read_csv(agg_path, usecols=["inchikey", "label"])
+        keys = set(pc["std_inchikey"])
+        m = agg[agg["inchikey"].isin(keys)]
+        per = m.groupby("inchikey")["label"].max()
+        actives = set(per[per == 1].index)
+        inactives = set(per[per == 0].index)
+
+        def group(keyset: set) -> dict:
+            sub = pc[pc["std_inchikey"].isin(keyset)]
+            if not len(sub):
+                return {"n": 0}
+            s = pd.to_numeric(sub["target_score"], errors="coerce").dropna()
+            return {
+                "n": int(len(sub)),
+                "median_score": round(float(s.median()), 4),
+                "above_90": int((s > 0.9).sum()),
+                "above_50": int((s > 0.5).sum()),
+                "frac_above_90": round(float((s > 0.9).mean()), 4),
+                "frac_above_50": round(float((s > 0.5).mean()), 4),
+            }
+
+        out["controls"] = {
+            "total_held_out": int(len(pc)),
+            "matched_in_curated_table": int(per.shape[0]),
+            "measured_active": group(actives),
+            "measured_inactive": group(inactives),
+        }
+
+    return out
+
+
 def availability() -> dict:
     """Which artefacts are on disk - drives the warning banner in the UI."""
     checks = {

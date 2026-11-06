@@ -108,6 +108,12 @@ def models() -> dict:
     }
 
 
+@app.get("/api/interpretation")
+def interpretation() -> dict:
+    """Computed evidence behind the claims on the ML-decoder view."""
+    return data.interpretation()
+
+
 @app.get("/api/safety")
 def safety() -> dict:
     stats = data.screening_stats()
