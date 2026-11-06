@@ -1,0 +1,30 @@
+# Terranova dependencies.
+#
+#   py -3.13 -m venv .venv
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+#
+# Pipeline (src/) needs everything below. The dashboard (app/) needs only
+# pandas, fastapi and uvicorn - it loads no model and imports no RDKit.
+
+# --- cheminformatics / modelling -------------------------------------------
+rdkit>=2024.3.1
+scikit-learn>=1.5
+lightgbm>=4.5
+pandas>=2.2
+numpy>=1.26
+
+# --- data acquisition -------------------------------------------------------
+requests>=2.32
+
+# --- knowledge graph --------------------------------------------------------
+networkx>=3.3
+pyvis>=0.3.2
+
+# --- figures ----------------------------------------------------------------
+matplotlib>=3.9
+seaborn>=0.13
+tqdm>=4.66
+
+# --- dashboard --------------------------------------------------------------
+fastapi>=0.115
+uvicorn[standard]>=0.32

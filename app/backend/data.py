@@ -1,0 +1,246 @@
+"""Load every precomputed artefact the dashboard serves.
+
+Design notes
+------------
+Nothing here loads a model. The pipeline has already run; this module reads its
+outputs. That keeps the demo fast to start and impossible to break on stage.
+
+The screening table is 145k rows / ~101 MB on disk, so it is loaded lazily on
+first request rather than at import, and the app degrades gracefully to the
+shortlist alone if it is absent.
+
+The reactive-alert catalogue is parsed out of ``src/safety.py`` with ``ast``
+rather than copied. Copying it would drift the moment someone edits the real
+alert set, and importing the module directly would drag in RDKit and build the
+PAINS catalogs (several seconds) for data we could read statically.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+import math
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+RESULTS = ROOT / "results"
+PROC = ROOT / "data" / "processed"
+REFERENCE = ROOT / "data" / "reference"
+SRC = ROOT / "src"
+
+TARGETS = ("TRPV1", "CB1", "FAAH")
+
+
+# ---------------------------------------------------------------------------
+# small helpers
+# ---------------------------------------------------------------------------
+def _clean(value: Any) -> Any:
+    """Make a pandas value JSON-safe (NaN/NaT -> None, numpy scalar -> python)."""
+    if value is None:
+        return None
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        return None
+    if hasattr(value, "item"):
+        try:
+            value = value.item()
+        except (ValueError, AttributeError):
+            return str(value)
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        return None
+    return value
+
+
+def records(df: pd.DataFrame) -> list[dict]:
+    """DataFrame -> list of JSON-safe dicts."""
+    return [{k: _clean(v) for k, v in row.items()}
+            for row in df.to_dict(orient="records")]
+
+
+def _read_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _read_csv(path: Path, **kw) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path, **kw)
+
+
+# ---------------------------------------------------------------------------
+# static artefacts - small, cached at first touch
+# ---------------------------------------------------------------------------
+@lru_cache(maxsize=1)
+def screening_stats() -> dict:
+    return _read_json(RESULTS / "screening_stats.json")
+
+
+@lru_cache(maxsize=1)
+def dili_report() -> dict:
+    return _read_json(RESULTS / "dili_report.json")
+
+
+@lru_cache(maxsize=1)
+def dili_probes() -> list[dict]:
+    """Probe scores written by scripts/make_dili_probes.py (optional)."""
+    data = _read_json(RESULTS / "dili_probes.json")
+    return data.get("probes", [])
+
+
+@lru_cache(maxsize=1)
+def training_report() -> list[dict]:
+    path = RESULTS / "training_report.json"
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def model_metrics() -> pd.DataFrame:
+    return _read_csv(RESULTS / "model_metrics.csv")
+
+
+@lru_cache(maxsize=1)
+def attrition() -> pd.DataFrame:
+    return _read_csv(PROC / "attrition_audit.csv")
+
+
+@lru_cache(maxsize=1)
+def dataset_summary() -> pd.DataFrame:
+    return _read_csv(PROC / "dataset_summary.csv")
+
+
+@lru_cache(maxsize=1)
+def faah_rescue() -> dict:
+    return {
+        "summary": _read_json(RESULTS / "faah_rescue_summary.json"),
+        "compounds": records(_read_csv(RESULTS / "faah_rescue_experiment.csv")),
+    }
+
+
+@lru_cache(maxsize=1)
+def seed_plants() -> list[dict]:
+    return records(_read_csv(REFERENCE / "pain_plants_seed.csv"))
+
+
+@lru_cache(maxsize=1)
+def literature_actives() -> list[dict]:
+    return records(_read_csv(REFERENCE / "literature_actives.csv"))
+
+
+@lru_cache(maxsize=1)
+def alert_catalog() -> list[dict]:
+    """Parse the ALERTS table out of src/safety.py without importing RDKit."""
+    path = SRC / "safety.py"
+    if not path.exists():
+        return []
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in tree.body:
+        targets = getattr(node, "targets", []) or (
+            [node.target] if hasattr(node, "target") else []
+        )
+        names = [t.id for t in targets if isinstance(t, ast.Name)]
+        if "ALERTS" not in names:
+            continue
+        raw = ast.literal_eval(node.value)
+        return [
+            {"name": n, "smarts": s, "severity": sev, "note": note}
+            for n, s, sev, note in raw
+        ]
+    return []
+
+
+# ---------------------------------------------------------------------------
+# compound tables
+# ---------------------------------------------------------------------------
+# Columns the explorer needs. reference_dois is excluded here and fetched on
+# demand for a single compound: it is a pipe-joined DOI list, by far the widest
+# column in the file, and nothing in the table view renders it.
+EXPLORER_COLS = [
+    "std_inchikey", "std_smiles", "compound_name", "pubchem_cid",
+    "npclass_pathway", "npclass_superclass", "npclass_class",
+    "source_species", "source_genera", "source_families",
+    "n_source_organisms", "n_references", "tier", "seed_match_level",
+    "traditional_pain_use", "relevant_target_hypothesis",
+    "mw", "clogp", "tpsa", "qed", "fsp3", "heavy_atoms",
+    "lipinski_violations", "cns_like",
+    "n_reactive_alerts", "max_alert_severity", "alert_severity_sum",
+    "reactive_alerts", "n_pains", "pains_flags",
+    "p_CB1", "ad_CB1", "p_FAAH", "ad_FAAH", "p_TRPV1", "ad_TRPV1",
+    "p_dili", "best_target", "target_score", "ad_best", "ad_confidence",
+    "in_domain", "safety_multiplier", "cns_multiplier", "dili_multiplier",
+    "composite_score",
+]
+
+
+def _load_compound_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame(columns=EXPLORER_COLS)
+    header = pd.read_csv(path, nrows=0).columns
+    usecols = [c for c in EXPLORER_COLS if c in header]
+    df = pd.read_csv(path, usecols=usecols, low_memory=False)
+    df.insert(0, "rank", range(1, len(df) + 1))
+    return df
+
+
+@lru_cache(maxsize=1)
+def shortlist() -> pd.DataFrame:
+    return _load_compound_csv(RESULTS / "shortlist.csv")
+
+
+@lru_cache(maxsize=1)
+def positive_controls() -> pd.DataFrame:
+    return _load_compound_csv(RESULTS / "positive_controls.csv")
+
+
+@lru_cache(maxsize=1)
+def screen() -> pd.DataFrame:
+    """The full 145k screen. Lazy: only paid for if someone opens the explorer."""
+    return _load_compound_csv(RESULTS / "screening_all.csv")
+
+
+def compound_references(inchikey: str) -> list[str]:
+    """Pull the DOI list for one compound by streaming the screen file.
+
+    Chunked rather than held in memory: the DOI column roughly doubles the
+    footprint of the screening table and is only ever needed one row at a time.
+    """
+    out: list[str] = []
+    for path in (RESULTS / "screening_all.csv", RESULTS / "positive_controls.csv"):
+        if not path.exists():
+            continue
+        header = pd.read_csv(path, nrows=0).columns
+        if "reference_dois" not in header:
+            continue
+        for chunk in pd.read_csv(
+            path, usecols=["std_inchikey", "reference_dois"],
+            chunksize=50_000, low_memory=False,
+        ):
+            hit = chunk[chunk["std_inchikey"] == inchikey]
+            if len(hit):
+                raw = hit.iloc[0]["reference_dois"]
+                if isinstance(raw, str) and raw.strip():
+                    out = [d for d in raw.split("|") if d.strip()]
+                return out
+    return out
+
+
+def availability() -> dict:
+    """Which artefacts are on disk - drives the warning banner in the UI."""
+    checks = {
+        "shortlist": RESULTS / "shortlist.csv",
+        "screening_all": RESULTS / "screening_all.csv",
+        "positive_controls": RESULTS / "positive_controls.csv",
+        "screening_stats": RESULTS / "screening_stats.json",
+        "model_metrics": RESULTS / "model_metrics.csv",
+        "training_report": RESULTS / "training_report.json",
+        "dili_report": RESULTS / "dili_report.json",
+        "attrition_audit": PROC / "attrition_audit.csv",
+        "dataset_summary": PROC / "dataset_summary.csv",
+    }
+    return {name: path.exists() for name, path in checks.items()}

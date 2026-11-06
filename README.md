@@ -42,14 +42,27 @@ LOTUS plant natural products ─────────┴──> standardize �
 
 ```bash
 py -3.13 -m venv .venv
-.venv\Scripts\python.exe -m pip install rdkit pandas numpy scikit-learn \
-    lightgbm requests networkx pyvis matplotlib seaborn tqdm
+.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 python src/run_all.py          # full pipeline; skips stages already done
 python src/run_all.py --force  # rebuild everything
 ```
 
 Read `results/REPORT.md` when it finishes.
+
+## Dashboard
+
+A local full-stack app presents the finished results — hypothesis, data
+provenance, model evaluation, safety layers, and an explorer over all 145,164
+screened compounds.
+
+```bash
+.venv\Scripts\python.exe -m app.run     # http://127.0.0.1:8000
+```
+
+It serves precomputed artefacts only: no model is loaded in the web process, so
+it starts in about a second. No build step and no CDN — it runs offline. See
+[`app/README.md`](app/README.md).
 
 ## Layout
 
@@ -71,7 +84,9 @@ Read `results/REPORT.md` when it finishes.
 | `src/validate_literature.py` | External validation set |
 | `src/kg.py` | Knowledge graph build and export |
 | `src/make_report.py` | Generates `results/REPORT.md` from artefacts |
-| `data/reference/` | Hand-curated seed lists (plants, literature actives) |
+| `scripts/make_dili_probes.py` | Precomputes DILI probe scores for the dashboard |
+| `app/` | FastAPI backend + static frontend (see `app/README.md`) |
+| `data/reference/` | Hand-curated
 | `results/` | Metrics, shortlist, graph, report |
 
 ## Four decisions that carry the project

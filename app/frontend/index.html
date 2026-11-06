@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terranova</title>
+<meta name="description" content="Plant-derived analgesic candidates on the paracetamol/AM404 axis: data provenance, model evaluation and a 145k-compound natural-product screen.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231baf7a'/><path d='M16 7c5 3 7 6 7 10a7 7 0 0 1-14 0c0-4 2-7 7-10z' fill='%23fff'/></svg>">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">TN</div>
+      <div>
+        <div class="brand-name">Terranova</div>
+        <div class="brand-sub">Track 02 · Natural products</div>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Sections">
+      <button class="nav-btn" data-view="overview" aria-current="true"><span class="nav-num">01</span> Overview</button>
+      <button class="nav-btn" data-view="science"><span class="nav-num">02</span> The hypothesis</button>
+      <button class="nav-btn" data-view="data"><span class="nav-num">03</span> Data &amp; provenance</button>
+      <button class="nav-btn" data-view="models"><span class="nav-num">04</span> Models</button>
+      <button class="nav-btn" data-view="safety"><span class="nav-num">05</span> Safety layers</button>
+      <button class="nav-btn" data-view="screen"><span class="nav-num">06</span> Screen explorer</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch colour theme">
+        <span id="theme-icon" aria-hidden="true">◐</span> <span id="theme-label">Theme</span>
+      </button>
+      <p class="disclaimer">
+        Every value here is a computational prediction. Nothing establishes that a
+        compound is active, or that it is safe.
+      </p>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="banner" id="artefact-banner" hidden></div>
+
+    <!-- ============================================================ 01 -->
+    <section class="view active" id="view-overview" aria-labelledby="h-overview">
+      <div class="view-head">
+        <div class="eyebrow">Makeathon 2026 · Track 02</div>
+        <h1 id="h-overview">Paracetamol-inspired natural analgesics</h1>
+        <p class="lede">
+          Paracetamol relieves pain and damages livers through two chemically
+          separable routes. We screened <strong id="lede-lib">145,000</strong> plant
+          natural products for the first while filtering out the second.
+        </p>
+      </div>
+
+      <div class="grid grid-4" id="overview-stats"></div>
+
+      <div class="card">
+        <h2>What the pipeline does</h2>
+        <p class="card-note">Six stages, each auditable. Counts are live from the artefacts on disk.</p>
+        <div id="pipeline-funnel" style="margin-top:14px"></div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Shortlist by target</h3>
+          <p class="card-note">
+            The 50 surviving candidates, by the target each scores highest on.
+          </p>
+          <div id="shortlist-by-target" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <h3>Does it recover known pharmacology?</h3>
+          <p class="card-note">
+            216 library compounds were in the training data. They are held out of the
+            ranking and scored separately as positive controls — if the models cannot
+            find the molecules we already know, nothing else they say is worth much.
+          </p>
+          <div id="controls-preview" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Top of the shortlist</h3>
+            <p class="card-note">In-domain, no severity-3 alert, no PAINS flag. Click any row for the full profile.</p>
+          </div>
+          <button class="btn btn-sm" data-goto="screen" type="button">Open explorer →</button>
+        </div>
+        <div id="overview-shortlist"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 02 -->
+    <section class="view" id="view-science" aria-labelledby="h-science">
+      <div class="view-head">
+        <div class="eyebrow">The hypothesis</div>
+        <h1 id="h-science">Two pathways from one molecule</h1>
+        <p class="lede">
+          Paracetamol's analgesia is increasingly attributed not to COX inhibition but
+          to its metabolite AM404. Its hepatotoxicity runs through an entirely
+          different route. That separation is the whole opportunity.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="pathway">
+          <div class="pathway-arm arm-good">
+            <h4>Analgesia — the route we want</h4>
+            <div class="pathway-chain">
+              <span class="pathway-node">paracetamol</span>
+              <span class="pathway-arrow">→</span>
+              <span class="pathway-node"><i>p</i>-aminophenol</span>
+              <span class="pathway-arrow">→</span>
+              <span class="pathway-node accent">AM404</span>
+            </div>
+            <p class="card-note">
+              Deacetylation, then conjugation with arachidonic acid by <strong>FAAH</strong>.
+              AM404 acts centrally and in the spinal dorsal horn through <strong>TRPV1</strong>
+              and the <strong>cannabinoid</strong> system.
+            </p>
+            <div class="pill-row" style="margin-top:10px">
+              <span class="badge badge-TRPV1"><span class="badge-dot"></span>TRPV1</span>
+              <span class="badge badge-CB1"><span class="badge-dot"></span>CB1</span>
+              <span class="badge badge-FAAH"><span class="badge-dot"></span>FAAH</span>
+            </div>
+          </div>
+
+          <div class="pathway-arm arm-bad">
+            <h4>Hepatotoxicity — the route we filter</h4>
+            <div class="pathway-chain">
+              <span class="pathway-node">paracetamol</span>
+              <span class="pathway-arrow">→</span>
+              <span class="pathway-node">CYP2E1 / 3A4</span>
+              <span class="pathway-arrow">→</span>
+              <span class="pathway-node danger">NAPQI</span>
+            </div>
+            <p class="card-note">
+              Oxidation of the <i>para</i>-aminophenol core to a hard electrophile.
+              At dose, glutathione conjugates it; in overdose that pool depletes, NAPQI
+              arylates protein thiols, and you get centrilobular necrosis.
+            </p>
+            <div class="pill-row" style="margin-top:10px">
+              <span class="badge badge-critical">quinone-imine precursor</span>
+              <span class="badge badge-serious">thiol arylation</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>The design question.</strong> Both arms begin at the same
+          <i>para</i>-aminophenol core, but only the second requires it. So we look for
+          plant compounds that engage TRPV1 / CB1 / FAAH <em>without</em> carrying the
+          structural features that enable bioactivation — and we check that
+          structurally, not just statistically.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Why these three targets</h2>
+        <div class="table-wrap" style="margin-top:12px">
+          <table>
+            <thead><tr><th scope="col">Target</th><th scope="col">Full name</th><th scope="col">Role on the AM404 axis</th><th scope="col">UniProt (human / rat / mouse)</th></tr></thead>
+            <tbody>
+              <tr>
+                <th scope="row"><span class="badge badge-TRPV1"><span class="badge-dot"></span>TRPV1</span></th>
+                <td>Transient receptor potential vanilloid 1</td>
+                <td>The capsaicin receptor; AM404 is a potent agonist. Ligand-gated ion channel.</td>
+                <td class="mono dim">Q8NER1 / O35433 / Q704Y3</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-CB1"><span class="badge-dot"></span>CB1</span></th>
+                <td>Cannabinoid receptor 1</td>
+                <td>Central analgesia; AM404 raises endocannabinoid tone indirectly.</td>
+                <td class="mono dim">P21554 / P20272 / P47746</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-FAAH"><span class="badge-dot"></span>FAAH</span></th>
+                <td>Fatty acid amide hydrolase</td>
+                <td>Forms AM404, and degrades anandamide. Inhibiting it is itself analgesic.</td>
+                <td class="mono dim">O00519 / P97612 / O08914</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="card-note" style="margin-top:12px">
+          Targets were resolved by <strong>UniProt accession → ChEMBL target ID</strong>,
+          not by name search. Rodent orthologs are collected because much published
+          TRPV1 and FAAH pharmacology is rodent, but they are tagged by organism and
+          never silently pooled — TRPV1 has well-documented species differences in
+          ligand sensitivity.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>The ethnopharmacology seed list</h2>
+            <p class="card-note">
+              <span id="seed-count">51</span> hand-curated species with a traditional
+              pain indication and a mechanistic hypothesis. Compounds from these plants
+              are tiered <code>pain_seed</code>; everything else from any land plant is
+              <code>plant_background</code>, so "top ranked" means something.
+            </p>
+          </div>
+        </div>
+        <div id="seed-table" style="margin-top:6px"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 03 -->
+    <section class="view" id="view-data" aria-labelledby="h-data">
+      <div class="view-head">
+        <div class="eyebrow">Data &amp; provenance</div>
+        <h1 id="h-data">Four datasets, three public sources</h1>
+        <p class="lede">
+          Every filtering decision happens in one place and is counted. Hidden
+          curation is how cheminformatics papers become irreproducible.
+        </p>
+      </div>
+
+      <div class="grid grid-2" id="source-cards"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Curation attrition</h2>
+            <p class="card-note">
+              Raw ChEMBL records to modelling-ready rows, counted at every step.
+              Hover any bar for what was dropped there.
+            </p>
+          </div>
+        </div>
+        <div id="attrition-chart"></div>
+        <div class="callout">
+          <strong>The biggest single cut</strong> is activity type: only IC50, EC50, Ki
+          and Kd survive. Percent-inhibition at a single concentration is not
+          convertible to a potency, so it cannot be labelled consistently.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>What survived, per target</h2>
+        <p class="card-note">
+          Active ≤ 1 µM, inactive ≥ 10 µM. The 1–10 µM band is <em>discarded</em>, not
+          forced into a class — those compounds are genuinely ambiguous and training on
+          them teaches noise.
+        </p>
+        <div id="dataset-chart" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card callout-warning">
+        <h2>The active rate is publication bias, not biology</h2>
+        <div class="grid grid-3" style="margin-top:12px" id="bias-stats"></div>
+        <p class="card-note" style="margin-top:14px">
+          ChEMBL is assembled from medicinal-chemistry papers, and people publish
+          compounds that worked. A classifier trained on 84% actives learns that
+          nearly everything is active, and its ranking over 145k natural products is
+          then driven by noise. Class weighting does not fix this: the model has simply
+          never been shown what a non-ligand looks like.
+        </p>
+        <div class="callout">
+          <strong>The fix:</strong> 60,000 drug-like molecules sampled across ChEMBL's
+          whole ID range as presumed inactives, property-matched to each target's
+          actives on MW and cLogP (DUD-E style), excluding anything sharing a scaffold
+          with a known active. Three decoys per active brings ~75% down to ~20%. They
+          stay labelled <code>presumed_inactive</code> so results can be re-derived
+          without the assumption.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Curation rules, and why</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Decision</th><th scope="col">Rule</th><th scope="col">Reasoning</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Assay types</th><td class="mono">B and F</td>
+                <td>TRPV1 is a ligand-gated ion channel; its potency data is dominated by calcium-flux and patch-clamp assays registered as <em>functional</em>. Binding-only would discard most TRPV1 pharmacology.</td></tr>
+              <tr><th scope="row">Activity types</th><td class="mono">IC50, EC50, Ki, Kd</td>
+                <td>Single-concentration readouts are not convertible to a potency.</td></tr>
+              <tr><th scope="row">Units</th><td class="mono">nM only</td>
+                <td>After ChEMBL's own standardisation. pActivity = 9 − log₁₀(nM).</td></tr>
+              <tr><th scope="row">Censored values</th><td class="mono">= for both, &gt; and ≥ as inactive only</td>
+                <td>"&gt;10000 nM" is not a measurement but is strong evidence of inactivity. "&lt;" records bound potency from above and cannot confirm an active threshold, so they are dropped.</td></tr>
+              <tr><th scope="row">Aggregation</th><td class="mono">median pActivity</td>
+                <td>Per compound × target × organism. The same compound appears across many labs; the median survives an order-of-magnitude outlier.</td></tr>
+              <tr><th scope="row">Ambiguous band</th><td class="mono">1–10 µM held out</td>
+                <td>Forcing a class on genuinely borderline compounds teaches the model noise.</td></tr>
+              <tr><th scope="row">Organism</th><td class="mono">tagged, never pooled</td>
+                <td>Human is primary; rat/mouse kept in a separate scope. Hence a <code>human</code> and an <code>all</code> variant of every model.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 04 -->
+    <section class="view" id="view-models" aria-labelledby="h-models">
+      <div class="view-head">
+        <div class="eyebrow">Models</div>
+        <h1 id="h-models">Nine models, evaluated twice each</h1>
+        <p class="lede">
+          Every model is scored under a random split and a scaffold split. The gap
+          between them is the honest measure of what happens when you screen
+          chemistry the model has never seen.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Why the split matters more than the score</h2>
+        <p class="card-note">
+          ChEMBL is built from congeneric series — one paper, one scaffold, many
+          analogues. Under a random split those analogues straddle train and test, the
+          model memorises the series, and you report an ROC-AUC near 0.95 that
+          collapses on anything new. <strong>Natural products share almost no scaffolds
+          with ChEMBL</strong>, so the random number is the wrong measurement for this
+          project. Both are reported below; the scaffold number is the one that counts.
+        </p>
+        <div id="split-chart" style="margin-top:16px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>All model metrics</h2>
+            <p class="card-note">
+              PR-AUC-led because the data is imbalanced and only the top of the ranked
+              list matters. EF 1% is the screening use case: hand a chemist the top 1%,
+              how many more actives than random?
+            </p>
+          </div>
+          <div class="seg" role="group" aria-label="Filter by split">
+            <button type="button" data-split="scaffold" aria-pressed="true">Scaffold</button>
+            <button type="button" data-split="random" aria-pressed="false">Random</button>
+            <button type="button" data-split="" aria-pressed="false">Both</button>
+          </div>
+        </div>
+        <div id="metrics-table"></div>
+      </div>
+
+      <div class="card">
+        <h2>Architecture</h2>
+        <div class="grid grid-2" style="margin-top:12px">
+          <div>
+            <h4>Representation</h4>
+            <p class="card-note">
+              ECFP4 (Morgan, radius 2, 2048 bits) plus physicochemical descriptors.
+              Every structure in the project — ChEMBL, decoys, LOTUS, DILI — passes
+              through the same <code>standardize()</code>, so they are comparable.
+            </p>
+            <h4 style="margin-top:14px">Algorithms</h4>
+            <p class="card-note">
+              Random Forest (500 trees) and LightGBM (600 estimators) are both trained.
+              The one with the better <em>scaffold-split</em> PR-AUC wins and is refit
+              on all data for deployment.
+            </p>
+          </div>
+          <div>
+            <h4>Applicability domain</h4>
+            <p class="card-note">
+              Each model ships its training-set fingerprint matrix, so every prediction
+              carries a max-Tanimoto similarity to what the model has actually seen.
+              Below 0.25 a prediction is extrapolation and is flagged, not silently
+              trusted. This is why the model files are 50–200 MB.
+            </p>
+            <h4 style="margin-top:14px">FAAH is labelled twice</h4>
+            <p class="card-note">
+              The natural-product FAAH inhibitors motivating this project sit at 1–15 µM.
+              A 1 µM cut labels nearly all of them inactive, training the model to reject
+              exactly the chemistry we are hunting. FAAH therefore also gets a 10 µM
+              variant, and both are reported.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>The FAAH rescue experiment</h2>
+            <p class="card-note">
+              Six known plant FAAH inhibitors, none of them in ChEMBL's FAAH set. Each
+              is scored by a model that never saw it: once by a model trained on ChEMBL
+              alone, once by a model that additionally saw only the <em>other five</em>.
+            </p>
+          </div>
+        </div>
+        <div id="rescue-chart"></div>
+        <div class="callout callout-good" id="rescue-note"></div>
+      </div>
+
+      <div class="card">
+        <h2>The DILI model, and what it gets wrong</h2>
+        <div class="grid grid-2">
+          <div>
+            <p class="card-note">
+              Random Forest over the TDC DILI benchmark — 475 marketed drugs
+              (<span id="dili-n">462</span> after standardisation), aggregated by the
+              FDA's National Center for Toxicological Research. Evaluated over five
+              repeated scaffold splits, because one split on 462 compounds is noisy.
+            </p>
+            <dl class="kv" id="dili-metrics" style="margin-top:12px"></dl>
+          </div>
+          <div id="dili-probe-host"></div>
+        </div>
+        <div class="callout callout-critical">
+          <h4>Paracetamol is not in the benchmark at all</h4>
+          Neither is isoniazid — two of the most famous hepatotoxins in medicine. So the
+          model scores paracetamol <strong id="para-score">0.37</strong>, i.e. low risk,
+          and it is wrong for a structural reason: the benchmark encodes
+          <em>idiosyncratic, immune-mediated</em> DILI rather than intrinsic
+          dose-dependent toxicity. A statistical model that misses this project's own
+          index compound has not earned a large say in the ranking — which is exactly
+          why the structural alert layer carries the weight instead.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 05 -->
+    <section class="view" id="view-safety" aria-labelledby="h-safety">
+      <div class="view-head">
+        <div class="eyebrow">Safety</div>
+        <h1 id="h-safety">Two layers, because one is not enough</h1>
+        <p class="lede">
+          A structural alert set that encodes bioactivation chemistry, and a statistical
+          DILI model. They disagree about paracetamol, and that disagreement is the
+          point.
+        </p>
+      </div>
+
+      <div class="grid grid-3" id="safety-stats"></div>
+
+      <div class="card">
+        <h2>How the composite score is built</h2>
+        <p class="card-note">
+          Deliberately transparent, because an opaque ranking formula is unfalsifiable.
+          The weights are printed in the output and shown here.
+        </p>
+        <div class="smiles" style="margin-top:12px">
+          composite = target_score × exp(−0.35 × alert_severity_sum) × ad_confidence × cns_bonus × (1 − 0.30 × p_dili)
+        </div>
+        <div class="grid grid-4" style="margin-top:14px" id="weight-stats"></div>
+        <div class="callout">
+          <strong>The DILI term is deliberately small</strong> relative to the structural
+          alert term. The alerts flag paracetamol at maximum severity on the exact NAPQI
+          mechanism; the model calls it low risk. We weighted the layer that is right
+          about the compound the whole project is named after.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Reactive-metabolite alert set</h2>
+            <p class="card-note">
+              <span id="alert-count">25</span> SMARTS patterns, read live from
+              <code>src/safety.py</code>. Severity 3 is a direct NAPQI-type
+              bioactivation precedent; 2 is an established reactive-metabolite route;
+              1 is context-dependent.
+            </p>
+          </div>
+          <div class="seg" role="group" aria-label="Filter by severity">
+            <button type="button" data-sev="" aria-pressed="true">All</button>
+            <button type="button" data-sev="3" aria-pressed="false">Severity 3</button>
+            <button type="button" data-sev="2" aria-pressed="false">2</button>
+            <button type="button" data-sev="1" aria-pressed="false">1</button>
+          </div>
+        </div>
+        <div id="alerts-table"></div>
+      </div>
+
+      <div class="card callout-warning">
+        <h2>Two caveats that belong in the writeup</h2>
+        <p class="card-note">
+          <strong>Structural alerts are a hazard flag, not a risk assessment.</strong>
+          Dose, exposure, clearance route and detoxification capacity all matter and
+          none are encoded here. A flagged compound is not "toxic"; it is "worth a
+          reactivity check".
+        </p>
+        <p class="card-note" style="margin-top:10px">
+          <strong>The alert set flags compounds this project likes.</strong> Curcumin
+          and 6-gingerol are Michael acceptors. Many flavonoids are catechols. That is a
+          genuine finding about the chemical space of plant analgesics — plants make
+          electrophiles on purpose, often as defence chemistry — not a bug to be tuned
+          away. We report the flags and keep the compounds, tagged.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 06 -->
+    <section class="view" id="view-screen" aria-labelledby="h-screen">
+      <div class="view-head">
+        <div class="eyebrow">Screen explorer</div>
+        <h1 id="h-screen">145,164 plant compounds, scored</h1>
+        <p class="lede">
+          The full screen, the 50-compound shortlist, and the 216 positive controls held
+          out for leakage control. Click any compound for its full profile and
+          literature provenance.
+        </p>
+      </div>
+
+      <div class="filters">
+        <div class="seg" role="group" aria-label="Choose dataset">
+          <button type="button" data-source="shortlist" aria-pressed="true">Shortlist (50)</button>
+          <button type="button" data-source="screen" aria-pressed="false">Full screen</button>
+          <button type="button" data-source="controls" aria-pressed="false">Positive controls</button>
+        </div>
+        <div class="field">
+          <label for="f-q">Search</label>
+          <input type="search" id="f-q" placeholder="name, genus, compound class…">
+        </div>
+        <div class="field">
+          <label for="f-target">Target</label>
+          <select id="f-target">
+            <option value="">All targets</option>
+            <option value="TRPV1">TRPV1</option>
+            <option value="CB1">CB1</option>
+            <option value="FAAH">FAAH</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-tier">Source tier</label>
+          <select id="f-tier">
+            <option value="">All plants</option>
+            <option value="pain_seed">Pain seed list</option>
+            <option value="plant_background">Background</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="f-domain"> In domain</label>
+        <label class="check"><input type="checkbox" id="f-alerts"> No severity-3 / PAINS</label>
+        <label class="check"><input type="checkbox" id="f-cns"> CNS-like</label>
+        <button class="btn btn-sm" id="f-reset" type="button">Reset</button>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="screen-table"></div>
+      </div>
+      <div class="pager">
+        <span class="pager-info" id="screen-info">—</span>
+        <span>
+          <button class="btn btn-sm" id="page-prev" type="button">← Previous</button>
+          <button class="btn btn-sm" id="page-next" type="button">Next →</button>
+        </span>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Composite score across the full screen</h3>
+        <p class="card-note">
+          The long tail is the point: a screen that ranks everything highly has not
+          discriminated. Only the right-hand edge reaches the shortlist.
+        </p>
+        <div id="dist-chart" style="margin-top:12px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title">Compound</h2>
+      <button class="modal-close" id="modal-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
