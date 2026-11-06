@@ -52,17 +52,63 @@ Read `results/REPORT.md` when it finishes.
 
 ## Dashboard
 
-A local full-stack app presents the finished results — hypothesis, data
-provenance, model evaluation, safety layers, and an explorer over all 145,164
-screened compounds.
+A local full-stack app presents the finished results — the hypothesis, data
+provenance, model evaluation, external validation, safety layers, an explorer
+over all 145,164 screened compounds, and a glossary for readers without a
+chemistry background.
+
+### Running it
+
+From the **repository root**:
 
 ```bash
-.venv\Scripts\python.exe -m app.run     # http://127.0.0.1:8000
+.venv\Scripts\python.exe -m app.run
 ```
 
-It serves precomputed artefacts only: no model is loaded in the web process, so
-it starts in about a second. No build step and no CDN — it runs offline. See
-[`app/README.md`](app/README.md).
+It starts on <http://127.0.0.1:8000> and opens your browser. `Ctrl+C` stops it.
+
+| Flag | Effect |
+|---|---|
+| `--port 9000` | Use a different port (if 8000 is taken) |
+| `--no-browser` | Don't open a browser window |
+| `--reload` | Auto-reload on code changes, for development |
+
+### Running it from a fresh clone
+
+You do **not** need the modelling stack. The dashboard loads no model and
+imports no RDKit — it reads precomputed files — so three packages are enough:
+
+```bash
+git clone https://github.com/EliraBytyqi/makeathon-2026-terranova-paracetamol-inspired-natural-analgesics.git
+cd makeathon-2026-terranova-paracetamol-inspired-natural-analgesics
+
+git lfs install
+git lfs pull                       # REQUIRED - see below
+
+py -3.13 -m venv .venv
+.venv\Scripts\python.exe -m pip install pandas fastapi "uvicorn[standard]"
+.venv\Scripts\python.exe -m app.run
+```
+
+> **`git lfs pull` is not optional.** `results/screening_all.csv` (104 MB) and
+> `results/positive_controls.csv` are stored in Git LFS. Without it you get
+> small pointer files instead of data, and the screen explorer will fail to
+> load while the rest of the app appears fine.
+
+### If something is wrong
+
+| Symptom | Cause and fix |
+|---|---|
+| Amber banner listing missing files | Those pipeline outputs aren't on disk. Run `python src/run_all.py` (needs the full `requirements.txt`). |
+| Screen explorer empty, other views fine | LFS files weren't fetched. Run `git lfs pull`. |
+| `Address already in use` | The app is already running, or something else holds the port. Use it, or pass `--port 9000`. |
+| `No module named app` | You're not in the repository root. `cd` there first. |
+| Knowledge graph is blank | Run `python src/run_all.py kg.py --force` to regenerate it and its local assets. |
+
+It serves precomputed artefacts only, so it starts in about a second and nothing
+loads a model at request time. No build step and no CDN — it runs with no
+network access at all. See [`app/README.md`](app/README.md) for the API and the
+design decisions.
 
 ## Layout
 
