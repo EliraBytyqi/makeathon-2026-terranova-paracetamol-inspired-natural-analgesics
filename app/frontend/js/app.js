@@ -110,6 +110,7 @@
       science: renderScience,
       data: renderData,
       models: renderModels,
+      validation: renderValidation,
       safety: renderSafety,
       screen: renderScreen,
       decoder: renderDecoder,
@@ -487,7 +488,124 @@
       </tbody></table></div>`;
   }
 
-  /* -------------------------------------------------------------- 05 safety */
+  /* ---------------------------------------------------------- 05 validation */
+  let valTab = "held";
+  let valBound = false;
+
+  async function renderValidation() {
+    try {
+      const v = await api("/api/validation");
+      const s = v.summary || {};
+      const held = v.held_out || [];
+      const kg = v.kg || {};
+
+      const topDecile = Math.round((s["held_out_frac_top10pct_of_library"] || 0) * (s.n_held_out || 0));
+      $("#validation-stats").innerHTML = [
+        stat("Held-out claims", int(s.n_held_out), "absent from ChEMBL training", 1),
+        stat("Scoring above 0.5", `${Math.round((s["held_out_frac_above_0.5"] || 0) * (s.n_held_out || 0))}`,
+             `of ${int(s.n_held_out)} — the headline failure`, 2),
+        stat("Median library percentile", num(s.held_out_median_library_percentile, 1),
+             "50 would be chance", 2),
+        stat("Reaching the top 10%", `${topDecile}`,
+             `${((s["held_out_frac_top10pct_of_library"] || 0) * 100).toFixed(0)}% of held-out actives`, 3),
+      ].join("");
+
+      // percentile against the library background - the real screening question
+      C.hbar($("#validation-chart"), {
+        title: "Held-out literature actives: percentile against the 145k library",
+        ariaLabel: "Library percentile for each held-out literature active",
+        labelWidth: 190,
+        labelHeader: "Compound (claimed target)",
+        valueHeader: "Library percentile",
+        max: 100,
+        data: held.map((r) => ({
+          label: `${(r.compound_name || "?").slice(0, 24)} · ${r.target}`,
+          value: r.library_percentile == null ? 0 : r.library_percentile,
+          display: r.library_percentile == null ? "—" : num(r.library_percentile, 1),
+          color: C.cssVar(TARGET_COLORS[r.target] || "--series-neutral"),
+          emphasis: (r.library_percentile || 0) >= 90,
+          tip: [
+            ["claimed target", r.target],
+            ["interaction", r.interaction || "—"],
+            ["reported potency", r.value_uM == null ? "—" : r.value_uM + " µM"],
+            ["model probability", r.p_claimed_target == null ? "—" : Number(r.p_claimed_target).toExponential(2)],
+            ["library percentile", num(r.library_percentile, 1)],
+            ["applicability domain", num(r.ad_claimed_target, 2)],
+          ],
+        })),
+        legend: ["TRPV1", "CB1", "FAAH"].map((t) => ({ label: t, color: C.cssVar(TARGET_COLORS[t]) })),
+      });
+
+      renderValidationTable(v);
+      if (!valBound) {
+        valBound = true;
+        $$("#view-validation [data-val]").forEach((b) => {
+          b.addEventListener("click", () => {
+            valTab = b.dataset.val;
+            $$("#view-validation [data-val]").forEach((x) =>
+              x.setAttribute("aria-pressed", String(x === b)));
+            renderValidationTable(v);
+          });
+        });
+      }
+
+      // knowledge graph
+      const byType = kg.nodes_by_type || {};
+      const byEv = kg.edges_by_evidence || {};
+      $("#kg-stats").innerHTML = [
+        stat("Nodes", int(kg.nodes), `${int(byType.Compound)} compounds · ${int(byType.Plant)} plants`, 1),
+        stat("Edges", int(kg.edges), "every one typed by evidence", 3),
+        stat("Measured edges", int(byEv.measured), "ChEMBL bioactivity", 1),
+        stat("Predicted edges", int(byEv.predicted), "model output, rendered differently", 2),
+      ].join("");
+
+      C.stacked($("#kg-evidence"), {
+        title: "Knowledge-graph edges by evidence class",
+        ariaLabel: "Edge counts by evidence class",
+        labelWidth: 110,
+        labelHeader: "Graph",
+        data: [{
+          label: "All edges",
+          measured: byEv.measured || 0,
+          literature: byEv.literature || 0,
+          predicted: byEv.predicted || 0,
+        }],
+        series: [
+          { key: "measured", label: "Measured (ChEMBL)", colorVar: "--series-1" },
+          { key: "literature", label: "Literature (LOTUS DOI)", colorVar: "--series-2" },
+          { key: "predicted", label: "Predicted (our model)", colorVar: "--series-3" },
+        ],
+      });
+    } catch (e) { errorBox($("#validation-stats"), e); }
+  }
+
+  function renderValidationTable(v) {
+    const rows = valTab === "held" ? (v.held_out || []) : (v.seen || []);
+    $("#validation-table").innerHTML = `<div class="table-wrap" style="max-height:480px;overflow-y:auto">
+      <table><thead><tr>
+        <th scope="col">Compound</th><th scope="col">Target</th>
+        <th scope="col">Interaction</th><th scope="col" class="num">Reported µM</th>
+        <th scope="col" class="num">Model p</th><th scope="col" class="num">Library %ile</th>
+        <th scope="col" class="num">AD</th><th scope="col" class="num">p(DILI)</th>
+      </tr></thead><tbody>
+      ${rows.map((r) => {
+        const pct = r.library_percentile;
+        const cls = pct >= 90 ? "badge-good" : pct >= 50 ? "badge-warning" : "badge-critical";
+        return `<tr>
+          <th scope="row" style="font-weight:500">${esc(r.compound_name)}</th>
+          <td>${targetBadge(r.target)}</td>
+          <td class="dim">${esc(r.interaction || "—")}</td>
+          <td class="num">${r.value_uM == null ? "—" : num(r.value_uM, 3)}</td>
+          <td class="num">${r.p_claimed_target == null ? "—" : Number(r.p_claimed_target).toExponential(1)}</td>
+          <td class="num"><span class="badge ${cls}">${num(pct, 1)}</span></td>
+          <td class="num">${num(r.ad_claimed_target, 2)}</td>
+          <td class="num">${num(r.p_dili, 2)}</td>
+        </tr>`;
+      }).join("")}
+      </tbody></table></div>`;
+  }
+
+  /* -------------------------------------------------------------- 06 safety */
   let sevFilter = "";
   async function renderSafety() {
     try {
@@ -1142,8 +1260,8 @@
 
     checkArtefacts();
     const initial = location.hash.slice(1);
-    go(["overview", "science", "data", "models", "safety", "screen", "decoder"].indexOf(initial) >= 0
-       ? initial : "overview");
+    go(["overview", "science", "data", "models", "validation", "safety", "screen", "decoder"]
+       .indexOf(initial) >= 0 ? initial : "overview");
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

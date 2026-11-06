@@ -1,0 +1,29 @@
+{
+  "nodes": 9082,
+  "edges": 9718,
+  "nodes_by_type": {
+    "Disease": 1,
+    "Target": 3,
+    "Pathway": 3,
+    "Compound": 8880,
+    "Plant": 168,
+    "ChemicalClass": 25,
+    "SafetyFlag": 1,
+    "?": 1
+  },
+  "edges_by_relation": {
+    "INVOLVED_IN": 3,
+    "MODULATES": 3,
+    "ACTS_ON": 8707,
+    "PREDICTED_ACTIVE": 251,
+    "MEMBER_OF": 174,
+    "HAS_FLAG": 200,
+    "CONTAINS": 373,
+    "TRADITIONALLY_USED_FOR": 7
+  },
+  "edges_by_evidence": {
+    "literature": 560,
+    "measured": 8707,
+    "predicted": 451
+  }
+}

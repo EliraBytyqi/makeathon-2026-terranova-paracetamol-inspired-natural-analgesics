@@ -22,6 +22,7 @@ Outputs:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import networkx as nx
@@ -242,6 +243,63 @@ def export_html(G: nx.MultiDiGraph, path: Path, top_n: int = TOP_N_FOR_VIEW):
      "interaction": {"hover": true, "tooltipDelay": 120}}
     """)
     net.write_html(str(path), notebook=False)
+    _localize_assets(path)
+
+
+def _localize_assets(path: Path):
+    """Make the exported graph work without a network connection.
+
+    pyvis writes its `lib/` folder relative to the *current working directory*,
+    not relative to the output file, and links vis-network from a CDN. Run from
+    src/, that leaves results/knowledge_graph.html pointing at a lib/ directory
+    that is not there and at cdnjs for the library itself - so the graph breaks
+    on any machine that is offline or behind a captive portal. Since the real
+    library is already vendored, point at it and drop the dead references.
+    """
+    import shutil
+
+    out_dir = path.parent
+    for candidate in (Path.cwd() / "lib", ROOT / "src" / "lib", ROOT / "lib"):
+        if candidate.is_dir() and candidate.resolve() != (out_dir / "lib").resolve():
+            shutil.copytree(candidate, out_dir / "lib", dirs_exist_ok=True)
+            shutil.rmtree(candidate, ignore_errors=True)
+            break
+
+    html = path.read_text(encoding="utf-8")
+    replacements = {
+        "https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css":
+            "lib/vis-9.1.2/vis-network.css",
+        "https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js":
+            "lib/vis-9.1.2/vis-network.min.js",
+    }
+    for remote, local in replacements.items():
+        html = html.replace(remote, local)
+
+    # Bootstrap is only used for pyvis's optional filter widget, which this
+    # export does not enable. Its tags span several lines with the attributes
+    # on their own rows, so they need a pattern rather than a literal match.
+    # (The ../node_modules references pyvis also emits sit inside an HTML
+    # comment and never generate a request, so they are left alone.)
+    html = re.sub(
+        r"\s*<link[^>]*?cdn\.jsdelivr\.net/npm/bootstrap[^>]*?/?>", "", html,
+        flags=re.DOTALL)
+    html = re.sub(
+        r"\s*<script[^>]*?cdn\.jsdelivr\.net/npm/bootstrap[^>]*?>\s*</script>", "",
+        html, flags=re.DOTALL)
+
+    path.write_text(html, encoding="utf-8")
+
+    if re.search(r'(?<!<!--)\s(?:src|href)="https?://', html):
+        print("  WARNING: graph still references a remote asset")
+
+    missing = [
+        ref for ref in ("lib/vis-9.1.2/vis-network.min.js", "lib/vis-9.1.2/vis-network.css")
+        if ref in html and not (out_dir / ref).exists()
+    ]
+    if missing:
+        print(f"  WARNING: graph references missing local assets: {missing}")
+    else:
+        print("  assets localised - graph renders with no network access")
 
 
 def main():

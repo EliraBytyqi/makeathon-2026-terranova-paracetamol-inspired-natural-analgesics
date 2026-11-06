@@ -108,6 +108,26 @@ def models() -> dict:
     }
 
 
+@app.get("/api/validation")
+def validation() -> dict:
+    """External validation plus knowledge-graph statistics."""
+    out = data.literature_validation()
+    out["kg"] = data.kg_stats()
+    return out
+
+
+@app.get("/kg")
+def knowledge_graph() -> FileResponse:
+    """The interactive pyvis knowledge graph, served as its own page."""
+    path = data.RESULTS / "knowledge_graph.html"
+    if not path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="knowledge_graph.html not found — run python src/run_all.py kg.py",
+        )
+    return FileResponse(path, media_type="text/html")
+
+
 @app.get("/api/interpretation")
 def interpretation() -> dict:
     """Computed evidence behind the claims on the ML-decoder view."""
@@ -256,6 +276,13 @@ def index() -> FileResponse:
         )
     return FileResponse(target)
 
+
+# The knowledge graph references lib/vis-9.1.2/... relative to itself, so those
+# vendored assets have to be reachable at /lib for /kg to render. Mounted before
+# the catch-all frontend mount, which would otherwise swallow the path.
+_KG_LIB = data.RESULTS / "lib"
+if _KG_LIB.exists():
+    app.mount("/lib", StaticFiles(directory=_KG_LIB), name="kg-assets")
 
 if FRONTEND.exists():
     app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")

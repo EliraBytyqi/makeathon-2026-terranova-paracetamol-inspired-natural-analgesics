@@ -26,9 +26,10 @@
       <button class="nav-btn" data-view="science"><span class="nav-num">02</span> The hypothesis</button>
       <button class="nav-btn" data-view="data"><span class="nav-num">03</span> Data &amp; provenance</button>
       <button class="nav-btn" data-view="models"><span class="nav-num">04</span> Models</button>
-      <button class="nav-btn" data-view="safety"><span class="nav-num">05</span> Safety layers</button>
-      <button class="nav-btn" data-view="screen"><span class="nav-num">06</span> Screen explorer</button>
-      <button class="nav-btn" data-view="decoder"><span class="nav-num">07</span> ML decoder</button>
+      <button class="nav-btn" data-view="validation"><span class="nav-num">05</span> External validation</button>
+      <button class="nav-btn" data-view="safety"><span class="nav-num">06</span> Safety layers</button>
+      <button class="nav-btn" data-view="screen"><span class="nav-num">07</span> Screen explorer</button>
+      <button class="nav-btn" data-view="decoder"><span class="nav-num">08</span> ML decoder</button>
     </nav>
 
     <div class="sidebar-foot">
@@ -423,6 +424,101 @@
     </section>
 
     <!-- ============================================================ 05 -->
+    <section class="view" id="view-validation" aria-labelledby="h-validation">
+      <div class="view-head">
+        <div class="eyebrow">External validation</div>
+        <h1 id="h-validation">The only genuinely held-out test</h1>
+        <p class="lede">
+          26 compound–target claims from the primary literature, 16 of them absent from
+          ChEMBL training entirely. Scored by models that have never seen them. This is
+          the honest test, and it is the most important result in the project.
+        </p>
+      </div>
+
+      <div class="grid grid-4" id="validation-stats"></div>
+
+      <div class="card callout-critical">
+        <h2>Read this before you read anything else</h2>
+        <p class="card-note">
+          <strong>Not one held-out literature active scores above 0.5.</strong> The median
+          predicted probability is effectively zero, and the median library percentile is
+          63 — barely above the 50 you would get by chance. The scaffold-split PR-AUC of
+          0.88–0.98 did <em>not</em> transfer to real plant chemistry.
+        </p>
+        <p class="card-note" style="margin-top:10px">
+          This is the number most projects never compute, and reporting it is the point.
+          The scaffold split controls for memorising chemical series; it does not control
+          for the training set never having contained this kind of molecule at all.
+          Only an external set exposes that, and it did.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Where the models do and do not generalise</h2>
+            <p class="card-note">
+              Ranked by percentile against the full 145k library background — the actual
+              screening question. Hover any bar for the reported potency.
+            </p>
+          </div>
+        </div>
+        <div id="validation-chart"></div>
+        <div class="callout">
+          <strong>The pattern is not random.</strong> The four compounds that do surface —
+          6-gingerol, curcumin, eugenol, piperine — are all TRPV1 vanilloids, structurally
+          close to capsaicin, which <em>is</em> in training. The FAAH flavonoids all sit
+          mid-pack. The models extrapolate a little way from what they know, and no further.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Every claim, scored</h2>
+        <div class="seg" role="group" aria-label="Filter validation set" style="margin-bottom:12px">
+          <button type="button" data-val="held" aria-pressed="true">Held out (16)</button>
+          <button type="button" data-val="seen" aria-pressed="false">Seen in training (10)</button>
+        </div>
+        <div id="validation-table"></div>
+        <p class="card-note" style="margin-top:10px">
+          The "seen in training" group is a wiring check, not evidence: median probability
+          0.9996 confirms the pipeline scores known ligands correctly end to end.
+        </p>
+      </div>
+
+      <div class="card callout-warning">
+        <h2>The diagnosis, and why the project is not sunk by this</h2>
+        <p class="card-note">
+          The FAAH rescue experiment answers exactly the question this result raises.
+          Adding five curated literature actives moves the median prediction on a held-out
+          sixth from 3.5e-5 to 0.33 — four orders of magnitude. <strong>So the failure is
+          coverage, not capability.</strong> ECFP4 plus a gradient-boosted tree can
+          represent this chemistry; ChEMBL simply does not contain it.
+        </p>
+        <p class="card-note" style="margin-top:10px">
+          That turns a negative result into a concrete, costed next step: the fix is a few
+          hundred curated literature actives, not a new architecture. Stating that is worth
+          more than a PR-AUC nobody can reproduce.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Knowledge graph</h2>
+            <p class="card-note">
+              Plant → compound → target → pathway → pain, with every edge typed by
+              evidence class. A graph where a prediction looks like a measurement is a
+              graph that misleads, so they render differently.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="/kg" target="_blank" rel="noopener">Open interactive graph →</a>
+        </div>
+        <div class="grid grid-4" id="kg-stats"></div>
+        <div id="kg-evidence" style="margin-top:16px"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 06 -->
     <section class="view" id="view-safety" aria-labelledby="h-safety">
       <div class="view-head">
         <div class="eyebrow">Safety</div>

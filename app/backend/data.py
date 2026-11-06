@@ -231,6 +231,36 @@ def compound_references(inchikey: str) -> list[str]:
 
 
 @lru_cache(maxsize=1)
+def literature_validation() -> dict:
+    """External validation: literature actives scored by models that never saw them.
+
+    This is the only genuinely held-out evaluation in the project. The
+    percentile column is the one that matters — it asks the actual screening
+    question ("would this compound surface above the library background?")
+    rather than an AUC over 16 rows, which would mean nothing.
+    """
+    df = _read_csv(RESULTS / "literature_validation.csv")
+    summary = _read_json(RESULTS / "literature_validation_summary.json")
+    cols = [c for c in [
+        "compound_name", "target", "interaction", "value_uM",
+        "p_claimed_target", "library_percentile", "ad_claimed_target",
+        "in_chembl_training", "n_reactive_alerts", "p_dili", "confidence",
+    ] if c in df.columns]
+    if len(df):
+        df = df[cols].sort_values("library_percentile", ascending=False)
+    return {
+        "summary": summary,
+        "held_out": records(df[df["in_chembl_training"] == False]) if len(df) else [],
+        "seen": records(df[df["in_chembl_training"] == True]) if len(df) else [],
+    }
+
+
+@lru_cache(maxsize=1)
+def kg_stats() -> dict:
+    return _read_json(RESULTS / "kg_stats.json")
+
+
+@lru_cache(maxsize=1)
 def interpretation() -> dict:
     """Evidence behind the claims on the ML-decoder view.
 
@@ -334,5 +364,8 @@ def availability() -> dict:
         "dili_report": RESULTS / "dili_report.json",
         "attrition_audit": PROC / "attrition_audit.csv",
         "dataset_summary": PROC / "dataset_summary.csv",
+        "literature_validation": RESULTS / "literature_validation.csv",
+        "knowledge_graph": RESULTS / "knowledge_graph.html",
+        "report": RESULTS / "REPORT.md",
     }
     return {name: path.exists() for name, path in checks.items()}

@@ -1,0 +1,10 @@
+{
+  "n_claims": 26,
+  "n_held_out": 16,
+  "n_seen_in_training": 10,
+  "held_out_median_probability": 0.0,
+  "held_out_frac_above_0.5": 0.0,
+  "held_out_median_library_percentile": 63.3,
+  "held_out_frac_top10pct_of_library": 0.1875,
+  "seen_median_probability": 0.9996
+}
