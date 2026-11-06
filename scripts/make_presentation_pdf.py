@@ -211,12 +211,13 @@ def build():
     st.append(table([
         ["Section", "What it gives you"],
         ["1. Read this first", "A result that landed today and changes your framing"],
-        ["2. The narrative", "Six beats, timed, with what to say at each"],
-        ["3. The demo script", "Exact click path through the dashboard"],
-        ["4. Numbers to know cold", "The figures a judge may ask you to defend"],
-        ["5. Question prep", "Eight likely questions with answers"],
-        ["6. Red lines", "Claims you must not make"],
-        ["7. Pre-flight checklist", "What to verify before you walk up"],
+        ["2. Why the order is the argument", "What makes this structure work, and why it cannot be copied"],
+        ["3. The narrative", "Six beats, timed, with what to say at each"],
+        ["4. The demo script", "Exact click path through the dashboard"],
+        ["5. Numbers to know cold", "The figures a judge may ask you to defend"],
+        ["6. Question prep", "Eight likely questions with answers"],
+        ["7. Red lines", "Claims you must not make"],
+        ["8. Pre-flight checklist", "What to verify before you walk up"],
     ], [42 * mm, 123 * mm]))
 
     st += [
@@ -305,8 +306,132 @@ def build():
             "on TRPV1 it lands in the bottom 5% of the library. If you do not say that "
             "first, somebody may find it and say it for you.", "small")]
 
-    # ======================================================== 2. NARRATIVE
-    st += [PageBreak(), P("2. The narrative - six beats", "h1")]
+    # ======================================================== 2. THE ARC
+    st += [PageBreak(), P("2. Why the order is the argument", "h1")]
+    st += [P(
+        "The running order in the next section is not a stylistic choice, and changing it "
+        "breaks the case. This page explains why, so that whoever is holding the clicker "
+        "understands what each beat is doing.", "body")]
+
+    st += [P("The shape", "h2")]
+    st += [P(
+        "It works, then here is where it breaks, then here is why, then here is the fix. "
+        "Four steps, and your project has the evidence for all four.", "body")]
+
+    st.append(table([
+        ["Step", "Your evidence", "What it establishes"],
+        [P("<b>It works</b>", "cellb"),
+         P("Positive controls: 38 measured actives, median 0.9988; 47 measured inactives, median 0.0004", "cell"),
+         P("The machine is built correctly", "cell")],
+        [P("<b>Where it breaks</b>", "cellb"),
+         P(f"External literature set: 0 of {n_held} above 0.5, median percentile {med_pct}", "cell"),
+         P("The boundary of competence", "cell")],
+        [P("<b>Why</b>", "cellb"),
+         P(f"FAAH rescue: median moves {rescue.get('baseline_median_p', 0):.1e} to {rescue.get('loo_median_p', 0):.3f}", "cell"),
+         P("The mechanism of the failure", "cell")],
+        [P("<b>The fix</b>", "cellb"),
+         P("A few hundred curated literature actives; the rescue prices it", "cell"),
+         P("A roadmap, not an apology", "cell")],
+    ], [30 * mm, 80 * mm, 55 * mm]))
+
+    st += [P("Why every step is load-bearing", "h2")]
+    st += [P("The clearest way to see it is to remove one and look at what is left.", "body")]
+    st.append(table([
+        ["If you present...", "What a judge actually hears"],
+        ["\"It works\" alone",
+         "A demo. Unfalsifiable, and every team has one. It carries no information, because a team that never checked would show the identical slide."],
+        ["\"It breaks\" alone", "A failed project. Nobody presents this."],
+        ["Works + breaks",
+         "Honest but defeatist. A limitation you cannot explain, and the last thing the room remembers is the failure."],
+        ["Works + breaks + why",
+         "A diagnosis. This is the step that turns a bad number into a finding."],
+        [P("<b>All four</b>", "cellb"),
+         P("<b>A research programme. The negative result becomes the justification for the next phase.</b>", "cellb")],
+    ], [42 * mm, 123 * mm]))
+
+    st += [
+        Spacer(1, 3 * mm),
+        callout("The hinge is step three",
+                "This is not four nice things stacked up. Without the rescue experiment, "
+                f"\"0 of {n_held}\" is simply bad news. With it, the same number becomes "
+                "evidence for a specific, testable claim about why - and the argument "
+                "survives.",
+                BLUE, "small"),
+    ]
+
+    st += [P("Why it cannot be copied in the last hour", "h2")]
+    st += [P(
+        "Each step depends on infrastructure that had to exist before you knew you would "
+        "need it. That is precisely what makes it credible.", "body")]
+    st.append(table([
+        ["Step", "What it required, and when"],
+        ["It works",
+         "Leakage control designed into screen.py - removing training compounds and keeping them aside as controls. An architectural decision made when the screen was written. Retrofitting it means re-running the screen."],
+        ["Where it breaks",
+         "resolve_literature.py: 24 compounds hand-curated from the primary literature, structures resolved through PubChem, potencies recorded with confidence levels. Hours of careful work, and not fabricable - a judge can check whether kaempferol really inhibits FAAH at 5 uM."],
+        ["Why",
+         "experiment_faah_rescue.py: a leave-one-out design that retrains a model per compound. A designed experiment, not a metric computed from existing output."],
+    ], [30 * mm, 135 * mm]))
+
+    st += [
+        Spacer(1, 3 * mm),
+        callout("It is expensive to fake, which is the whole point",
+                "A team that spent their time optimising a number cannot produce this at "
+                "11pm - not through laziness, but because what makes it possible is the "
+                "evaluation infrastructure, and that had to be built alongside the model. "
+                "The arc is not a presentation technique bolted on at the end. It is the "
+                "visible output of having built the project a particular way.",
+                AQUA, "small"),
+    ]
+
+    st += [P("Why judges reward it specifically", "h2")]
+    st += [P(
+        "Consider the judge's actual problem. They see fifteen to thirty teams in a day, "
+        "every one claims their model works, and they can verify none of it. So what they "
+        "are really trying to estimate is: <b>does this team know whether their own thing "
+        "works?</b>", "body")]
+    st += [P(
+        "A team reporting only successes provides no evidence either way. A team reporting "
+        "a specific, quantified limitation has demonstrably run a test that could have "
+        "embarrassed them, and did not flinch. In a format where nothing can be verified, "
+        "that is the only credible signal available.", "body")]
+    st += [P(
+        "It also inoculates you completely. The strongest attack on any screening project "
+        "is \"this will not generalise\". Once you have said it yourself, with a number, "
+        "before anyone asks, there is no attack left. The worst thing a judge can say, you "
+        "have already said, with more precision than they could.", "body")]
+
+    st += [P("Three rules for delivering it", "h2")]
+    st.append(table([
+        ["#", "Rule", "Why"],
+        ["1", "Order is non-negotiable: competence first, limitation second, never reversed",
+         "You earn the right to report the negative by first demonstrating the positive."],
+        ["2", "Beats 4 and 5 must be adjacent - no slide, no tangent, no pause for questions",
+         "If the room sits in the failure for even thirty seconds, the framing is lost."],
+        ["3", "Tone is finding, not confession",
+         "You went looking for this. Never \"unfortunately our model did not work\"."],
+    ], [8 * mm, 85 * mm, 72 * mm]))
+
+    st += [P("The transitions, where it is won or lost", "h2")]
+    st += [
+        P("(beat 3 to 4) &nbsp; \"That is the part that works. Now - here is what happened "
+          "when we tested it properly.\"", "say"),
+        P("(beat 4 to 5) &nbsp; \"That number could have ended the project. It did not, "
+          "because we could isolate why.\"", "say"),
+        P("(beat 5 to 6) &nbsp; \"Which means the fix is not a better model. It is about "
+          "three hundred more rows of data.\"", "say"),
+    ]
+    st += [
+        Spacer(1, 2 * mm),
+        callout("Land on that last line",
+                "It reframes everything behind it. You are not a team whose model "
+                "underperformed. You are a team that knows exactly what their model costs "
+                "to finish - and that is a different kind of team entirely.",
+                BLUE, "small"),
+    ]
+
+    # ======================================================== 3. NARRATIVE
+    st += [PageBreak(), P("3. The narrative - six beats", "h1")]
     st += [P(
         "Timed for a six-minute slot. Cut beat 6 first if you are given five, and "
         "compress beat 2 if you are given four. The order matters: you earn the right to "
@@ -375,7 +500,7 @@ def build():
         st.append(KeepTogether(block))
 
     # ======================================================== 3. DEMO
-    st += [PageBreak(), P("3. The demo script", "h1")]
+    st += [PageBreak(), P("4. The demo script", "h1")]
     st += [P(
         "Start the dashboard before you are called up, not when you reach the podium. "
         "Have it already open on the Overview view with the browser at full screen.", "body")]
@@ -431,7 +556,7 @@ def build():
     ]
 
     # ======================================================== 4. NUMBERS
-    st += [PageBreak(), P("4. Numbers to know cold", "h1")]
+    st += [PageBreak(), P("5. Numbers to know cold", "h1")]
     st += [P("If you can only memorise one column, memorise the right-hand one.", "body")]
 
     st += [P("Scale", "h2")]
@@ -481,7 +606,7 @@ def build():
     ], [62 * mm, 103 * mm]))
 
     # ======================================================== 5. Q&A
-    st += [PageBreak(), P("5. Question prep", "h1")]
+    st += [PageBreak(), P("6. Question prep", "h1")]
 
     qa = [
         ("Your scaffold-split PR-AUC is 0.98. Isn't that suspiciously high?",
@@ -539,7 +664,7 @@ def build():
         ]))
 
     # ======================================================== 6. RED LINES
-    st += [PageBreak(), P("6. Red lines", "h1")]
+    st += [PageBreak(), P("7. Red lines", "h1")]
     st += [P(
         "This is a biomedical project presented to people who may know more biology than you "
         "do. One overclaim costs more credibility than every chart you built. These are not "
@@ -565,7 +690,7 @@ def build():
     ]
 
     # ======================================================== 7. CHECKLIST
-    st += [P("7. Pre-flight checklist", "h1")]
+    st += [P("8. Pre-flight checklist", "h1")]
     st.append(table([
         ["", "Check", "How"],
         ["[ ]", "Dashboard starts and all artefacts are present",
