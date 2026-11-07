@@ -269,6 +269,18 @@ def validation_corrected() -> dict:
 
 
 @lru_cache(maxsize=1)
+def pubchem_validation() -> dict:
+    """Retrospective validation against PubChem BioAssay.
+
+    The only analysis in the project with a real denominator: PubChem records
+    Inactive outcomes as well as Active ones, so compounds that were screened
+    and did nothing are in the data. Written by scripts/validate_pubchem.py
+    then summarised by scripts/make_pubchem_summary.py.
+    """
+    return _read_json(RESULTS / "pubchem_summary.json")
+
+
+@lru_cache(maxsize=1)
 def kg_stats() -> dict:
     return _read_json(RESULTS / "kg_stats.json")
 
@@ -379,6 +391,7 @@ def availability() -> dict:
         "dataset_summary": PROC / "dataset_summary.csv",
         "literature_validation": RESULTS / "literature_validation.csv",
         "validation_corrected": RESULTS / "validation_corrected.json",
+        "pubchem_validation": RESULTS / "pubchem_summary.json",
         "knowledge_graph": RESULTS / "knowledge_graph.html",
         "report": RESULTS / "REPORT.md",
     }

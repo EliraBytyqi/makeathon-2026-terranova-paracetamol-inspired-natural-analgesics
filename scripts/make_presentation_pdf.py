@@ -165,6 +165,11 @@ def build():
     rescue = load(RESULTS / "faah_rescue_summary.json", {}) or {}
     dili = load(RESULTS / "dili_report.json", {}) or {}
     probes = (load(RESULTS / "dili_probes.json", {}) or {}).get("probes", [])
+    pubchem = load(RESULTS / "pubchem_summary.json", {}) or {}
+    pc_cb1 = (pubchem.get("cb1") or {})
+    pc_all = pc_cb1.get("all", {}) or {}
+    pc_novel = pc_cb1.get("novel_ad_lt_0.5", {}) or {}
+    pc_sep = pubchem.get("separation", {}) or {}
     corrected = load(RESULTS / "validation_corrected.json", {}) or {}
     thr = corrected.get("threshold_experiment", {}) or {}
     tests = corrected.get("tests", {}) or {}
@@ -236,11 +241,66 @@ def build():
 
     # ======================================================== 1. READ FIRST
     st += [PageBreak(), P("1. Read this first", "h1")]
+
+    st += [P("The result to lead with", "h2")]
     st += [P(
-        "The external validation stage ran for the first time late in the build, and the "
-        "first reading of it was <b>wrong in a way worth understanding</b>, because the "
-        "corrected version is both more defensible and more interesting. Read this page "
-        "before you plan a single slide.", "body")]
+        "The project has a genuine, externally validated result, and it is the only "
+        "number here grounded in experiments nobody on this team ran. Lead with it.", "body")]
+    st.append(table([
+        ["Validation set", "n", "ROC-AUC", "95% CI", "p"],
+        [P("<b>CB1, all PubChem overlap</b>", "cellb"),
+         P(f"{pc_all.get('n')} ({pc_all.get('n_active')} act / {pc_all.get('n_inactive')} inact)", "cell"),
+         P(f"<b>{pc_all.get('roc_auc')}</b>", "cellb"),
+         P(f"{pc_all.get('ci95')}", "cell"),
+         P(f"{pc_all.get('p', 0):.1e}", "cell")],
+        [P("<b>CB1, novel chemistry only</b>", "cellb"),
+         P(f"{pc_novel.get('n')} ({pc_novel.get('n_active')} act / {pc_novel.get('n_inactive')} inact)", "cell"),
+         P(f"<b>{pc_novel.get('roc_auc')}</b>", "cellb"),
+         P(f"{pc_novel.get('ci95')}", "cell"),
+         P(f"{pc_novel.get('p', 0):.4f}", "cell")],
+    ], [50 * mm, 38 * mm, 25 * mm, 28 * mm, 24 * mm]))
+
+    st += [
+        Spacer(1, 3 * mm),
+        callout(
+            "Why this one counts when the others did not",
+            "Every earlier validation compared against compounds somebody published "
+            "as ACTIVE - no negatives, so no denominator. PubChem BioAssay records "
+            "the outcome explicitly, Active and Inactive, so compounds that were "
+            "screened and did nothing are in the data. Every one of these "
+            f"{pc_all.get('n')} compounds was excluded from all "
+            f"{pubchem.get('training_skeletons_excluded', 0):,} training structures, so "
+            "the model is predicting, not remembering. Median predicted score was "
+            f"{pc_sep.get('active_median')} for measured actives against "
+            f"{pc_sep.get('inactive_median')} for measured inactives.",
+            GREEN),
+        Spacer(1, 3 * mm),
+        callout(
+            "The negatives are the persuasive part",
+            "It correctly REJECTED beta-caryophyllene and eleven of its isomers - the "
+            "compound routinely called a \"dietary cannabinoid\" because it binds CB2, "
+            "but which is not a CB1 ligand - scoring them around 1e-4. It also "
+            "correctly rejected mescaline, DMT and O-methylbufotenine. A model merely "
+            "pattern-matching \"plant compound that sounds psychoactive\" fails every "
+            "one of those.",
+            BLUE),
+        Spacer(1, 3 * mm),
+        callout(
+            "State the limits in the same breath",
+            "<b>CB1 only.</b> The TRPV1 overlap was 43 compounds all measured active and "
+            "the FAAH overlap 13 all measured inactive - single-class, so ROC-AUC is "
+            "undefined and we claim nothing for them. <b>Quote ROC-AUC, never "
+            "enrichment:</b> PubChem skews active (74.6% base rate here) so enrichment "
+            "factors are meaningless. <b>It is retrospective</b> - a blind test, since "
+            "the model never saw these outcomes, but not a prospective one.",
+            AMBER),
+    ]
+
+    st += [P("The second validation, which stayed inconclusive", "h2")]
+    st += [P(
+        "A separate literature-based test ran earlier, and the first reading of it was "
+        "<b>wrong in a way worth understanding</b>. Report it alongside the CB1 result "
+        "rather than quoting only the number that worked.", "body")]
 
     st += [callout(
         "The claim we nearly made, and why it was wrong",
@@ -484,7 +544,17 @@ def build():
          "peaked near zero, so it is not simply calling everything active.",
          "Screen explorer -> Positive controls tab. Scroll the top rows."),
 
-        ("2:30-3:45", "But here is where it stops", AMBER,
+        ("2:30-3:45", "Validated against real experiments", AQUA,
+         "Then we went looking for experimental data to test it against. PubChem BioAssay "
+         "records inactive outcomes as well as active ones, which gives a real "
+         f"denominator. {pc_all.get('n')} of our library compounds have published "
+         "outcomes and were never in our training set. ROC-AUC "
+         f"{pc_all.get('roc_auc')}, p = {pc_all.get('p', 0):.0e}. Restrict it to novel "
+         f"chemistry and it is still {pc_novel.get('roc_auc')}. And it correctly "
+         "rejected beta-caryophyllene - the compound everyone calls a dietary "
+         "cannabinoid, which is not a CB1 ligand.",
+         "External validation view, the green card at the top."),
+        ("3:45-4:30", "And here is where it stops", AMBER,
          "Then we ran the test most screens skip: compounds reported active in the primary "
          "literature but absent from ChEMBL. And be careful here, because the first reading "
          "of this was wrong. Seven of the sixteen are weaker than the cut-off our own model "
@@ -495,7 +565,7 @@ def build():
          "claim it failed.</b>",
          "External validation view. Stop on the amber card. Let it land."),
 
-        ("3:45-4:45", "So we found out why", BLUE,
+        ("4:30-5:15", "So we found out why", BLUE,
          "Two explanations. One: our potency cut-off was too strict. We retrained at the looser "
          f"bar - it bought {thr.get('median_gain')} percentile points, left the hit rate "
          "unchanged, and made a false positive worse. Ruled out. Two: the training set has "
@@ -504,7 +574,7 @@ def build():
          "fine. The database is the gap.",
          "The diagnosis slide: ruled out on the left, confirmed on the right."),
 
-        ("4:45-6:00", "What it is for, and what is next", AQUA,
+        ("5:15-6:00", "What it is for, and what is next", AQUA,
          "What we hand over is not a discovery, it is a prioritised, filtered, "
          f"provenance-tracked hypothesis list: {len(shortlist) if shortlist is not None else 50} "
          "compounds, each traceable to a plant and a paper, each screened against the "
@@ -605,7 +675,11 @@ def build():
         ["Scaffold-split PR-AUC, across all models", f"{pr_lo:.3f} - {pr_hi:.3f}"],
         ["Positive controls, measured active: median score", "0.9988 (34 of 38 above 0.9)"],
         ["Positive controls, measured inactive: median score", "0.0004"],
-        [P("<b>External validation, fair denominator</b>", "cellb"),
+        [P("<b>PubChem CB1 validation, ROC-AUC</b>", "cellb"),
+         P(f"<b>{pc_all.get('roc_auc')}</b> on n={pc_all.get('n')}, p={pc_all.get('p', 0):.1e}", "cellb")],
+        [P("<b>Same, novel chemistry only</b>", "cellb"),
+         P(f"<b>{pc_novel.get('roc_auc')}</b> on n={pc_novel.get('n')}, p={pc_novel.get('p', 0):.4f}", "cellb")],
+        [P("<b>Literature validation, fair denominator</b>", "cellb"),
          P(f"<b>{corrected.get('fair_denominator')}</b> of {corrected.get('raw_claims')} "
            f"({corrected.get('excluded_weaker_than_cut')} below their model's cut-off)", "cellb")],
         [P("<b>Their median library percentile</b>", "cellb"),
@@ -650,8 +724,19 @@ def build():
          "molecule', which is far easier than ranking among plausible candidates. That is "
          "exactly why we ran an external validation, and there we could not reproduce it. "
          "We treat the scaffold figure as an upper bound, not a result."),
+        ("Has any of this been validated against real experiments?",
+         f"Yes, for CB1. We took every library compound with a published PubChem "
+         f"BioAssay outcome that was absent from our training data - {pc_all.get('n')} "
+         f"compounds, {pc_all.get('n_active')} measured active and "
+         f"{pc_all.get('n_inactive')} measured inactive - and the model separates them "
+         f"at ROC-AUC {pc_all.get('roc_auc')}, p = {pc_all.get('p', 0):.0e}. Restricted "
+         f"to chemistry unlike anything in training it is still "
+         f"{pc_novel.get('roc_auc')}, p = {pc_novel.get('p', 0):.3f}. That is a blind "
+         "test on experiments we had no hand in. It is retrospective, and it is CB1 "
+         "only - the other two overlaps were single-class and cannot be scored."),
         ("So your model doesn't work?",
-         "We do not know yet, and we are not going to pretend either way. It demonstrably "
+         "For CB1 it demonstrably does, against independent experimental outcomes. For "
+         "TRPV1 and FAAH we have no such evidence and we do not claim any. It also "
          "works inside its training distribution - measured actives 0.9988, measured "
          "inactives 0.0004. On genuinely new plant chemistry our test came back "
          f"inconclusive: {corrected.get('fair_denominator')} usable compounds, median "

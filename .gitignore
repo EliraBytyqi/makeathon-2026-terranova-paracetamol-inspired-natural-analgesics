@@ -9,3 +9,13 @@ makeathon-2026-terranova-paracetamol-inspired-natural-analgesics/
 # pyvis writes its vendored JS next to the working directory when kg.py runs.
 # The copy that matters is results/lib, which kg.py places beside the graph.
 src/lib/
+
+# Experiment models: large, regenerable by scripts/experiment_*.py, and not
+# part of the deployed pipeline. The production models in models/ are tracked.
+models/experiments/
+
+# Raw third-party bulk downloads. Re-fetched by the scripts that use them
+# (validate_pubchem.py, experiment_npass.py); the derived results ARE tracked.
+data/external/npass/
+data/external/pubchem/
+data/interim/bioactivity_with_npass.csv

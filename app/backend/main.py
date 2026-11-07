@@ -114,6 +114,7 @@ def validation() -> dict:
     out = data.literature_validation()
     out["kg"] = data.kg_stats()
     out["corrected"] = data.validation_corrected()
+    out["pubchem"] = data.pubchem_validation()
     return out
 
 

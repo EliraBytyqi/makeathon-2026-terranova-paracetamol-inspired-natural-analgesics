@@ -1,0 +1,35 @@
+{
+  "all 71": {
+    "n": 71,
+    "n_active": 53,
+    "n_inactive": 18,
+    "roc_auc": 0.952,
+    "ci95": [
+      0.89,
+      1.0
+    ],
+    "mannwhitney_p": 5.318526185587488e-09
+  },
+  "novel chemistry only (AD<0.5)": {
+    "n": 29,
+    "n_active": 13,
+    "n_inactive": 16,
+    "roc_auc": 0.779,
+    "ci95": [
+      0.533,
+      1.0
+    ],
+    "mannwhitney_p": 0.004416323363448084
+  },
+  "stricter novelty (AD<0.4)": {
+    "n": 26,
+    "n_active": 11,
+    "n_inactive": 15,
+    "roc_auc": 0.818,
+    "ci95": [
+      0.556,
+      1.0
+    ],
+    "mannwhitney_p": 0.0022126861605630175
+  }
+}

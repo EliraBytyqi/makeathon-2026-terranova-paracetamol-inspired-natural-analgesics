@@ -1,0 +1,18 @@
+{
+  "recipe": "pActivity regression on ChEMBL + NPASS, all species, no decoys",
+  "scaffold_spearman": {
+    "TRPV1": 0.814,
+    "CB1": 0.849,
+    "FAAH": 0.796
+  },
+  "n_fair": 9,
+  "median_baseline": 55.1,
+  "median_combined": 60.5,
+  "gain": 5.4,
+  "wilcoxon_vs_chance_p": 0.125,
+  "paired_vs_baseline_p": 0.2129,
+  "top10pct_baseline": 1,
+  "top10pct_combined": 2,
+  "top25pct_combined": 3,
+  "improved": 6
+}

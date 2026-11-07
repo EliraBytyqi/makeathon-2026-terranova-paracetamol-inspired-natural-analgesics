@@ -1,0 +1,96 @@
+{
+  "source": "PubChem BioAssay, retrieved via PUG REST for all nine panel accessions",
+  "design": "library compounds with an independent measured Active/Inactive outcome, excluded from every production training set",
+  "total_overlap": 127,
+  "training_skeletons_excluded": 44516,
+  "cb1": {
+    "all": {
+      "n": 71,
+      "n_active": 53,
+      "n_inactive": 18,
+      "roc_auc": 0.952,
+      "ci95": [
+        0.89,
+        1.0
+      ],
+      "p": 5.318526185587488e-09
+    },
+    "novel_ad_lt_0.5": {
+      "n": 29,
+      "n_active": 13,
+      "n_inactive": 16,
+      "roc_auc": 0.779,
+      "ci95": [
+        0.533,
+        1.0
+      ],
+      "p": 0.004416323363448084
+    },
+    "novel_ad_lt_0.4": {
+      "n": 26,
+      "n_active": 11,
+      "n_inactive": 15,
+      "roc_auc": 0.818,
+      "ci95": [
+        0.556,
+        1.0
+      ],
+      "p": 0.0022126861605630175
+    }
+  },
+  "separation": {
+    "active_median": 0.3444,
+    "inactive_median": 0.0001
+  },
+  "notable_correct_rejections": [
+    {
+      "compound_name": "Albanin F",
+      "model_score": 0.00015556345,
+      "ad": 0.33,
+      "n_synonyms": 3
+    },
+    {
+      "compound_name": "Caryophyllene,alpha + beta mixt.",
+      "model_score": 0.00013618021,
+      "ad": 0.32,
+      "n_synonyms": 12
+    },
+    {
+      "compound_name": "Mescaline",
+      "model_score": 4.192412e-05,
+      "ad": 0.46,
+      "n_synonyms": 1
+    },
+    {
+      "compound_name": "N,N-Dimethyltryptamine",
+      "model_score": 5.9642725e-06,
+      "ad": 0.51,
+      "n_synonyms": 1
+    },
+    {
+      "compound_name": "O-Methylbufotenine",
+      "model_score": 1.2126471e-06,
+      "ad": 0.68,
+      "n_synonyms": 1
+    }
+  ],
+  "unscorable": {
+    "TRPV1": {
+      "n": 43,
+      "n_active": 43,
+      "n_inactive": 0,
+      "reason": "only one outcome class present - ROC-AUC undefined"
+    },
+    "FAAH": {
+      "n": 13,
+      "n_active": 0,
+      "n_inactive": 13,
+      "reason": "only one outcome class present - ROC-AUC undefined"
+    }
+  },
+  "caveats": [
+    "PubChem's records skew active (74.6% base rate here), so enrichment factors are meaningless; ROC-AUC is base-rate independent and is the figure to quote.",
+    "Retrospective: the experiments already existed. It is a blind test because the model never saw the outcomes, not a prospective one.",
+    "TRPV1 and FAAH overlaps were single-class and cannot be scored. The result is CB1 only."
+  ]
+}

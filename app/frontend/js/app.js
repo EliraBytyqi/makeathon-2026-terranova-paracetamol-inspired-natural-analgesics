@@ -501,6 +501,8 @@
       const t = c.tests || {};
       const thr = c.threshold_experiment || null;
 
+      renderPubChem(v.pubchem || {});
+
       $("#validation-stats").innerHTML = [
         stat("Fair denominator", int(c.fair_denominator),
              `${int(c.raw_claims)} claims, ${int(c.excluded_weaker_than_cut)} below their model&rsquo;s cut-off`, 1),
@@ -644,6 +646,65 @@
         ],
       });
     } catch (e) { errorBox($("#validation-stats"), e); }
+  }
+
+  function renderPubChem(pc) {
+    const host = $("#pubchem-card");
+    const cb = pc.cb1 || {};
+    const all = cb.all, novel = cb["novel_ad_lt_0.5"];
+    if (!all) {
+      host.hidden = true;
+      return;
+    }
+    const sep = pc.separation || {};
+    const fmtp = (x) => (x < 0.001 ? Number(x).toExponential(1) : Number(x).toFixed(4));
+
+    $("#pubchem-stats").innerHTML = [
+      stat("CB1 · all overlap", num(all.roc_auc, 3),
+           `ROC-AUC · n=${all.n} (${all.n_active} active / ${all.n_inactive} inactive) · p=${fmtp(all.p)}`, 3),
+      novel ? stat("CB1 · novel chemistry", num(novel.roc_auc, 3),
+           `ROC-AUC · n=${novel.n} (${novel.n_active}/${novel.n_inactive}) · p=${fmtp(novel.p)}`, 1) : "",
+      stat("Score separation", `${num(sep.active_median, 3)} vs ${Number(sep.inactive_median).toExponential(0)}`,
+           "median predicted p(CB1): measured active vs measured inactive", 2),
+    ].join("");
+
+    const rej = (pc.notable_correct_rejections || []).map((r) =>
+      `<tr><th scope="row" style="font-weight:500">${esc(r.compound_name)}</th>
+       <td class="num">${Number(r.model_score).toExponential(1)}</td>
+       <td class="num dim">${num(r.ad, 2)}</td></tr>`).join("");
+    const un = pc.unscorable || {};
+    const unrows = Object.keys(un).map((k) =>
+      `<tr><th scope="row">${targetBadge(k)}</th>
+       <td class="num">${int(un[k].n)}</td>
+       <td class="num">${int(un[k].n_active)} / ${int(un[k].n_inactive)}</td>
+       <td class="card-note">${esc(un[k].reason)}</td></tr>`).join("");
+
+    $("#pubchem-detail").innerHTML = `
+      <div class="grid grid-2">
+        <div>
+          <h4>Correctly rejected — the convincing part</h4>
+          <p class="card-note">Measured <strong>inactive</strong> at CB1, and the model
+          said so. β-caryophyllene is the trap: widely called a &#8220;dietary
+          cannabinoid&#8221; because it hits CB2, but it is not a CB1 ligand.</p>
+          <div class="table-wrap" style="margin-top:9px"><table>
+            <thead><tr><th scope="col">Compound</th><th scope="col" class="num">p(CB1)</th>
+            <th scope="col" class="num">AD</th></tr></thead><tbody>${rej}</tbody></table></div>
+        </div>
+        <div>
+          <h4>What could not be scored</h4>
+          <p class="card-note">Both overlaps were single-class, so ROC-AUC is undefined.
+          <strong>The result is CB1 only</strong> — do not generalise it.</p>
+          <div class="table-wrap" style="margin-top:9px"><table>
+            <thead><tr><th scope="col">Target</th><th scope="col" class="num">n</th>
+            <th scope="col" class="num">act/inact</th><th scope="col">Why</th></tr></thead>
+            <tbody>${unrows}</tbody></table></div>
+          <div class="callout callout-warning" style="margin-top:12px;font-size:0.82rem">
+            PubChem skews active (74.6% base rate here), so enrichment factors are
+            meaningless. ROC-AUC is base-rate independent — quote that. And this is
+            retrospective: a blind test, not a prospective one.
+          </div>
+        </div>
+      </div>`;
   }
 
   function renderValidationTable(v) {
