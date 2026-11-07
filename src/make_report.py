@@ -242,8 +242,7 @@ def main():
         A("A smoke test showed the FAAH model assigning near-zero probability "
           "to kaempferol and genistein — the very natural-product FAAH "
           "inhibitors that motivated this project.\n")
-        A("We checked why, rather than assuming "
-          "(`src/check_faah_flavonoids.py`):\n")
+        A("We checked why, rather than assuming:\n")
         A("```")
         A("FAAH rows in curated ChEMBL data:     4,979  (4,257 compounds)")
         A("kaempferol, genistein, biochanin A,")

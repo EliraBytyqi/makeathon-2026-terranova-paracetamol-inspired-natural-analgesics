@@ -100,7 +100,7 @@ def build(shortlist_n: int = 200) -> nx.MultiDiGraph:
             n_measured += 1
 
     # ---- predicted activity + plant provenance -------------------------
-    screen_path = RESULTS / "screening_all.csv"
+    screen_path = RESULTS / "screening_all.csv.gz"
     n_predicted = 0
     n_contains = 0
     n_flags = 0
@@ -274,6 +274,15 @@ def _localize_assets(path: Path):
     }
     for remote, local in replacements.items():
         html = html.replace(remote, local)
+
+    # Subresource-integrity hashes were computed for the CDN copies. Once the
+    # URLs point at vendored local files the hashes no longer match, and the
+    # browser silently refuses to execute vis-network - which renders the page
+    # blank with no visible error. Strip integrity and crossorigin along with
+    # the rewrite.
+    html = re.sub(r'\s+integrity="[^"]*"', "", html)
+    html = re.sub(r'\s+crossorigin="[^"]*"', "", html)
+    html = re.sub(r'\s+referrerpolicy="[^"]*"', "", html)
 
     # Bootstrap is only used for pyvis's optional filter widget, which this
     # export does not enable. Its tags span several lines with the attributes

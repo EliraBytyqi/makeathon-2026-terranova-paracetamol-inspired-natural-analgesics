@@ -46,6 +46,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import GroupShuffleSplit, StratifiedKFold
 
 from decoys import match_decoys, prepare_pool, property_overlap_report
+import modelio
 from featurize import featurize_smiles, scaffold, scaffold_groups
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,7 +60,34 @@ RESULTS.mkdir(exist_ok=True)
 RANDOM_STATE = 42
 MIN_CLASS = 25          # below this a target/scope combination is not modellable
 TEST_FRACTION = 0.2
-DECOYS_PER_ACTIVE = 3   # brings a ~75% active rate down to roughly 20%
+DECOYS_PER_ACTIVE = 1   # measured, not assumed - see note below
+DECOY_WEIGHT = 0.4      # a presumed inactive is not worth a measured one
+
+# Both numbers used to be assertions. Now they are measurements.
+#
+# The ratio was 3, justified in a comment as bringing a ~75% active rate down
+# to roughly 20%. scripts/experiment_decoy_ratio.py tested 0, 1, 2, 3 and 5
+# against the external PubChem set, where decoys cannot flatter the score:
+#
+#     ratio      TRPV1    CB1    FAAH
+#       0        0.944   0.841   0.619      <- publication bias, unusable for CB1
+#       1        0.952   0.919   0.626
+#       3        0.954   0.918   0.612      <- the old setting
+#       5        0.955   0.920   0.589
+#
+# Going from zero decoys to one is worth +0.078 on CB1. Everything past one is
+# noise, and the dip at ratio 2 across all three targets confirms it. Three
+# decoys per active therefore carried roughly 17,900 extra presumed-inactive
+# molecules for no measurable gain, so the ratio is 1.
+#
+# The weight is the second half of the same problem. Every decoy used to enter
+# the loss with label 0 and full weight, identical to a compound somebody had
+# actually assayed and found inactive - the "presumed_inactive" tag was
+# recorded in the frame and never read by anything. That asserts a certainty
+# the data does not support, and it is the standard positive-unlabeled mistake.
+# Decoys now carry weight 0.4, so the model is still taught what a non-ligand
+# looks like but is penalised less for being unsure about a molecule nobody
+# measured. Measured compounds, active or inactive, keep weight 1.0.
 
 _morgan = GetMorganGenerator(radius=2, fpSize=2048)
 
@@ -299,13 +327,18 @@ def train_one(target: str, scope: str, df: pd.DataFrame, label_col: str,
 
     y = sub[label_col].astype(int).values
     smiles = sub["std_smiles"].tolist()
+    n_presumed = int((sub["evidence"] == "presumed_inactive").sum())
     print(f"    final set: {len(sub):,} compounds, {(y==1).sum():,} active "
-          f"({y.mean():.1%})")
+          f"({y.mean():.1%}); {n_presumed:,} negatives are presumed, "
+          f"carried at weight {DECOY_WEIGHT}")
 
     X, mask = featurize_smiles(smiles)
     X, y = X[mask], y[mask]
     smiles = [s for s, m in zip(smiles, mask) if m]
     sub = sub[mask]
+    # measured evidence counts fully; a decoy is an assumption, not a datum
+    w = np.where(sub["evidence"].to_numpy() == "presumed_inactive",
+                 DECOY_WEIGHT, 1.0).astype(float)
     groups = scaffold_groups(smiles)
     n_scaffolds = len(set(groups))
     print(f"    {n_scaffolds:,} distinct Bemis-Murcko scaffolds "
@@ -332,7 +365,7 @@ def train_one(target: str, scope: str, df: pd.DataFrame, label_col: str,
             continue
         report["splits"][split_kind] = {}
         for mname, model in make_models().items():
-            model.fit(X[tr], y[tr])
+            model.fit(X[tr], y[tr], sample_weight=w[tr])
             score = model.predict_proba(X[te])[:, 1]
             m = evaluate(y[te], score)
             report["splits"][split_kind][mname] = m
@@ -358,8 +391,11 @@ def train_one(target: str, scope: str, df: pd.DataFrame, label_col: str,
         return report
     mname = best[0]
     final = make_models()[mname]
-    final.fit(X, y)
+    final.fit(X, y, sample_weight=w)
     report["selected_model"] = mname
+    report["decoys_per_active"] = DECOYS_PER_ACTIVE
+    report["decoy_sample_weight"] = DECOY_WEIGHT
+    report["n_presumed_inactive"] = n_presumed
 
     bundle = {
         "model": final,
@@ -373,8 +409,7 @@ def train_one(target: str, scope: str, df: pd.DataFrame, label_col: str,
         "report": report,
     }
     path = MODELS / f"{target}_{scope}_{label_col}.pkl"
-    with open(path, "wb") as fh:
-        pickle.dump(bundle, fh)
+    modelio.save(bundle, path)
     print(f"    -> saved {path.name} (model: {mname})")
     return report
 

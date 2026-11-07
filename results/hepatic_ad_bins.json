@@ -1,0 +1,276 @@
+{
+  "bins": {
+    "mito": {
+      "overall": {
+        "n": 1328,
+        "n_pos": 143,
+        "n_neg": 1185,
+        "scoreable": true,
+        "roc_auc": 0.8838,
+        "ci95": [
+          0.853,
+          0.9112
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.0745,
+        "p": 2.9854180600858206e-51
+      },
+      "0.0-0.3": {
+        "n": 108,
+        "n_pos": 20,
+        "n_neg": 88,
+        "scoreable": true,
+        "roc_auc": 0.7312,
+        "ci95": [
+          0.595,
+          0.843
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1353,
+        "p": 0.0006522123037058631
+      },
+      "0.3-0.4": {
+        "n": 159,
+        "n_pos": 16,
+        "n_neg": 143,
+        "scoreable": true,
+        "roc_auc": 0.8785,
+        "ci95": [
+          0.7982,
+          0.9477
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.0741,
+        "p": 3.610993478568133e-07
+      },
+      "0.4-0.5": {
+        "n": 199,
+        "n_pos": 26,
+        "n_neg": 173,
+        "scoreable": true,
+        "roc_auc": 0.8699,
+        "ci95": [
+          0.792,
+          0.9359
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.0791,
+        "p": 6.176500951140827e-10
+      },
+      "0.5-0.6": {
+        "n": 304,
+        "n_pos": 29,
+        "n_neg": 275,
+        "scoreable": true,
+        "roc_auc": 0.9208,
+        "ci95": [
+          0.8514,
+          0.9707
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.0633,
+        "p": 4.5997559073562577e-14
+      },
+      "0.6-1.0": {
+        "n": 558,
+        "n_pos": 52,
+        "n_neg": 506,
+        "scoreable": true,
+        "roc_auc": 0.9166,
+        "ci95": [
+          0.8753,
+          0.9511
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.0674,
+        "p": 2.079971103964406e-23
+      }
+    },
+    "hepg2": {
+      "overall": {
+        "n": 844,
+        "n_pos": 194,
+        "n_neg": 650,
+        "scoreable": true,
+        "roc_auc": 0.7436,
+        "ci95": [
+          0.7023,
+          0.7848
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1564,
+        "p": 3.2288984237828427e-25
+      },
+      "0.0-0.3": {
+        "n": 93,
+        "n_pos": 30,
+        "n_neg": 63,
+        "scoreable": true,
+        "roc_auc": 0.6751,
+        "ci95": [
+          0.5472,
+          0.788
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.203,
+        "p": 0.0033014567519171266
+      },
+      "0.3-0.4": {
+        "n": 102,
+        "n_pos": 23,
+        "n_neg": 79,
+        "scoreable": true,
+        "roc_auc": 0.7655,
+        "ci95": [
+          0.6448,
+          0.8726
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1503,
+        "p": 5.6787858743430495e-05
+      },
+      "0.4-0.5": {
+        "n": 139,
+        "n_pos": 31,
+        "n_neg": 108,
+        "scoreable": true,
+        "roc_auc": 0.7279,
+        "ci95": [
+          0.6067,
+          0.8332
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1514,
+        "p": 5.7135432245244454e-05
+      },
+      "0.5-0.6": {
+        "n": 198,
+        "n_pos": 39,
+        "n_neg": 159,
+        "scoreable": true,
+        "roc_auc": 0.7802,
+        "ci95": [
+          0.6892,
+          0.8643
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1355,
+        "p": 3.035823253373806e-08
+      },
+      "0.6-1.0": {
+        "n": 312,
+        "n_pos": 71,
+        "n_neg": 241,
+        "scoreable": true,
+        "roc_auc": 0.7312,
+        "ci95": [
+          0.656,
+          0.8029
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1601,
+        "p": 1.594389582898218e-09
+      }
+    },
+    "clinical": {
+      "overall": {
+        "n": 116,
+        "n_pos": 60,
+        "n_neg": 56,
+        "scoreable": true,
+        "roc_auc": 0.8229,
+        "ci95": [
+          0.7455,
+          0.8924
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1852,
+        "p": 1.0376287643324308e-09
+      },
+      "0.0-0.3": {
+        "n": 47,
+        "n_pos": 27,
+        "n_neg": 20,
+        "scoreable": true,
+        "roc_auc": 0.7667,
+        "ci95": [
+          0.6203,
+          0.891
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.2011,
+        "p": 0.001008802980722853
+      },
+      "0.3-0.4": {
+        "n": 21,
+        "n_pos": 4,
+        "n_neg": 17,
+        "scoreable": true,
+        "roc_auc": 0.8676,
+        "ci95": [
+          0.55,
+          1.0
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1953,
+        "p": 0.011862990810359231
+      },
+      "0.4-0.5": {
+        "n": 16,
+        "n_pos": 6,
+        "n_neg": 10,
+        "scoreable": true,
+        "roc_auc": 0.8667,
+        "ci95": [
+          0.619,
+          1.0
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1905,
+        "p": 0.007992007992007992
+      },
+      "0.5-0.6": {
+        "n": 11,
+        "n_pos": 7,
+        "scoreable": false
+      },
+      "0.6-1.0": {
+        "n": 21,
+        "n_pos": 16,
+        "n_neg": 5,
+        "scoreable": true,
+        "roc_auc": 0.975,
+        "ci95": [
+          0.8875,
+          1.0
+        ],
+        "ci_excludes_chance": true,
+        "brier": 0.1467,
+        "p": 0.00019656985601258046
+      }
+    }
+  },
+  "note": "plant natural products only; each head scored on its own measured endpoint; heads retrained with every library structure removed",
+  "library_ad_distribution": {
+    "0.0-0.3": {
+      "n": 122060,
+      "frac": 0.8408
+    },
+    "0.3-0.4": {
+      "n": 16541,
+      "frac": 0.1139
+    },
+    "0.4-0.5": {
+      "n": 3751,
+      "frac": 0.0258
+    },
+    "0.5-0.6": {
+      "n": 1648,
+      "frac": 0.0114
+    },
+    "0.6-1.0": {
+      "n": 1164,
+      "frac": 0.008
+    }
+  }
+}

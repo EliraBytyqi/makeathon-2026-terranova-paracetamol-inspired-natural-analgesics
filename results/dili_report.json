@@ -1,27 +1,106 @@
 {
-  "n": 462,
-  "positive_rate": 0.5065,
-  "n_scaffolds": 331,
+  "endpoint": "clinical",
+  "description": "FDA DILIrank 2.0 concern class (label-derived, human outcome)",
+  "n": 506,
+  "n_positive": 199,
+  "positive_rate": 0.3933,
+  "n_scaffolds": 389,
+  "repeats": 10,
+  "candidates": {
+    "random_forest": {
+      "scaffold": {
+        "pr_auc": 0.7457,
+        "pr_auc_sd": 0.0545,
+        "roc_auc": 0.7865,
+        "roc_auc_sd": 0.0382,
+        "mcc": 0.4621,
+        "mcc_sd": 0.0733,
+        "balanced_acc": 0.7269,
+        "balanced_acc_sd": 0.0407
+      },
+      "random": {
+        "pr_auc": 0.7558,
+        "pr_auc_sd": 0.0371,
+        "roc_auc": 0.8231,
+        "roc_auc_sd": 0.0301,
+        "mcc": 0.5019,
+        "mcc_sd": 0.0616,
+        "balanced_acc": 0.7481,
+        "balanced_acc_sd": 0.0305
+      }
+    },
+    "lightgbm": {
+      "scaffold": {
+        "pr_auc": 0.7197,
+        "pr_auc_sd": 0.0628,
+        "roc_auc": 0.7569,
+        "roc_auc_sd": 0.042,
+        "mcc": 0.3838,
+        "mcc_sd": 0.0699,
+        "balanced_acc": 0.6875,
+        "balanced_acc_sd": 0.0341
+      },
+      "random": {
+        "pr_auc": 0.7327,
+        "pr_auc_sd": 0.0423,
+        "roc_auc": 0.8011,
+        "roc_auc_sd": 0.0293,
+        "mcc": 0.4447,
+        "mcc_sd": 0.0737,
+        "balanced_acc": 0.7155,
+        "balanced_acc_sd": 0.0357
+      }
+    }
+  },
+  "selected": "random_forest",
+  "scaffold": {
+    "pr_auc": 0.7457,
+    "pr_auc_sd": 0.0545,
+    "roc_auc": 0.7865,
+    "roc_auc_sd": 0.0382,
+    "mcc": 0.4621,
+    "mcc_sd": 0.0733,
+    "balanced_acc": 0.7269,
+    "balanced_acc_sd": 0.0407
+  },
+  "random": {
+    "pr_auc": 0.7558,
+    "pr_auc_sd": 0.0371,
+    "roc_auc": 0.8231,
+    "roc_auc_sd": 0.0301,
+    "mcc": 0.5019,
+    "mcc_sd": 0.0616,
+    "balanced_acc": 0.7481,
+    "balanced_acc_sd": 0.0305
+  },
+  "generalisation_gap_roc_auc": 0.0366,
   "splits": {
     "scaffold_5x": {
-      "pr_auc": 0.9082,
-      "roc_auc": 0.8892,
-      "mcc": 0.6656,
-      "balanced_acc": 0.8332,
-      "pr_auc_sd": 0.0304,
-      "roc_auc_sd": 0.0235,
-      "mcc_sd": 0.0429,
-      "balanced_acc_sd": 0.0203
+      "pr_auc": 0.7457,
+      "pr_auc_sd": 0.0545,
+      "roc_auc": 0.7865,
+      "roc_auc_sd": 0.0382,
+      "mcc": 0.4621,
+      "mcc_sd": 0.0733,
+      "balanced_acc": 0.7269,
+      "balanced_acc_sd": 0.0407
     },
     "random_5x": {
-      "pr_auc": 0.9051,
-      "roc_auc": 0.9029,
-      "mcc": 0.6783,
-      "balanced_acc": 0.8387,
-      "pr_auc_sd": 0.0467,
-      "roc_auc_sd": 0.0438,
-      "mcc_sd": 0.098,
-      "balanced_acc_sd": 0.0491
+      "pr_auc": 0.7558,
+      "pr_auc_sd": 0.0371,
+      "roc_auc": 0.8231,
+      "roc_auc_sd": 0.0301,
+      "mcc": 0.5019,
+      "mcc_sd": 0.0616,
+      "balanced_acc": 0.7481,
+      "balanced_acc_sd": 0.0305
     }
+  },
+  "label_convention": "most_vs_none",
+  "dilist_convention_for_comparison": {
+    "n": 825,
+    "positive_rate": 0.6279,
+    "scaffold_roc_auc": 0.7541,
+    "note": "most + less concern vs none; rejected because it puts severity-0 aspirin in the same class as severity-8 troglitazone"
   }
 }

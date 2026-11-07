@@ -1,6 +1,6 @@
 """Can a handful of curated natural actives rescue the FAAH blind spot?
 
-The diagnostic in check_faah_flavonoids.py established that ChEMBL's FAAH
+A chemical-space diagnostic established that ChEMBL's FAAH
 records contain essentially no flavonoids (2 of 4,979 rows, none active), and
 that the resulting model scores kaempferol at 6e-6 and genistein at 6.5e-5.
 That is extrapolation into empty space, not a judgement.

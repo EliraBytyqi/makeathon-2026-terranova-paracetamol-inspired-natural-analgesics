@@ -29,7 +29,8 @@
       <button class="nav-btn" data-view="validation"><span class="nav-num">05</span> External validation</button>
       <button class="nav-btn" data-view="safety"><span class="nav-num">06</span> Safety layers</button>
       <button class="nav-btn" data-view="screen"><span class="nav-num">07</span> Screen explorer</button>
-      <button class="nav-btn" data-view="decoder"><span class="nav-num">08</span> ML decoder</button>
+      <button class="nav-btn" data-view="demo"><span class="nav-num">08</span> Live demo</button>
+      <button class="nav-btn" data-view="decoder"><span class="nav-num">09</span> ML decoder</button>
     </nav>
 
     <div class="sidebar-foot">
@@ -396,31 +397,7 @@
         <div class="callout callout-good" id="rescue-note"></div>
       </div>
 
-      <div class="card">
-        <h2>The DILI model, and what it gets wrong</h2>
-        <div class="grid grid-2">
-          <div>
-            <p class="card-note">
-              Random Forest over the TDC DILI benchmark — 475 marketed drugs
-              (<span id="dili-n">462</span> after standardisation), aggregated by the
-              FDA's National Center for Toxicological Research. Evaluated over five
-              repeated scaffold splits, because one split on 462 compounds is noisy.
-            </p>
-            <dl class="kv" id="dili-metrics" style="margin-top:12px"></dl>
-          </div>
-          <div id="dili-probe-host"></div>
-        </div>
-        <div class="callout callout-critical">
-          <h4>Paracetamol is not in the benchmark at all</h4>
-          Neither is isoniazid — two of the most famous hepatotoxins in medicine. So the
-          model scores paracetamol <strong id="para-score">0.37</strong>, i.e. low risk,
-          and it is wrong for a structural reason: the benchmark encodes
-          <em>idiosyncratic, immune-mediated</em> DILI rather than intrinsic
-          dose-dependent toxicity. A statistical model that misses this project's own
-          index compound has not earned a large say in the ranking — which is exactly
-          why the structural alert layer carries the weight instead.
-        </div>
-      </div>
+      
     </section>
 
     <!-- ============================================================ 05 -->
@@ -454,40 +431,9 @@
 
       <div class="grid grid-4" id="validation-stats"></div>
 
-      <div class="card callout-warning">
-        <h2>Read the denominator before you read the result</h2>
-        <p class="card-note">
-          The raw run reports 16 held-out claims and that none scored above 0.5. Both
-          halves of that sentence are misleading, and we corrected them.
-        </p>
-        <div class="grid grid-2" style="margin-top:14px">
-          <div>
-            <h4>7 of 16 are weaker than the model&#8217;s own cut-off</h4>
-            <p class="card-note">
-              Each model is trained on a potency threshold — 1 µM for TRPV1 and CB1,
-              10 µM for FAAH. Eugenol is reported at <strong>300 µM</strong>. Scoring it
-              low is the <em>correct</em> answer, not a miss. Excluding those leaves a
-              fair denominator of <strong>9</strong>.
-            </p>
-            <div id="excluded-table" style="margin-top:10px"></div>
-          </div>
-          <div>
-            <h4>&#8220;Above 0.5&#8221; is not an activity boundary</h4>
-            <p class="card-note">
-              Measured against this library, a probability of 0.5 sits near the 99th
-              percentile. So &#8220;none scored above 0.5&#8221; really means
-              &#8220;none reached the top 1% of 145,164 compounds&#8221; — a far weaker
-              claim than failure.
-            </p>
-            <div id="half-table" style="margin-top:10px"></div>
-          </div>
-        </div>
-      </div>
+      
 
-      <div class="card">
-        <h2>What the corrected result says</h2>
-        <div id="corrected-verdict"></div>
-      </div>
+      
 
       <div class="card">
         <div class="card-head">
@@ -590,14 +536,17 @@
           The weights are printed in the output and shown here.
         </p>
         <div class="smiles" style="margin-top:12px">
-          composite = target_score × exp(−0.35 × alert_severity_sum) × ad_confidence × cns_bonus × (1 − 0.30 × p_dili)
+          composite = target_score × exp(−0.35 × alert_severity_sum) × ad_confidence × cns_bonus × (1 − 0.35 × p_hepatic)
         </div>
         <div class="grid grid-4" style="margin-top:14px" id="weight-stats"></div>
         <div class="callout">
-          <strong>The DILI term is deliberately small</strong> relative to the structural
-          alert term. The alerts flag paracetamol at maximum severity on the exact NAPQI
-          mechanism; the model calls it low risk. We weighted the layer that is right
-          about the compound the whole project is named after.
+          <strong>The hepatic term is weighted 0.35, and that number moved twice.</strong>
+          It was 0.30 while the old model could not see its own index compound. The new
+          panel is 27&times; larger and does contain paracetamol, which first suggested
+          0.45 &mdash; but external validation put the panel near 0.65, not the 0.79 its
+          internal scaffold split implied, so it settled at 0.35. The structural alerts
+          keep the hard veto: they encode mechanism rather than correlation, and they are
+          the only layer that can see metabolism-dependent toxicity at all.
         </div>
       </div>
 
@@ -622,22 +571,7 @@
         <div id="alerts-table"></div>
       </div>
 
-      <div class="card callout-warning">
-        <h2>Two caveats that belong in the writeup</h2>
-        <p class="card-note">
-          <strong>Structural alerts are a hazard flag, not a risk assessment.</strong>
-          Dose, exposure, clearance route and detoxification capacity all matter and
-          none are encoded here. A flagged compound is not "toxic"; it is "worth a
-          reactivity check".
-        </p>
-        <p class="card-note" style="margin-top:10px">
-          <strong>The alert set flags compounds this project likes.</strong> Curcumin
-          and 6-gingerol are Michael acceptors. Many flavonoids are catechols. That is a
-          genuine finding about the chemical space of plant analgesics — plants make
-          electrophiles on purpose, often as defence chemistry — not a bug to be tuned
-          away. We report the flags and keep the compounds, tagged.
-        </p>
-      </div>
+      
     </section>
 
     <!-- ============================================================ 06 -->
@@ -654,7 +588,8 @@
 
       <div class="filters">
         <div class="seg" role="group" aria-label="Choose dataset">
-          <button type="button" data-source="shortlist" aria-pressed="true">Shortlist (50)</button>
+          <button type="button" data-source="candidates" aria-pressed="true">Candidates (50 distinct)</button>
+          <button type="button" data-source="shortlist" aria-pressed="false">Raw top 50 rows</button>
           <button type="button" data-source="screen" aria-pressed="false">Full screen</button>
           <button type="button" data-source="controls" aria-pressed="false">Positive controls</button>
         </div>
@@ -685,6 +620,14 @@
         <button class="btn btn-sm" id="f-reset" type="button">Reset</button>
       </div>
 
+      <div class="callout" style="margin-bottom:14px">
+        <strong>Candidates vs raw rows.</strong> The library stores stereoisomers,
+        tautomers and salt variants as separate entries, so the top 50 <em>rows</em> of
+        the ranked screen contain only 27 distinct chemical skeletons &mdash; 15 of them
+        occupy 38 slots. <strong>Candidates</strong> collapses to one row per skeleton and
+        keeps the best-scoring representative, so it is 50 genuinely different molecules:
+        what you would hand a laboratory. Both views are here so the difference is visible.
+      </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div id="screen-table"></div>
       </div>
@@ -705,7 +648,37 @@
         <div id="dist-chart" style="margin-top:12px"></div>
       </div>
     </section>
-    <!-- ============================================================ 07 -->
+    <!-- ============================================================ 08 -->
+    <section class="view" id="view-demo" aria-labelledby="h-demo">
+      <div class="view-head">
+        <div class="eyebrow">Live demo</div>
+        <h1 id="h-demo">Give it a molecule</h1>
+        <p class="lede">
+          The whole pipeline on one structure, computed now rather than looked up.
+          Pick a molecule or paste a SMILES string: the three activity models run,
+          the structural alerts fire, and the hepatic panel returns a liability
+          number. Nothing here is precomputed.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="filters" style="margin:0">
+          <div class="field" style="min-width:280px">
+            <label for="demo-pick">Molecule</label>
+            <select id="demo-pick"><option value="">Loading…</option></select>
+          </div>
+          <div class="field" style="flex:1;min-width:260px">
+            <label for="demo-smiles">or a SMILES string</label>
+            <input type="text" id="demo-smiles" placeholder="CC(=O)Nc1ccc(O)cc1" spellcheck="false">
+          </div>
+          <button class="btn" id="demo-run" type="button">Run the pipeline</button>
+        </div>
+        <p class="card-note" id="demo-note" style="margin-top:12px">—</p>
+      </div>
+
+      <div id="demo-out" aria-live="polite"></div>
+    </section>
+    <!-- ============================================================ 09 -->
     <section class="view" id="view-decoder" aria-labelledby="h-decoder">
       <div class="view-head">
         <div class="eyebrow">ML decoder</div>
@@ -717,46 +690,7 @@
         </p>
       </div>
 
-      <div class="card">
-        <h2>The task in one paragraph</h2>
-        <p class="card-note">
-          We have <strong>three binary classifiers</strong>, one per protein target. Input
-          is a molecule; output is P(this molecule acts on this protein). Training labels
-          come from a public database of lab measurements, where a continuous potency
-          value is thresholded into active/inactive. We then run inference over
-          <strong>145,164 unlabelled molecules</strong> found in plants and rank them.
-          A fourth classifier predicts liver toxicity, and a rule-based filter removes
-          molecules containing substructures known to cause it. The final ranking is a
-          hand-weighted reranker over all of it.
-        </p>
-        <div class="grid grid-3" style="margin-top:16px">
-          <div class="pathway-arm">
-            <h4>It is a retrieval problem</h4>
-            <p class="card-note">
-              Not accuracy. We hand a chemist the top 50 of 145k and they test those. Only
-              the head of the ranking is ever seen, which is why every metric is
-              PR-AUC and lift@k rather than accuracy or ROC.
-            </p>
-          </div>
-          <div class="pathway-arm">
-            <h4>The test set is deliberately OOD</h4>
-            <p class="card-note">
-              Training data is synthetic drug chemistry; inference data is plant
-              chemistry. They barely overlap. So the evaluation uses a
-              <em>grouped</em> split on molecular core structure, and every prediction
-              carries a novelty score.
-            </p>
-          </div>
-          <div class="pathway-arm">
-            <h4>Labels are badly biased</h4>
-            <p class="card-note">
-              The source database is built from published papers, and people publish what
-              worked. The raw positive rate is 84%. That is publication bias, not
-              base rate, and it is the single biggest data problem in the project.
-            </p>
-          </div>
-        </div>
-      </div>
+      
 
       <div class="card">
         <div class="card-head">
@@ -816,14 +750,7 @@
         <div id="conclusions" style="margin-top:14px"></div>
       </div>
 
-      <div class="card callout-warning">
-        <h2>What a reviewer will attack first</h2>
-        <p class="card-note">
-          If you present this, expect these five. Each is a real limitation, and having
-          the answer ready is worth more than hoping nobody asks.
-        </p>
-        <div id="attacks" style="margin-top:14px"></div>
-      </div>
+      
     </section>
   </main>
 </div>

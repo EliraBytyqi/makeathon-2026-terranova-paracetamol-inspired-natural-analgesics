@@ -1,0 +1,158 @@
+{
+  "test_a_temporal": {
+    "design": "clinical head trained on DILIrank v1 drugs, tested on the 300 drugs added in v2 (141 unambiguous)",
+    "n_train": 393,
+    "n_test": 113,
+    "n_test_novel_scaffold": 93,
+    "results": {
+      "random_forest": {
+        "all": {
+          "n": 113,
+          "n_positive": 21,
+          "n_negative": 92,
+          "positive_rate": 0.1858,
+          "scoreable": true,
+          "roc_auc": 0.676,
+          "ci95": [
+            0.5387,
+            0.8
+          ],
+          "mannwhitney_p": 0.006105943766340311,
+          "median_positive": 0.6474,
+          "median_negative": 0.5134
+        },
+        "novel_scaffold": {
+          "n": 93,
+          "n_positive": 18,
+          "n_negative": 75,
+          "positive_rate": 0.1935,
+          "scoreable": true,
+          "roc_auc": 0.6489,
+          "ci95": [
+            0.4982,
+            0.7857
+          ],
+          "mannwhitney_p": 0.025604230668728842,
+          "median_positive": 0.646,
+          "median_negative": 0.5482
+        }
+      },
+      "lightgbm": {
+        "all": {
+          "n": 113,
+          "n_positive": 21,
+          "n_negative": 92,
+          "positive_rate": 0.1858,
+          "scoreable": true,
+          "roc_auc": 0.6553,
+          "ci95": [
+            0.5258,
+            0.7789
+          ],
+          "mannwhitney_p": 0.013528017951359685,
+          "median_positive": 0.9931,
+          "median_negative": 0.7716
+        },
+        "novel_scaffold": {
+          "n": 93,
+          "n_positive": 18,
+          "n_negative": 75,
+          "positive_rate": 0.1935,
+          "scoreable": true,
+          "roc_auc": 0.6474,
+          "ci95": [
+            0.4915,
+            0.7909
+          ],
+          "mannwhitney_p": 0.02678607353136425,
+          "median_positive": 0.9937,
+          "median_negative": 0.8958
+        }
+      }
+    }
+  },
+  "test_b_cross_dataset": {
+    "design": "Tox21-trained heads scored against DILIrank most-concern vs no-concern; these heads never saw a clinical label",
+    "results": {
+      "mito": {
+        "all_clinical": {
+          "n": 506,
+          "n_positive": 199,
+          "n_negative": 307,
+          "positive_rate": 0.3933,
+          "scoreable": true,
+          "roc_auc": 0.6558,
+          "ci95": [
+            0.61,
+            0.7043
+          ],
+          "mannwhitney_p": 1.5861160727606187e-09,
+          "median_positive": 0.2667,
+          "median_negative": 0.1603
+        },
+        "excluding_tox21_trained": {
+          "n": 147,
+          "n_positive": 42,
+          "n_negative": 105,
+          "positive_rate": 0.2857,
+          "scoreable": true,
+          "roc_auc": 0.6231,
+          "ci95": [
+            0.5243,
+            0.7132
+          ],
+          "mannwhitney_p": 0.010004918414003406,
+          "median_positive": 0.3938,
+          "median_negative": 0.2685
+        }
+      },
+      "hepg2": {
+        "all_clinical": {
+          "n": 506,
+          "n_positive": 199,
+          "n_negative": 307,
+          "positive_rate": 0.3933,
+          "scoreable": true,
+          "roc_auc": 0.5668,
+          "ci95": [
+            0.5153,
+            0.6171
+          ],
+          "mannwhitney_p": 0.005550280997053342,
+          "median_positive": 0.4152,
+          "median_negative": 0.3722
+        },
+        "excluding_tox21_trained": {
+          "n": 287,
+          "n_positive": 89,
+          "n_negative": 198,
+          "positive_rate": 0.3101,
+          "scoreable": true,
+          "roc_auc": 0.5581,
+          "ci95": [
+            0.4865,
+            0.6258
+          ],
+          "mannwhitney_p": 0.05794268137837687,
+          "median_positive": 0.4352,
+          "median_negative": 0.4197
+        }
+      },
+      "clinical_resubstitution_not_a_test": {
+        "n": 506,
+        "n_positive": 199,
+        "n_negative": 307,
+        "positive_rate": 0.3933,
+        "scoreable": true,
+        "roc_auc": 0.9981,
+        "ci95": [
+          0.9961,
+          0.9994
+        ],
+        "mannwhitney_p": 2.6727687615352693e-80,
+        "median_positive": 0.7336,
+        "median_negative": 0.222
+      }
+    }
+  }
+}

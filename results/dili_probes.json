@@ -1,77 +1,156 @@
 {
-  "model": "dili.pkl",
-  "n_training_compounds": 462,
-  "caveat": "Trained on 475 marketed drugs. Natural products are largely outside this chemical space. Use for deprioritisation only; this is not a safety assessment.",
+  "model": "hepatic_panel.pkl",
+  "heads": {
+    "clinical": 506,
+    "mito": 7173,
+    "hepg2": 4446
+  },
+  "n_training_compounds": 12125,
+  "combination": "max over heads",
+  "caveat": "Three structure-only heads over DILIrank 2.0 and two Tox21 HepG2 assays. The Tox21 heads cannot see metabolism-dependent toxicity, because HepG2 cells barely express CYP2E1 and the assays top out near 100 uM; paracetamol is measured inactive in both. Use the panel to deprioritise, never to clear a compound, and always alongside the structural alerts.",
   "probes": [
     {
       "name": "paracetamol",
       "smiles": "CC(=O)Nc1ccc(O)cc1",
-      "note": "absent from benchmark",
-      "p_dili": 0.3693,
-      "ad": 0.5714
+      "note": "in DILIrank as most-concern; old model scored it 0.37",
+      "heads": {
+        "clinical": 0.71,
+        "mito": 0.2686,
+        "hepg2": 0.2263
+      },
+      "p_hepatic": 0.71,
+      "p_dili": 0.71,
+      "ad": 1.0
     },
     {
       "name": "isoniazid",
       "smiles": "NNC(=O)c1ccncc1",
-      "note": "absent from benchmark",
-      "p_dili": 0.5587,
-      "ad": 0.5161
+      "note": "classic hepatotoxin; most-concern",
+      "heads": {
+        "clinical": 0.6791,
+        "mito": 0.0613,
+        "hepg2": 0.0957
+      },
+      "p_hepatic": 0.6791,
+      "p_dili": 0.6791,
+      "ad": 1.0
     },
     {
       "name": "diclofenac",
       "smiles": "O=C(O)Cc1ccccc1Nc1c(Cl)cccc1Cl",
-      "note": "benchmark positive",
-      "p_dili": 0.8852,
+      "note": "most-concern",
+      "heads": {
+        "clinical": 0.8711,
+        "mito": 0.2397,
+        "hepg2": 0.2484
+      },
+      "p_hepatic": 0.8711,
+      "p_dili": 0.8711,
+      "ad": 1.0
+    },
+    {
+      "name": "troglitazone",
+      "smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+      "note": "withdrawn from market for hepatotoxicity",
+      "heads": {
+        "clinical": 0.5931,
+        "mito": 0.7817,
+        "hepg2": 0.7416
+      },
+      "p_hepatic": 0.7817,
+      "p_dili": 0.5931,
       "ad": 1.0
     },
     {
       "name": "valproate",
       "smiles": "CCCC(CCC)C(=O)O",
-      "note": "benchmark positive",
-      "p_dili": 0.3772,
+      "note": "most-concern",
+      "heads": {
+        "clinical": 0.4305,
+        "mito": 0.0132,
+        "hepg2": 0.0771
+      },
+      "p_hepatic": 0.4305,
+      "p_dili": 0.4305,
       "ad": 1.0
     },
     {
       "name": "aspirin",
       "smiles": "CC(=O)Oc1ccccc1C(=O)O",
-      "note": "benchmark negative",
-      "p_dili": 0.365,
-      "ad": 1.0
+      "note": "less-concern, so excluded from training: extrapolation",
+      "heads": {
+        "clinical": 0.6963,
+        "mito": 0.0362,
+        "hepg2": 0.1666
+      },
+      "p_hepatic": 0.6963,
+      "p_dili": 0.6963,
+      "ad": 0.4167
     },
     {
       "name": "ibuprofen",
       "smiles": "CC(C)Cc1ccc(C(C)C(=O)O)cc1",
-      "note": "reference analgesic",
-      "p_dili": 0.3643,
+      "note": "low hepatic concern",
+      "heads": {
+        "clinical": 0.4381,
+        "mito": 0.0584,
+        "hepg2": 0.2926
+      },
+      "p_hepatic": 0.4381,
+      "p_dili": 0.4381,
       "ad": 0.6
-    },
-    {
-      "name": "curcumin",
-      "smiles": "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O",
-      "note": "natural product",
-      "p_dili": 0.6462,
-      "ad": 0.3818
-    },
-    {
-      "name": "kaempferol",
-      "smiles": "O=c1c(O)c(-c2ccc(O)cc2)oc2cc(O)cc(O)c12",
-      "note": "natural product",
-      "p_dili": 0.8098,
-      "ad": 0.2222
-    },
-    {
-      "name": "capsaicin",
-      "smiles": "COc1cc(CNC(=O)CCCC/C=C/C(C)C)ccc1O",
-      "note": "natural product",
-      "p_dili": 0.2406,
-      "ad": 1.0
     },
     {
       "name": "caffeine",
       "smiles": "Cn1c(=O)c2c(ncn2C)n(C)c1=O",
-      "note": "negative control",
-      "p_dili": 0.5546,
-      "ad": 0.3684
+      "note": "no-concern control",
+      "heads": {
+        "clinical": 0.2654,
+        "mito": 0.0863,
+        "hepg2": 0.1977
+      },
+      "p_hepatic": 0.2654,
+      "p_dili": 0.2654,
+      "ad": 1.0
+    },
+    {
+      "name": "curcumin",
+      "smiles": "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O",
+      "note": "plant NP; measured mitochondria-active in Tox21",
+      "heads": {
+        "clinical": 0.5743,
+        "mito": 0.7239,
+        "hepg2": 0.6935
+      },
+      "p_hepatic": 0.7239,
+      "p_dili": 0.5743,
+      "ad": 0.3
+    },
+    {
+      "name": "kaempferol",
+      "smiles": "O=c1c(O)c(-c2ccc(O)cc2)oc2cc(O)cc(O)c12",
+      "note": "plant NP; measured mitochondria-active in Tox21",
+      "heads": {
+        "clinical": 0.6544,
+        "mito": 0.9315,
+        "hepg2": 0.5155
+      },
+      "p_hepatic": 0.9315,
+      "p_dili": 0.6544,
+      "ad": 0.2333
+    },
+    {
+      "name": "capsaicin",
+      "smiles": "COc1cc(CNC(=O)CCCC/C=C/C(C)C)ccc1O",
+      "note": "plant NP; our TRPV1 positive control",
+      "heads": {
+        "clinical": 0.4119,
+        "mito": 0.3752,
+        "hepg2": 0.3735
+      },
+      "p_hepatic": 0.4119,
+      "p_dili": 0.4119,
+      "ad": 0.2927
     }
   ]
 }

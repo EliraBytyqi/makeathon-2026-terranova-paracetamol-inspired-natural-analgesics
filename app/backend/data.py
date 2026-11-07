@@ -194,6 +194,29 @@ def shortlist() -> pd.DataFrame:
 
 
 @lru_cache(maxsize=1)
+def candidates() -> pd.DataFrame:
+    """The experiment-ready list: 50 DISTINCT molecules.
+
+    shortlist.csv is the top 50 ROWS of the ranked screen, which is not the
+    same thing as 50 compounds - the library stores stereoisomers, tautomers
+    and salt variants separately, so those 50 rows hold only 27 distinct
+    chemical skeletons. Handed to a laboratory that is 23 wasted assay wells.
+
+    This file collapses to one row per InChIKey skeleton, keeps the
+    best-scoring representative, and carries the provenance an
+    experimentalist actually needs: source species, literature DOIs, the
+    predicted target with its applicability domain, and the hepatic flag.
+    Written by scripts/make_candidate_list.py.
+    """
+    return _load_compound_csv(RESULTS / "candidates_top50.csv")
+
+
+@lru_cache(maxsize=1)
+def candidates_summary() -> dict:
+    return _read_json(RESULTS / "candidates_top50.json")
+
+
+@lru_cache(maxsize=1)
 def positive_controls() -> pd.DataFrame:
     return _load_compound_csv(RESULTS / "positive_controls.csv")
 
@@ -201,7 +224,7 @@ def positive_controls() -> pd.DataFrame:
 @lru_cache(maxsize=1)
 def screen() -> pd.DataFrame:
     """The full 145k screen. Lazy: only paid for if someone opens the explorer."""
-    return _load_compound_csv(RESULTS / "screening_all.csv")
+    return _load_compound_csv(RESULTS / "screening_all.csv.gz")
 
 
 def compound_references(inchikey: str) -> list[str]:
@@ -211,7 +234,7 @@ def compound_references(inchikey: str) -> list[str]:
     footprint of the screening table and is only ever needed one row at a time.
     """
     out: list[str] = []
-    for path in (RESULTS / "screening_all.csv", RESULTS / "positive_controls.csv"):
+    for path in (RESULTS / "screening_all.csv.gz", RESULTS / "positive_controls.csv"):
         if not path.exists():
             continue
         header = pd.read_csv(path, nrows=0).columns
@@ -278,6 +301,67 @@ def pubchem_validation() -> dict:
     then summarised by scripts/make_pubchem_summary.py.
     """
     return _read_json(RESULTS / "pubchem_summary.json")
+
+
+@lru_cache(maxsize=1)
+def pubchem_validation_expanded() -> dict:
+    """The validation that made all three targets scoreable.
+
+    Supersedes pubchem_validation() on two counts, both of which changed the
+    numbers. First, outcomes from PubChem are keyed on the InChIKey skeleton,
+    which collapses stereoisomers and salts, and the plant library holds
+    several entries per skeleton - so the earlier set counted one measured
+    compound up to several times. The CB1 overlap reported as n=71 is 31
+    distinct structures. Everything here is deduplicated before any statistic
+    is computed.
+
+    Second, the earlier set required the test compound to be in the plant
+    library, which is what left TRPV1 and FAAH single-class. Dropping that
+    restriction - keeping "measured" and "never trained on" - turns 11
+    scoreable TRPV1 structures into 966 and 2 FAAH into 621.
+
+    Written by scripts/validate_pubchem_expanded.py.
+    """
+    return _read_json(RESULTS / "pubchem_validation_expanded.json")
+
+
+@lru_cache(maxsize=1)
+def hepatic_report() -> dict:
+    """Training report for the three-head hepatic panel.
+
+    Replaces the single TDC model: DILIrank 2.0 plus two Tox21 HepG2 assays,
+    12,125 compounds against the old 462.
+    """
+    return _read_json(RESULTS / "hepatic_report.json")
+
+
+@lru_cache(maxsize=1)
+def hepatic_validation() -> dict:
+    """External validation of the hepatic panel - the honest numbers.
+
+    Two designs. A temporal holdout trains the clinical head on DILIrank v1
+    and tests it on the drugs the FDA added in v2. A cross-dataset test scores
+    the Tox21-trained heads, which have never seen a clinical label, against
+    DILIrank. Both land near 0.65, well below the internal scaffold splits,
+    and the file also records the 0.998 resubstitution score that shows why
+    the paracetamol probe is not evidence of anything.
+
+    Written by scripts/validate_hepatic.py.
+    """
+    return _read_json(RESULTS / "hepatic_validation.json")
+
+
+@lru_cache(maxsize=1)
+def hepatic_stacked() -> dict:
+    """A pre-registered experiment that failed, kept because it failed.
+
+    Ten Tox21 mechanism endpoints were turned into features for the clinical
+    head. The target to beat was fixed in advance at 0.676. Adding them scored
+    0.656. Reported rather than buried.
+
+    Written by scripts/experiment_hepatic_stacked.py.
+    """
+    return _read_json(RESULTS / "hepatic_stacked_experiment.json")
 
 
 @lru_cache(maxsize=1)
@@ -381,12 +465,16 @@ def availability() -> dict:
     """Which artefacts are on disk - drives the warning banner in the UI."""
     checks = {
         "shortlist": RESULTS / "shortlist.csv",
-        "screening_all": RESULTS / "screening_all.csv",
+        "candidates_top50": RESULTS / "candidates_top50.csv",
+        "screening_all": RESULTS / "screening_all.csv.gz",
         "positive_controls": RESULTS / "positive_controls.csv",
         "screening_stats": RESULTS / "screening_stats.json",
         "model_metrics": RESULTS / "model_metrics.csv",
         "training_report": RESULTS / "training_report.json",
         "dili_report": RESULTS / "dili_report.json",
+        "hepatic_report": RESULTS / "hepatic_report.json",
+        "hepatic_validation": RESULTS / "hepatic_validation.json",
+        "pubchem_validation_expanded": RESULTS / "pubchem_validation_expanded.json",
         "attrition_audit": PROC / "attrition_audit.csv",
         "dataset_summary": PROC / "dataset_summary.csv",
         "literature_validation": RESULTS / "literature_validation.csv",

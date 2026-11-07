@@ -1,16 +1,16 @@
 {
   "library_size": 145380,
-  "removed_as_training_overlap": 216,
-  "screened": 145164,
-  "in_domain": 114969,
-  "in_domain_rate": 0.792,
+  "removed_as_training_overlap": 133,
+  "screened": 145247,
+  "in_domain": 95869,
+  "in_domain_rate": 0.66,
   "severity3_flagged": 828,
-  "pains_flagged": 13276,
+  "pains_flagged": 13281,
   "shortlist_size": 50,
   "weights": {
     "alert_penalty": 0.35,
     "ad_floor": 0.25,
     "cns_bonus": 1.15,
-    "dili_weight": 0.3
+    "dili_weight": 0.35
   }
 }

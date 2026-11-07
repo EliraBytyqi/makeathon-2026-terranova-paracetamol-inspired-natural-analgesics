@@ -1,0 +1,158 @@
+{
+  "n_boot": 2000,
+  "targets": {
+    "TRPV1": {
+      "external_all": {
+        "n": 965,
+        "n_active": 877,
+        "n_inactive": 88,
+        "scoreable": true,
+        "roc_auc": 0.9176,
+        "ci95": [
+          0.8943,
+          0.9382
+        ],
+        "mannwhitney_p": 1.5305842325456854e-38,
+        "median_active": 0.976326,
+        "median_inactive": 5.9e-05
+      },
+      "external_novel_ad_lt_0.5": {
+        "n": 264,
+        "n_active": 262,
+        "n_inactive": 2,
+        "scoreable": true,
+        "roc_auc": 0.9275,
+        "ci95": [
+          0.874,
+          0.9734
+        ],
+        "mannwhitney_p": 0.018869189147548617,
+        "median_active": 0.002172,
+        "median_inactive": 1.6e-05
+      },
+      "external_novel_ad_lt_0.4": {
+        "n": 183,
+        "n_active": 183,
+        "n_inactive": 0,
+        "scoreable": false,
+        "reason": "single-class: ROC-AUC is undefined"
+      },
+      "in_library": {
+        "n": 11,
+        "n_active": 11,
+        "n_inactive": 0,
+        "scoreable": false,
+        "reason": "single-class: ROC-AUC is undefined"
+      }
+    },
+    "CB1": {
+      "external_all": {
+        "n": 2104,
+        "n_active": 1962,
+        "n_inactive": 142,
+        "scoreable": true,
+        "roc_auc": 0.9174,
+        "ci95": [
+          0.8983,
+          0.9355
+        ],
+        "mannwhitney_p": 1.9393884662198268e-62,
+        "median_active": 0.804517,
+        "median_inactive": 0.003042
+      },
+      "external_novel_ad_lt_0.5": {
+        "n": 508,
+        "n_active": 391,
+        "n_inactive": 117,
+        "scoreable": true,
+        "roc_auc": 0.8137,
+        "ci95": [
+          0.7688,
+          0.856
+        ],
+        "mannwhitney_p": 3.466964453611406e-25,
+        "median_active": 0.094479,
+        "median_inactive": 0.003334
+      },
+      "external_novel_ad_lt_0.4": {
+        "n": 234,
+        "n_active": 136,
+        "n_inactive": 98,
+        "scoreable": true,
+        "roc_auc": 0.7108,
+        "ci95": [
+          0.6436,
+          0.7756
+        ],
+        "mannwhitney_p": 1.928363614877329e-08,
+        "median_active": 0.031628,
+        "median_inactive": 0.003042
+      },
+      "in_library": {
+        "n": 31,
+        "n_active": 26,
+        "n_inactive": 5,
+        "scoreable": true,
+        "roc_auc": 0.9,
+        "ci95": [
+          0.7333,
+          1.0
+        ],
+        "mannwhitney_p": 0.0014949002713185136,
+        "median_active": 0.012881,
+        "median_inactive": 8.9e-05
+      }
+    },
+    "FAAH": {
+      "external_all": {
+        "n": 621,
+        "n_active": 506,
+        "n_inactive": 115,
+        "scoreable": true,
+        "roc_auc": 0.6245,
+        "ci95": [
+          0.5677,
+          0.6793
+        ],
+        "mannwhitney_p": 1.5138078893178106e-05,
+        "median_active": 0.992357,
+        "median_inactive": 0.971977
+      },
+      "external_novel_ad_lt_0.5": {
+        "n": 379,
+        "n_active": 286,
+        "n_inactive": 93,
+        "scoreable": true,
+        "roc_auc": 0.5664,
+        "ci95": [
+          0.4886,
+          0.643
+        ],
+        "mannwhitney_p": 0.02719479053388709,
+        "median_active": 0.975236,
+        "median_inactive": 0.946753
+      },
+      "external_novel_ad_lt_0.4": {
+        "n": 183,
+        "n_active": 123,
+        "n_inactive": 60,
+        "scoreable": true,
+        "roc_auc": 0.6218,
+        "ci95": [
+          0.5235,
+          0.7164
+        ],
+        "mannwhitney_p": 0.0037814400262328332,
+        "median_active": 0.964809,
+        "median_inactive": 0.767709
+      },
+      "in_library": {
+        "n": 2,
+        "n_active": 0,
+        "n_inactive": 2,
+        "scoreable": false,
+        "reason": "single-class: ROC-AUC is undefined"
+      }
+    }
+  }
+}

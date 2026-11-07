@@ -135,7 +135,7 @@ def fig_alerts():
 
 
 def fig_domain():
-    p = RESULTS / "screening_all.csv"
+    p = RESULTS / "screening_all.csv.gz"
     if not p.exists():
         return
     df = pd.read_csv(p, low_memory=False)

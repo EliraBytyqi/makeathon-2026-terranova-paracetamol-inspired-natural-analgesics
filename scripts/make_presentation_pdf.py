@@ -166,6 +166,8 @@ def build():
     dili = load(RESULTS / "dili_report.json", {}) or {}
     probes = (load(RESULTS / "dili_probes.json", {}) or {}).get("probes", [])
     pubchem = load(RESULTS / "pubchem_summary.json", {}) or {}
+    expanded = load(RESULTS / "pubchem_validation_expanded.json", {}) or {}
+    hepval = load(RESULTS / "hepatic_validation.json", {}) or {}
     pc_cb1 = (pubchem.get("cb1") or {})
     pc_all = pc_cb1.get("all", {}) or {}
     pc_novel = pc_cb1.get("novel_ad_lt_0.5", {}) or {}
@@ -176,6 +178,8 @@ def build():
     metrics = load(RESULTS / "model_metrics.csv")
     attr = load(PROC / "attrition_audit.csv")
     shortlist = load(RESULTS / "shortlist.csv")
+    candidates = load(RESULTS / "candidates_top50.csv")
+    cand_summary = load(RESULTS / "candidates_top50.json", {}) or {}
     litcsv = load(RESULTS / "literature_validation.csv")
 
     para = next((p for p in probes if p["name"] == "paracetamol"), {})
@@ -287,12 +291,17 @@ def build():
         Spacer(1, 3 * mm),
         callout(
             "State the limits in the same breath",
-            "<b>CB1 only.</b> The TRPV1 overlap was 43 compounds all measured active and "
-            "the FAAH overlap 13 all measured inactive - single-class, so ROC-AUC is "
-            "undefined and we claim nothing for them. <b>Quote ROC-AUC, never "
-            "enrichment:</b> PubChem skews active (74.6% base rate here) so enrichment "
-            "factors are meaningless. <b>It is retrospective</b> - a blind test, since "
-            "the model never saw these outcomes, but not a prospective one.",
+            "<b>Grade each target separately - they are not equivalent.</b> CB1 is "
+            "validated, including on novel chemistry (0.693 on 218 structures, 124 "
+            "active against 94 inactive). TRPV1 reaches 0.945 but every one of its 88 "
+            "measured inactives sits close to training chemistry, so beyond that it is "
+            "untested. FAAH is 0.637 - real, and weak. <b>Quote ROC-AUC, never "
+            "enrichment:</b> PubChem skews active, so enrichment factors are "
+            "meaningless. <b>Volunteer the two corrections we made to our own result:</b> "
+            "we had been counting stereoisomers of one molecule as independent samples, "
+            "and we had been requiring test compounds to be plant natural products, "
+            "which is the only reason TRPV1 and FAAH once looked unscoreable. "
+            "<b>It is retrospective</b> - a blind test, not a prospective one.",
             AMBER),
     ]
 
@@ -576,7 +585,7 @@ def build():
 
         ("5:15-6:00", "What it is for, and what is next", AQUA,
          "What we hand over is not a discovery, it is a prioritised, filtered, "
-         f"provenance-tracked hypothesis list: {len(shortlist) if shortlist is not None else 50} "
+         f"provenance-tracked hypothesis list: {len(candidates) if candidates is not None else 50} DISTINCT "
          "compounds, each traceable to a plant and a paper, each screened against the "
          "reactive chemistry that makes paracetamol dangerous. The knowledge graph makes "
          "every claim inspectable, and measured, literature and predicted edges look "
@@ -643,7 +652,7 @@ def build():
         callout("If the laptop dies",
                 "Everything the demo shows also exists as files: "
                 "<font face='Courier'>results/REPORT.md</font> is the whole project in "
-                "16,000 words, <font face='Courier'>results/shortlist.csv</font> is the "
+                "16,000 words, <font face='Courier'>results/candidates_top50.csv</font> is the "
                 "50 candidates, and "
                 "<font face='Courier'>results/knowledge_graph.html</font> opens in any "
                 "browser with no server at all. Have that last one open in a second tab "
@@ -665,7 +674,9 @@ def build():
         ["Within applicability domain", f"{int(stats.get('in_domain', 0)):,} ({stats.get('in_domain_rate', 0) * 100:.1f}%)"],
         ["Flagged by a severity-3 structural alert", f"{int(stats.get('severity3_flagged', 0)):,}"],
         ["Flagged as PAINS (assay interference)", f"{int(stats.get('pains_flagged', 0)):,}"],
-        ["Final shortlist", f"{int(stats.get('shortlist_size', 0))}"],
+        ["Candidate list (distinct molecules)", f"{len(candidates) if candidates is not None else 50}"],
+        ["  of which TRPV1 / CB1 / FAAH", "/".join(str(cand_summary.get('by_target', {}).get(k, 0)) for k in ('TRPV1', 'CB1', 'FAAH'))],
+        ["Distinct skeletons passing all filters", f"{cand_summary.get('distinct_skeletons_available', 0):,}"],
         ["Knowledge graph", f"{kg.get('nodes', 0):,} nodes / {kg.get('edges', 0):,} edges"],
     ], [110 * mm, 55 * mm], align_right=(1,)))
 
@@ -732,11 +743,13 @@ def build():
          f"at ROC-AUC {pc_all.get('roc_auc')}, p = {pc_all.get('p', 0):.0e}. Restricted "
          f"to chemistry unlike anything in training it is still "
          f"{pc_novel.get('roc_auc')}, p = {pc_novel.get('p', 0):.3f}. That is a blind "
-         "test on experiments we had no hand in. It is retrospective, and it is CB1 "
-         "only - the other two overlaps were single-class and cannot be scored."),
+         "test on experiments we had no hand in. All three targets are now scoreable: "
+         "TRPV1 0.945 on 966 structures, CB1 0.925 on 2,104, FAAH 0.637 on 621. Only "
+         "CB1 holds up on chemistry unlike its training set, and we say so."),
         ("So your model doesn't work?",
-         "For CB1 it demonstrably does, against independent experimental outcomes. For "
-         "TRPV1 and FAAH we have no such evidence and we do not claim any. It also "
+         "For CB1 it demonstrably does, against independent experimental outcomes. "
+         "TRPV1 works near its training chemistry and is untested beyond it. FAAH is "
+         "weak at 0.637 and we would not rank on it. It also "
          "works inside its training distribution - measured actives 0.9988, measured "
          "inactives 0.0004. On genuinely new plant chemistry our test came back "
          f"inconclusive: {corrected.get('fair_denominator')} usable compounds, median "

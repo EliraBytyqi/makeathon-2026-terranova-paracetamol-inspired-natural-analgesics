@@ -59,7 +59,7 @@ def main() -> None:
         stats_block = {"error": f"tests unavailable: {exc}"}
 
     # what a probability of 0.5 actually means, per target
-    screen = pd.read_csv(RESULTS / "screening_all.csv",
+    screen = pd.read_csv(RESULTS / "screening_all.csv.gz",
                          usecols=["p_TRPV1", "p_CB1", "p_FAAH"],
                          low_memory=False)
     half = {}

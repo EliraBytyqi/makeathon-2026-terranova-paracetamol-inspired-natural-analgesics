@@ -36,6 +36,9 @@ import pandas as pd
 from scipy import stats as sps
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+import modelio  # noqa: E402
 RESULTS = ROOT / "results"
 RAW = ROOT / "data" / "external" / "pubchem"
 RAW.mkdir(parents=True, exist_ok=True)
@@ -134,7 +137,7 @@ def main() -> None:
     print(f"  resolved {bio['inchikey'].nunique():,} structures")
 
     print("\n=== 3. joining to the screen ===")
-    screen = pd.read_csv(RESULTS / "screening_all.csv",
+    screen = pd.read_csv(RESULTS / "screening_all.csv.gz",
                          usecols=["std_inchikey", "compound_name", "best_target",
                                   "target_score", "composite_score", "in_domain",
                                   "p_TRPV1", "p_CB1", "p_FAAH", "tier"],
@@ -145,8 +148,7 @@ def main() -> None:
     for p in glob.glob(str(ROOT / "models" / "*.pkl")):
         if os.path.basename(p) == "dili.pkl":
             continue
-        with open(p, "rb") as fh:
-            train_keys.update(pickle.load(fh).get("train_inchikeys", []))
+            train_keys.update(modelio.load(p).get("train_inchikeys", []))
     train_skel = {k[:14] for k in train_keys if isinstance(k, str)}
     print(f"  training compounds to exclude: {len(train_skel):,} skeletons")
 

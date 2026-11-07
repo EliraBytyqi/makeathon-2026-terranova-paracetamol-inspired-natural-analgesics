@@ -1,0 +1,111 @@
+{
+  "baseline_to_beat": {
+    "all": 0.676,
+    "novel_scaffold": 0.649
+  },
+  "n_train": 393,
+  "n_test": 113,
+  "mechanism_features": [
+    "mmp_ratio",
+    "mmp_rhod",
+    "are_nrf2",
+    "casp3",
+    "cytotox_flo",
+    "viability_glo",
+    "pxr",
+    "car",
+    "p53",
+    "hek293_viab"
+  ],
+  "temporal": {
+    "structure_only": {
+      "all": {
+        "n": 113,
+        "n_positive": 21,
+        "scoreable": true,
+        "roc_auc": 0.676,
+        "ci95": [
+          0.5387,
+          0.8
+        ],
+        "mannwhitney_p": 0.006105943766340311
+      },
+      "novel_scaffold": {
+        "n": 93,
+        "n_positive": 18,
+        "scoreable": true,
+        "roc_auc": 0.6489,
+        "ci95": [
+          0.4982,
+          0.7857
+        ],
+        "mannwhitney_p": 0.025604230668728842
+      }
+    },
+    "structure_plus_mechanism": {
+      "all": {
+        "n": 113,
+        "n_positive": 21,
+        "scoreable": true,
+        "roc_auc": 0.6563,
+        "ci95": [
+          0.5108,
+          0.7855
+        ],
+        "mannwhitney_p": 0.013024815614408715
+      },
+      "novel_scaffold": {
+        "n": 93,
+        "n_positive": 18,
+        "scoreable": true,
+        "roc_auc": 0.5933,
+        "ci95": [
+          0.443,
+          0.7371
+        ],
+        "mannwhitney_p": 0.11115592593353357
+      }
+    },
+    "mechanism_only": {
+      "all": {
+        "n": 113,
+        "n_positive": 21,
+        "scoreable": true,
+        "roc_auc": 0.6014,
+        "ci95": [
+          0.4608,
+          0.741
+        ],
+        "mannwhitney_p": 0.07450318454923485
+      },
+      "novel_scaffold": {
+        "n": 93,
+        "n_positive": 18,
+        "scoreable": true,
+        "roc_auc": 0.5326,
+        "ci95": [
+          0.376,
+          0.6897
+        ],
+        "mannwhitney_p": 0.33614453871996
+      }
+    }
+  },
+  "scaffold_cv": {
+    "structure_only": {
+      "roc_auc": 0.7866,
+      "sd": 0.0382,
+      "repeats": 10
+    },
+    "structure_plus_mechanism": {
+      "roc_auc": 0.7687,
+      "sd": 0.033,
+      "repeats": 10
+    },
+    "mechanism_only": {
+      "roc_auc": 0.67,
+      "sd": 0.0391,
+      "repeats": 10
+    }
+  }
+}

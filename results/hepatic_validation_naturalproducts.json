@@ -1,0 +1,80 @@
+{
+  "design": "all three heads retrained with every screening-library structure removed, then scored on those structures",
+  "per_endpoint": {
+    "clinical": {
+      "n": 116,
+      "n_positive": 60,
+      "n_negative": 56,
+      "scoreable": true,
+      "roc_auc": 0.8229,
+      "ci95": [
+        0.7455,
+        0.8924
+      ],
+      "mannwhitney_p": 1.0376287643324308e-09
+    },
+    "mito": {
+      "n": 1328,
+      "n_positive": 143,
+      "n_negative": 1185,
+      "scoreable": true,
+      "roc_auc": 0.8838,
+      "ci95": [
+        0.853,
+        0.9112
+      ],
+      "mannwhitney_p": 2.9854180600858206e-51
+    },
+    "hepg2": {
+      "n": 844,
+      "n_positive": 194,
+      "n_negative": 650,
+      "scoreable": true,
+      "roc_auc": 0.7436,
+      "ci95": [
+        0.7023,
+        0.7848
+      ],
+      "mannwhitney_p": 3.2288984237828427e-25
+    }
+  },
+  "combined": {
+    "all": {
+      "n": 1367,
+      "n_positive": 302,
+      "n_negative": 1065,
+      "scoreable": true,
+      "roc_auc": 0.6771,
+      "ci95": [
+        0.6431,
+        0.7097
+      ],
+      "mannwhitney_p": 2.528776165932442e-21
+    },
+    "AD<": {
+      "n": 269,
+      "n_positive": 69,
+      "n_negative": 200,
+      "scoreable": true,
+      "roc_auc": 0.5597,
+      "ci95": [
+        0.4709,
+        0.6381
+      ],
+      "mannwhitney_p": 0.06972285207083553
+    },
+    "AD>=": {
+      "n": 1098,
+      "n_positive": 233,
+      "n_negative": 865,
+      "scoreable": true,
+      "roc_auc": 0.7005,
+      "ci95": [
+        0.6621,
+        0.7378
+      ],
+      "mannwhitney_p": 2.6053583729480072e-21
+    }
+  },
+  "ad_median": 0.5625
+}

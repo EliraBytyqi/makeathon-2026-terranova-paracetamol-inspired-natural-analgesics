@@ -1,0 +1,77 @@
+[
+  {
+    "label": "Hydroxy-alpha-sanshool",
+    "smiles": "CC=C/C=C/C=CCCC=CC(=O)NCC(C)(C)O",
+    "note": "Szechuan pepper. Our #1 shortlist hit - CB1 0.989, no alerts."
+  },
+  {
+    "label": "Feruloylputrescine",
+    "smiles": "COc1cc(/C=C/C(=O)NCCCCN)ccc1O",
+    "note": "Our #2 shortlist hit - TRPV1 0.987, no alerts."
+  },
+  {
+    "label": "Capsaicin analogue (shortlist #3)",
+    "smiles": "COc1cc(CNC(=O)CCCC=CC(C)C)ccc1O",
+    "note": "Our #3 hit - TRPV1 1.000. A natural capsaicin relative."
+  },
+  {
+    "label": "Paracetamol",
+    "smiles": "CC(=O)Nc1ccc(O)cc1",
+    "note": "The index compound. Brings the liver risk without the analgesia."
+  },
+  {
+    "label": "AM404",
+    "smiles": "CCCCC/C=C\\C/C=C\\C/C=C\\C/C=C\\CCCC(=O)Nc1ccc(O)cc1",
+    "note": "Paracetamol's active metabolite - what actually relieves pain."
+  },
+  {
+    "label": "Capsaicin",
+    "smiles": "COc1cc(CNC(=O)CCCC/C=C/C(C)C)ccc1O",
+    "note": "Chilli pepper. Our TRPV1 positive control."
+  },
+  {
+    "label": "Anandamide",
+    "smiles": "CCCCC/C=C\\C/C=C\\C/C=C\\C/C=C\\CCCC(=O)NCCO",
+    "note": "The endogenous cannabinoid that FAAH breaks down."
+  },
+  {
+    "label": "THC",
+    "smiles": "CCCCCc1cc(O)c2c(c1)OC(C)(C)[C@@H]1CCC(C)=C[C@@H]21",
+    "note": "Classic CB1 agonist."
+  },
+  {
+    "label": "beta-Caryophyllene",
+    "smiles": "C=C1CC/C=C(\\C)CC[C@@H]2[C@@H]1CC2(C)C",
+    "note": "Called a 'dietary cannabinoid'. It is not a CB1 ligand - watch it get rejected."
+  },
+  {
+    "label": "Kaempferol",
+    "smiles": "O=c1c(O)c(-c2ccc(O)cc2)oc2cc(O)cc(O)c12",
+    "note": "Common plant flavonoid. Measured mitochondria-toxic in Tox21."
+  },
+  {
+    "label": "Curcumin",
+    "smiles": "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O",
+    "note": "Turmeric. Also measured mitochondria-toxic."
+  },
+  {
+    "label": "Troglitazone",
+    "smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+    "note": "Withdrawn from the market for killing livers."
+  },
+  {
+    "label": "Caffeine",
+    "smiles": "Cn1c(=O)c2c(ncn2C)n(C)c1=O",
+    "note": "Negative control. Should be quiet everywhere."
+  },
+  {
+    "label": "Ibuprofen",
+    "smiles": "CC(C)Cc1ccc(C(C)C(=O)O)cc1",
+    "note": "Reference analgesic, low hepatic concern."
+  },
+  {
+    "label": "Capsazepine",
+    "smiles": "Oc1cc2c(cc1O)CN(C(=S)NCCc1ccc(Cl)cc1)CCC2",
+    "note": "A TRPV1 antagonist - binds the target we screen for."
+  }
+]

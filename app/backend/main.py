@@ -10,6 +10,7 @@ Run with:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -86,6 +87,12 @@ def overview() -> dict:
 # ---------------------------------------------------------------------------
 # data provenance
 # ---------------------------------------------------------------------------
+@app.get("/api/candidates")
+def candidates() -> dict:
+    """The deduplicated, experiment-ready candidate list and its make-up."""
+    return data.candidates_summary()
+
+
 @app.get("/api/datasets")
 def datasets() -> dict:
     return {
@@ -104,6 +111,9 @@ def models() -> dict:
         "training_report": data.training_report(),
         "dili": data.dili_report(),
         "dili_probes": data.dili_probes(),
+        "hepatic": data.hepatic_report(),
+        "hepatic_validation": data.hepatic_validation(),
+        "hepatic_stacked": data.hepatic_stacked(),
         "faah_rescue": data.faah_rescue(),
     }
 
@@ -115,6 +125,8 @@ def validation() -> dict:
     out["kg"] = data.kg_stats()
     out["corrected"] = data.validation_corrected()
     out["pubchem"] = data.pubchem_validation()
+    out["expanded"] = data.pubchem_validation_expanded()
+    out["hepatic"] = data.hepatic_validation()
     return out
 
 
@@ -167,6 +179,8 @@ def _frame(source: str) -> pd.DataFrame:
         return data.positive_controls()
     if source == "screen":
         return data.screen()
+    if source == "candidates":
+        return data.candidates()
     raise HTTPException(status_code=404, detail=f"unknown source '{source}'")
 
 
@@ -279,6 +293,46 @@ def index() -> FileResponse:
     return FileResponse(target)
 
 
+
+
+# ---------------------------------------------------------------------------
+# live prediction
+# ---------------------------------------------------------------------------
+# Everything above this line reads precomputed files. These two routes are the
+# exception: they load the models and score a structure on request, so the
+# dashboard can run the pipeline on a molecule nobody screened in advance.
+# Models are loaded lazily on the first call and cached by src/predict.py's
+# own module state, so the first prediction is slow and the rest are not.
+@app.get("/api/demo_molecules")
+def demo_molecules() -> list[dict]:
+    """The curated dropdown: our own hits, the index compound, and controls."""
+    path = Path(__file__).resolve().parent / "demo_molecules.json"
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@app.get("/api/predict")
+def predict_one(smiles: str = Query(..., min_length=1, max_length=600)) -> dict:
+    """Run one structure through all five pipeline stages."""
+    try:
+        import sys
+        src = str(Path(__file__).resolve().parents[2] / "src")
+        if src not in sys.path:
+            sys.path.insert(0, src)
+        from predict import predict as _predict
+    except Exception as exc:                       # models or RDKit missing
+        raise HTTPException(503, f"prediction unavailable: {exc}") from exc
+
+    result = _predict(smiles)
+    if not result.get("ok"):
+        raise HTTPException(400, result.get("error", "could not score"))
+    return result
+
+# ---------------------------------------------------------------------------
+# static mounts LAST: a mount at "/" matches before any route registered
+# after it, which would swallow /api/predict and /api/demo_molecules.
+# ---------------------------------------------------------------------------
 # The knowledge graph references lib/vis-9.1.2/... relative to itself, so those
 # vendored assets have to be reachable at /lib for /kg to render. Mounted before
 # the catch-all frontend mount, which would otherwise swallow the path.

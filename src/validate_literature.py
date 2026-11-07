@@ -22,6 +22,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import modelio
 from featurize import featurize_smiles
 from safety import physchem, profile
 from screen import load_models, pick_model_per_target
@@ -79,7 +80,7 @@ def main():
     ]
 
     # percentile against the full plant library background
-    np_path = RESULTS / "screening_all.csv"
+    np_path = RESULTS / "screening_all.csv.gz"
     if np_path.exists():
         bg = pd.read_csv(np_path, low_memory=False)
         pct = []
@@ -113,8 +114,7 @@ def main():
     # DILI
     dili_path = ROOT / "models" / "dili.pkl"
     if dili_path.exists():
-        with open(dili_path, "rb") as fh:
-            db = pickle.load(fh)
+        db = modelio.load(dili_path)
         dp = np.full(len(lit), np.nan)
         dp[mask] = db["model"].predict_proba(X[mask])[:, 1]
         lit["p_dili"] = dp

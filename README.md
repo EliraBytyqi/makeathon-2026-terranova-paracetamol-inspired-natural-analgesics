@@ -1,180 +1,268 @@
 # Terranova
 
-**Track 02 — Natural Products for Drug Discovery**
+Screening plant natural products for the analgesic pharmacology of paracetamol,
+while filtering out the chemistry that makes it hepatotoxic.
 
-Finding plant-derived compounds that may act on the pain targets behind
-paracetamol's *analgesic* mechanism (TRPV1, CB1, FAAH), while screening out the
-chemistry behind its *hepatotoxic* one.
-
-> Everything this project outputs is a computational prediction. Nothing here
-> establishes that a compound is active, or that it is safe.
+**Makeathon 2026 · Track 02 · Natural Products**
+Elira Bytyqi · Shkurta Jashari · Fjolla Nebihi
 
 ---
 
-## The idea in one paragraph
+## Project description
 
-Paracetamol's pain relief is increasingly attributed not to COX inhibition but
-to its metabolite **AM404**, formed by deacetylation to *p*-aminophenol and
-conjugation with arachidonic acid by **FAAH**. AM404 acts centrally and in the
-spinal dorsal horn through **TRPV1** and the **cannabinoid** system. Its liver
-toxicity runs through a *different* route entirely: CYP oxidation of the
-*para*-aminophenol core to **NAPQI**, a hard electrophile that depletes
-glutathione and arylates protein thiols. Those two pathways are chemically
-separable — so we look for plant compounds that engage the first without
-carrying the structural features that enable the second.
+### The chosen challenge
 
-## Pipeline
+Track 02 — Natural Products. Use computational methods to find plant-derived
+compounds with therapeutic potential.
 
-```
-ChEMBL (TRPV1/CB1/FAAH, 3 species)  ──┐
-ChEMBL decoy pool (60k molecules)   ──┤──> curate ──> scaffold split ──> models
-                                       │
-LOTUS plant natural products ─────────┴──> standardize ──> screen ──> rank
-                                                              │
-                              reactive-metabolite alerts ─────┤
-                              DILI model ─────────────────────┤
-                              applicability domain ───────────┘
-                                                              │
-                                                  knowledge graph + shortlist
-```
+### The problem being solved
 
-## Quick start
+Paracetamol is one of the most widely used drugs in the world and the leading
+cause of acute liver failure in the West. The two facts come from the same
+molecule taking two different metabolic routes:
+
+- **Analgesia.** Deacetylation gives p-aminophenol, which crosses into the CNS.
+  There **FAAH** conjugates it with arachidonic acid to form **AM404** — a
+  potent **TRPV1** agonist, an anandamide reuptake inhibitor and a weak **CB1**
+  ligand.
+- **Hepatotoxicity.** **CYP2E1** and CYP3A4 oxidise the same parent molecule to
+  **NAPQI**, an electrophilic quinone imine. Once glutathione is depleted it
+  arylates mitochondrial protein thiols and kills hepatocytes.
+
+Those two routes need different chemistry. The analgesic route needs an amide
+FAAH will accept as a substrate; the toxic route needs a *para*-aminophenol that
+CYP can oxidise. **In principle a molecule can offer the first without offering
+the second** — and that gap is what this project screens for.
+
+The pipeline scores **145,247 plant compounds** against TRPV1, CB1 and FAAH,
+applies a reactive-metabolite and hepatic-liability safety layer, and returns a
+ranked, provenance-tracked candidate list. It is a hypothesis list for a
+laboratory, not an experimental result: **no compound was assayed by this team.**
+
+### What it produces
+
+| Output | File |
+|---|---|
+| 50 distinct candidate molecules, with plant source and literature DOIs | `results/candidates_top50.csv` |
+| Full scored screen | `results/screening_all.csv` |
+| External validation against measured outcomes | `results/pubchem_validation_expanded.json` |
+| Knowledge graph (plant → compound → target → pain) | `results/knowledge_graph.html` |
+| Written report | `results/REPORT.md` |
+
+Headline result: on **3,691 structures measured by other groups and absent from
+all training data**, the CB1 model reaches **ROC-AUC 0.917**, and **0.711** on
+chemistry unlike anything it was trained on. TRPV1 reaches 0.918 but has no
+measured inactives in novel chemical space, so it is validated only near its
+training set. FAAH reaches 0.625 — real, and weak. Each is reported with that
+grading attached.
+
+---
+
+## Technologies
+
+### Programming language
+
+- **Python 3.13**
+
+### Libraries and frameworks
+
+| Area | Packages |
+|---|---|
+| Cheminformatics | `rdkit` 2026.9.1 — structure standardisation, ECFP4 fingerprints, descriptors, SMARTS alerts, PAINS/Brenk/NIH catalogues |
+| Machine learning | `scikit-learn` 1.9.1 (Random Forest, grouped splits, metrics), `lightgbm` 4.7.0 |
+| Data | `pandas` 3.1.1, `numpy` 2.5.4, `scipy` 1.18.1, `openpyxl` 3.1.5 |
+| Web backend | `fastapi` 0.162.0, `uvicorn` 0.54.0 |
+| Web frontend | Plain ES2019, hand-rolled SVG charts — **no framework, no bundler, no build step** |
+| Knowledge graph | `networkx` 3.7, `pyvis` 0.3.2 (vis-network vendored locally, runs offline) |
+| Documents | `reportlab` 5.1.0, `pypdf` 7.0.0 |
+| HTTP | `requests` 2.34.2 |
+
+### Data sources
+
+| Source | Role |
+|---|---|
+| **LOTUS** | Screening library — 145,380 referenced plant structures, each with a DOI |
+| **ChEMBL** | Training labels (58,394 raw activities, 9 UniProt accessions) and the presumed-inactive pool |
+| **PubChem BioAssay** | External test set — the only source that records *Inactive* outcomes |
+| **FDA DILIrank 2.0** | Clinical hepatotoxicity labels |
+| **Tox21** | HepG2 mitochondrial-potential and cytotoxicity assays |
+
+COCONUT and NPASS were evaluated and **not used**: COCONUT carries structures
+with no bioactivity data, and NPASS augmentation measurably reduced external
+performance.
+
+---
+
+## Execution instructions
+
+### Installation
 
 ```bash
-py -3.13 -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
+git clone <repository-url>
+cd terranova
 
-python src/run_all.py          # full pipeline; skips stages already done
-python src/run_all.py --force  # rebuild everything
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
-Read `results/REPORT.md` when it finishes.
+Python 3.11 or newer is required (developed on 3.13).
 
-## Dashboard
+### Run the application
 
-A local full-stack app presents the finished results — the hypothesis, data
-provenance, model evaluation, external validation, safety layers, an explorer
-over all 145,164 screened compounds, and a glossary for readers without a
-chemistry background.
-
-### Running it
-
-From the **repository root**:
+The dashboard reads precomputed results from `results/`, so it starts
+immediately after cloning:
 
 ```bash
-.venv\Scripts\python.exe -m app.run
+python -m app.run
 ```
 
-It starts on <http://127.0.0.1:8000> and opens your browser. `Ctrl+C` stops it.
+Then open **http://127.0.0.1:8000**.
 
-| Flag | Effect |
-|---|---|
-| `--port 9000` | Use a different port (if 8000 is taken) |
-| `--no-browser` | Don't open a browser window |
-| `--reload` | Auto-reload on code changes, for development |
-
-### Running it from a fresh clone
-
-You do **not** need the modelling stack. The dashboard loads no model and
-imports no RDKit — it reads precomputed files — so three packages are enough:
+During development, `--reload` picks up code changes automatically:
 
 ```bash
-git clone https://github.com/EliraBytyqi/makeathon-2026-terranova-paracetamol-inspired-natural-analgesics.git
-cd makeathon-2026-terranova-paracetamol-inspired-natural-analgesics
-
-git lfs install
-git lfs pull                       # REQUIRED - see below
-
-py -3.13 -m venv .venv
-.venv\Scripts\python.exe -m pip install pandas fastapi "uvicorn[standard]"
-.venv\Scripts\python.exe -m app.run
+python -m uvicorn app.backend.main:app --reload
 ```
 
-> **`git lfs pull` is not optional.** `results/screening_all.csv` (104 MB) and
-> `results/positive_controls.csv` are stored in Git LFS. Without it you get
-> small pointer files instead of data, and the screen explorer will fail to
-> load while the rest of the app appears fine.
+### Score a single molecule
 
-### If something is wrong
+```bash
+python src/predict.py "CC(=O)Nc1ccc(O)cc1"      # SMILES
+python src/predict.py --name paracetamol         # resolved via PubChem
+python src/predict.py "<smiles>" --json          # machine-readable
+```
 
-| Symptom | Cause and fix |
+### Rebuild the pipeline from source data
+
+```bash
+python src/run_all.py            # skips any stage whose output already exists
+python src/run_all.py --force    # rebuild everything, including network fetches
+python src/run_all.py screen.py  # run one named stage
+```
+
+Stages run in order: resolve targets → fetch ChEMBL → fetch decoys → build
+dataset → build natural-product library → standardise → resolve literature →
+build hepatic dataset → train hepatic panel → train activity models → screen →
+validate → knowledge graph → report.
+
+A full `--force` run re-downloads tens of thousands of records and takes
+several hours. The default incremental run takes about 15 minutes.
+
+---
+
+## API management
+
+**No API keys, accounts or secrets are required.** Every data source used here
+is a public, unauthenticated endpoint:
+
+| Service | Endpoint | Auth |
+|---|---|---|
+| ChEMBL | `https://www.ebi.ac.uk/chembl/api/data` | none |
+| PubChem PUG REST | `https://pubchem.ncbi.nlm.nih.gov/rest/pug` | none |
+| NCBI E-utilities | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` | none |
+| FDA DILIrank | static file download | none |
+| LOTUS | static dataset download | none |
+
+Requests are rate-limited in code and identified by a descriptive
+`User-Agent`. All responses are cached under `data/external/`, so a rebuild
+does not re-fetch what is already on disk. There is no `.env` file and nothing
+to configure.
+
+The project's own HTTP API is served by the dashboard and is also unauthenticated:
+
+| Route | Returns |
 |---|---|
-| Amber banner listing missing files | Those pipeline outputs aren't on disk. Run `python src/run_all.py` (needs the full `requirements.txt`). |
-| Screen explorer empty, other views fine | LFS files weren't fetched. Run `git lfs pull`. |
-| `Address already in use` | The app is already running, or something else holds the port. Use it, or pass `--port 9000`. |
-| `No module named app` | You're not in the repository root. `cd` there first. |
-| Knowledge graph is blank | Run `python src/run_all.py kg.py --force` to regenerate it and its local assets. |
+| `GET /api/health` | status and which result files are present |
+| `GET /api/overview` | headline screening statistics |
+| `GET /api/candidates` | the 50 distinct candidate molecules |
+| `GET /api/compounds/{source}` | paged, filterable compound tables |
+| `GET /api/predict?smiles=...` | **live scoring of any molecule** |
+| `GET /api/validation` | external validation results |
+| `GET /kg` | interactive knowledge graph |
 
-It serves precomputed artefacts only, so it starts in about a second and nothing
-loads a model at request time. No build step and no CDN — it runs with no
-network access at all. See [`app/README.md`](app/README.md) for the API and the
-design decisions.
+---
 
-## Layout
+## Presentation
 
-| Path | What it is |
+### Live demo
+
+Start the dashboard and open **http://127.0.0.1:8000**. Nine views:
+
+1. **Overview** — headline numbers
+2. **The hypothesis** — the biochemistry
+3. **Data & provenance** — sources and curation attrition
+4. **Models** — architecture, features, performance
+5. **External validation** — the held-out test on measured outcomes
+6. **Safety layers** — structural alerts and PAINS
+7. **Screen explorer** — the candidate list and the full 145k screen
+8. **Live demo** — *paste any molecule and watch all five pipeline stages run*
+9. **ML decoder** — the project in machine-learning terms
+
+View 08 is the one to show first: pick **Hydroxy-α-sanshool** (our top hit —
+CB1 0.991, no alerts, shortlisted), then **Paracetamol** (inactive on all three
+targets, severity-3 reactive alert, disqualified). Nothing is precomputed; the
+models load and score on request in under a second.
+
+### Documents
+
+| Document | Path |
 |---|---|
-| `src/chembl_client.py` | Resilient ChEMBL REST client (see note below) |
-| `src/resolve_targets.py` | UniProt accession → ChEMBL target IDs |
-| `src/fetch_chembl.py` | Bioactivity harvest, checkpointed per target |
-| `src/fetch_decoys.py` | Presumed-inactive molecule pool |
-| `src/build_np_library.py` | LOTUS → plant compound library, two tiers |
-| `src/standardize.py` | Shared structure normalization |
-| `src/featurize.py` | ECFP4 + descriptors, Bemis-Murcko scaffolds |
-| `src/decoys.py` | DUD-E-style property matching |
-| `src/safety.py` | Reactive-metabolite alerts, PAINS, CNS-likeness |
-| `src/build_dataset.py` | Curation with a full attrition audit |
-| `src/train.py` | Target models, random vs scaffold evaluation |
-| `src/train_dili.py` | Hepatotoxicity model |
-| `src/screen.py` | Library screening and composite ranking |
-| `src/validate_literature.py` | External validation set |
-| `src/kg.py` | Knowledge graph build and export |
-| `src/make_report.py` | Generates `results/REPORT.md` from artefacts |
-| `scripts/make_dili_probes.py` | Precomputes DILI probe scores for the dashboard |
-| `app/` | FastAPI backend + static frontend (see `app/README.md`) |
-| `data/reference/` | Hand-curated
-| `results/` | Metrics, shortlist, graph, report |
+| Slide deck (10 slides) | `docs/` — exported from the presentation artifact |
+| 10-minute video script, two presenters | `docs/Terranova_Video_Script.pdf` |
+| Presentation plan and Q&A preparation | `docs/Terranova_Presentation_Plan.pdf` |
+| Written technical report | `results/REPORT.md` |
 
-## Four decisions that carry the project
+### Screenshots
 
-**1. Scaffold splitting, not random.** ChEMBL is built from medicinal-chemistry
-papers, each contributing a congeneric series. Under a random split those
-analogues straddle train and test, the model memorises the series, and you
-report an ROC-AUC near 0.95 that collapses on anything new. Since natural
-products share almost no scaffolds with ChEMBL, that is exactly the wrong
-measurement. We report both splits and the gap between them.
+Place exported images in `docs/screenshots/` and reference them here:
 
-**2. Decoys, because the active rate is a lie.** After curation, measured data
-is 84% active for TRPV1 and 75% for FAAH. That is publication bias, not
-biology. A model trained on it calls everything active. We add
-property-matched (MW, cLogP) presumed-inactive decoys, excluding any that
-share a scaffold with a known active, and keep them labelled
-`presumed_inactive` so results can be re-derived without the assumption.
+```
+docs/screenshots/01-overview.png
+docs/screenshots/02-live-demo.png
+docs/screenshots/03-candidates.png
+docs/screenshots/04-knowledge-graph.png
+```
 
-**3. Two safety layers, because one is not enough.** The structural alert set
-flags paracetamol at maximum severity on the exact NAPQI mechanism. The DILI
-model, trained on a public benchmark, scores paracetamol as *low risk* —
-because paracetamol and isoniazid are **absent from that benchmark entirely**.
-We kept both layers, and weighted the alerts above the model.
+### Video
 
-**4. Evidence is typed throughout.** Every knowledge-graph edge is `measured`,
-`literature` or `predicted`, and renders differently. A graph where a
-prediction looks like a measurement is a graph that misleads.
+> Link to be added once the recording is uploaded.
 
-## Note on the ChEMBL API
+---
 
-During development the EBI list endpoints were intermittently returning HTTP
-500 and read timeouts on roughly 70–80% of requests, with failures distributed
-randomly rather than by quota. Exponential backoff is the wrong response to
-that failure mode — it multiplies dead time. `chembl_client.py` instead uses
-many cheap constant-interval retries, a short timeout so hung connections fail
-fast, and concurrency across independent offsets, with per-target
-checkpointing so a long harvest survives interruption.
+## Repository layout
 
-## FAAH is labelled differently, on purpose
+```
+src/            pipeline stages, in run order (run_all.py drives them)
+app/            FastAPI backend + dependency-free frontend
+scripts/        validation experiments and document generators
+data/           raw, interim, processed and cached external downloads
+models/         trained models (.pkl)
+results/        every output: screen, candidates, validation, graph, report
+docs/           presentation documents
+```
 
-The natural-product FAAH inhibitors motivating this work — kaempferol,
-genistein, biochanin A, silybin, licarin A — sit at roughly 1–15 µM. A 1 µM
-activity cut classifies nearly all of them as inactive, training the model to
-reject exactly the chemistry we are hunting. FAAH therefore also gets a 10 µM
-classification variant, and both are reported.
+---
+
+## Scope and limitations
+
+Stated plainly, because they matter more than the headline numbers:
+
+- **Nothing here has been tested in a laboratory.** Every figure is a
+  computational prediction or a retrospective comparison against published
+  measurements.
+- **The three target models are not equally trustworthy.** CB1 is validated
+  including on novel chemistry; TRPV1 only near its training set; FAAH is weak
+  at 0.625 and should not be used to rank on its own.
+- **The hepatic panel is a weak statistical prior** (≈0.65 on a temporal
+  holdout of marketed drugs, 0.74–0.88 on held-out plant natural products). The
+  25 mechanism-based structural alerts, not the model, hold the veto — no
+  cell-based assay can see paracetamol's toxicity, because HepG2 cells barely
+  express CYP2E1.
+- **Roughly 60–80% of each model's negative class is presumed, not measured.**
+  Decoys are labelled `presumed_inactive` and carried at sample weight 0.4 so
+  the loss does not treat an assumption as a measurement.

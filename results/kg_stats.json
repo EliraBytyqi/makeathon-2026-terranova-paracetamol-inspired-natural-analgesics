@@ -1,29 +1,29 @@
 {
-  "nodes": 9082,
-  "edges": 9718,
+  "nodes": 9090,
+  "edges": 9846,
   "nodes_by_type": {
     "Disease": 1,
     "Target": 3,
     "Pathway": 3,
     "Compound": 8880,
-    "Plant": 168,
-    "ChemicalClass": 25,
+    "Plant": 178,
+    "ChemicalClass": 20,
     "SafetyFlag": 1,
-    "?": 1
+    "?": 4
   },
   "edges_by_relation": {
     "INVOLVED_IN": 3,
     "MODULATES": 3,
     "ACTS_ON": 8707,
-    "PREDICTED_ACTIVE": 251,
-    "MEMBER_OF": 174,
+    "PREDICTED_ACTIVE": 361,
+    "MEMBER_OF": 158,
     "HAS_FLAG": 200,
-    "CONTAINS": 373,
-    "TRADITIONALLY_USED_FOR": 7
+    "CONTAINS": 405,
+    "TRADITIONALLY_USED_FOR": 9
   },
   "edges_by_evidence": {
-    "literature": 560,
+    "literature": 578,
     "measured": 8707,
-    "predicted": 451
+    "predicted": 561
   }
 }

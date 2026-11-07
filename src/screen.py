@@ -34,6 +34,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import modelio
 from featurize import featurize_smiles
 from train import max_similarity_from_fps, query_fingerprints
 
@@ -46,14 +47,38 @@ RESULTS.mkdir(exist_ok=True)
 ALERT_PENALTY = 0.35     # per unit of summed alert severity
 AD_FLOOR = 0.25          # below this Tanimoto, predictions are extrapolation
 CNS_BONUS = 1.15         # central analgesia is the hypothesis, so reward CNS-likeness
-DILI_WEIGHT = 0.30       # deliberately small - see note below
+DILI_WEIGHT = 0.35       # raised from 0.30, but less than first set - see note
 
-# The DILI term is weighted far below the structural-alert term on purpose.
-# check_dili_labels.py established that the TDC DILI benchmark contains neither
-# paracetamol nor isoniazid, and the model scores paracetamol as low risk. A
-# statistical model that misses the project's own index compound has not earned
-# a large say in the ranking. The structural alerts, which do flag paracetamol
-# at maximum severity, carry the weight instead.
+# This weight used to be 0.30, and the reason was specific: the old safety
+# model was trained on TDC's 475-drug DILI benchmark, which contains neither
+# paracetamol nor isoniazid, and it scored paracetamol at 0.37 - "low risk"
+# for the index compound of this entire project. A model that misses that has
+# not earned a large say in a ranking.
+#
+# That model is gone. The hepatic panel is trained on 12,444 compounds across
+# FDA DILIrank 2.0 and two Tox21 HepG2 assays, and paracetamol is in it as
+# most-DILI-concern. Internal scaffold ROC-AUC is 0.79 (clinical), 0.86
+# (mitochondrial) and 0.77 (cytotoxicity), which first suggested a weight
+# around 0.45.
+#
+# scripts/validate_hepatic.py then measured the panel properly, and the
+# external numbers are much lower than the internal ones:
+#
+#   clinical head, trained on DILIrank v1 and tested on the drugs the FDA
+#   added in v2:                    ROC-AUC 0.68, and 0.65 on new scaffolds
+#                                   with a CI that reaches 0.50
+#   mito head predicting clinical DILI (it has never seen a clinical label):
+#                                   ROC-AUC 0.66
+#   hepg2 head, same test:          ROC-AUC 0.57, not significant
+#
+# Resubstitution on the clinical head is 0.998, which is what memorisation
+# looks like and why the paracetamol score is not evidence of anything.
+#
+# So: more than 0.30, because the panel is 27x larger and does contain the
+# index compound. Well short of 0.45, because its true external
+# discrimination is around 0.65. The structural alerts keep the hard veto -
+# they encode mechanism rather than correlation, and they are the only layer
+# that can see metabolism-dependent toxicity at all.
 
 
 def load_models(scope: str = "human"):
@@ -66,8 +91,7 @@ def load_models(scope: str = "human"):
     for path in sorted(MODELS.glob("*.pkl")):
         if path.name == "dili.pkl":
             continue
-        with open(path, "rb") as fh:
-            b = pickle.load(fh)
+        b = modelio.load(path)
         if "target" not in b:
             continue
         key = (b["target"], b["scope"], b["label_col"])
@@ -99,7 +123,7 @@ def add_composite_columns(df: pd.DataFrame, target_cols: list[str],
     """Attach the best-target pick, applicability domain and composite score.
 
     Module level rather than nested inside main() so it can be exercised by
-    smoke_screen.py before committing to a full 150k-compound run.
+    a small subset before committing to a full 150k-compound run.
     """
     df = df.copy()
     df["best_target"] = (df[target_cols].idxmax(axis=1)
@@ -115,8 +139,13 @@ def add_composite_columns(df: pd.DataFrame, target_cols: list[str],
     df["safety_multiplier"] = np.exp(
         -ALERT_PENALTY * df["alert_severity_sum"].fillna(0))
     df["cns_multiplier"] = np.where(df["cns_like"] == 1, CNS_BONUS, 1.0)
-    if "p_dili" in df.columns:
-        df["dili_multiplier"] = 1.0 - DILI_WEIGHT * df["p_dili"].fillna(0.5)
+    # p_hepatic is the max over the three hepatic heads; p_dili is the
+    # clinical head alone, kept as a fallback for results produced before the
+    # panel existed.
+    hep = ("p_hepatic" if "p_hepatic" in df.columns
+           else "p_dili" if "p_dili" in df.columns else None)
+    if hep:
+        df["dili_multiplier"] = 1.0 - DILI_WEIGHT * df[hep].fillna(0.5)
     else:
         df["dili_multiplier"] = 1.0
     df["composite_score"] = (
@@ -181,17 +210,37 @@ def main():
                 Q, q_idx, len(frame), b["ad_fps"])
             print(f"   scored {t}", flush=True)
 
+        # Hepatic liability: three heads over DILIrank 2.0 and two Tox21 HepG2
+        # assays. p_dili stays the clinical head so every existing column name
+        # keeps its meaning; p_hepatic is the max over the three, which is what
+        # the composite uses.
+        panel_path = MODELS / "hepatic_panel.pkl"
         dili_path = MODELS / "dili.pkl"
-        if dili_path.exists():
-            with open(dili_path, "rb") as fh:
-                db = pickle.load(fh)
+        if panel_path.exists():
+            panel = modelio.load(panel_path)
+            head_cols = []
+            for hname, hb in panel["heads"].items():
+                col = "p_dili" if hname == "clinical" else f"p_{hname}"
+                p = np.full(len(frame), np.nan, dtype=np.float32)
+                if mask.any():
+                    p[mask] = hb["model"].predict_proba(X[mask])[:, 1]
+                out[col] = p
+                head_cols.append(col)
+                if hname == "clinical":
+                    out["ad_dili"] = max_similarity_from_fps(
+                        Q, q_idx, len(frame), hb["ad_fps"])
+                print(f"   scored hepatic:{hname}", flush=True)
+            out["p_hepatic"] = out[head_cols].max(axis=1)
+        elif dili_path.exists():
+            db = modelio.load(dili_path)
             dp = np.full(len(frame), np.nan, dtype=np.float32)
             if mask.any():
                 dp[mask] = db["model"].predict_proba(X[mask])[:, 1]
             out["p_dili"] = dp
+            out["p_hepatic"] = dp
             out["ad_dili"] = max_similarity_from_fps(
                 Q, q_idx, len(frame), db["ad_fps"])
-            print("   scored DILI", flush=True)
+            print("   scored DILI (single head; no panel found)", flush=True)
         return out[out["featurized"]].drop(columns=["featurized"])
 
     print("\nscoring novel compounds...")
@@ -208,7 +257,7 @@ def main():
     screen = screen.sort_values("composite_score", ascending=False)
     controls = controls.sort_values("target_score", ascending=False)
 
-    screen.to_csv(RESULTS / "screening_all.csv", index=False)
+    screen.to_csv(RESULTS / "screening_all.csv.gz", index=False)
     controls.to_csv(RESULTS / "positive_controls.csv", index=False)
 
     # ---- shortlist -------------------------------------------------------
@@ -220,7 +269,7 @@ def main():
     shortlist.to_csv(RESULTS / "shortlist.csv", index=False)
 
     cols = ["compound_name", "best_target", "target_score", "ad_best",
-            "n_reactive_alerts", "p_dili", "cns_like", "composite_score",
+            "n_reactive_alerts", "p_hepatic", "cns_like", "composite_score",
             "source_genera", "npclass_class", "tier"]
     cols = [c for c in cols if c in screen.columns]
     print("\n=== TOP 25 SHORTLIST (in-domain, no severity-3 alert, no PAINS) ===")

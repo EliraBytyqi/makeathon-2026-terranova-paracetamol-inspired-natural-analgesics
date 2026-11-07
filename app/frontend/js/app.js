@@ -12,7 +12,7 @@
 
   const TARGET_COLORS = { TRPV1: "--series-1", CB1: "--series-2", FAAH: "--series-3" };
   const state = {
-    source: "shortlist",
+    source: "candidates",
     page: 1,
     pageSize: 50,
     sort: "rank",
@@ -113,6 +113,7 @@
       validation: renderValidation,
       safety: renderSafety,
       screen: renderScreen,
+      demo: renderDemo,
       decoder: renderDecoder,
     }[view];
     if (fn) fn();
@@ -257,11 +258,18 @@
       meta: ["145,380 plant compounds", "DOI-backed provenance", "two source tiers"],
     },
     {
-      name: "TDC DILI benchmark",
-      role: "Hepatotoxicity labels",
+      name: "FDA DILIrank 2.0",
+      role: "Clinical hepatotoxicity labels",
       accent: 4,
-      detail: "475 marketed drugs aggregated by the FDA's National Center for Toxicological Research, derived from Xu et al. 2015. Small, and entirely outside natural-product chemical space.",
-      meta: ["462 usable compounds", "50.7% positive", "331 scaffolds"],
+      detail: "1,336 approved drugs ranked by the evidence in their own FDA labels. 982 carry an unambiguous concern class; the 354 marked ambiguous are dropped rather than guessed at. Replaces the 475-drug TDC benchmark, which did not contain paracetamol.",
+      meta: ["506 modelable (most vs none)", "217 most-concern", "contains paracetamol"],
+    },
+    {
+      name: "Tox21 \u2014 HepG2 assay panel",
+      role: "Measured liver-cell mechanism",
+      accent: 5,
+      detail: "Mitochondrial membrane potential and CellTox Green cytotoxicity, both run in HepG2 liver cells as dose\u2013response screens. Measured outcomes rather than inferences from a drug label, and an order of magnitude more of them.",
+      meta: ["11,619 measured compounds", "2 endpoints", "Active / Inactive calls"],
     },
   ];
 
@@ -415,47 +423,6 @@
           low: it is a large flavonolignan far outside the training distribution.`;
       }
 
-      // DILI
-      const dili = m.dili || {};
-      const sc = (dili.splits || {}).scaffold_5x || {};
-      const rnd = (dili.splits || {}).random_5x || {};
-      $("#dili-n").textContent = int(dili.n);
-      $("#dili-metrics").innerHTML = [
-        ["Compounds", int(dili.n)],
-        ["Scaffolds", int(dili.n_scaffolds)],
-        ["Positive rate", ((dili.positive_rate || 0) * 100).toFixed(1) + "%"],
-        ["ROC-AUC (scaffold, 5×)", `${num(sc.roc_auc)} ± ${num(sc.roc_auc_sd)}`],
-        ["ROC-AUC (random, 5×)", `${num(rnd.roc_auc)} ± ${num(rnd.roc_auc_sd)}`],
-        ["MCC (scaffold, 5×)", `${num(sc.mcc)} ± ${num(sc.mcc_sd)}`],
-      ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join("");
-
-      const probes = m.dili_probes || [];
-      if (probes.length) {
-        const para = probes.find((p) => p.name === "paracetamol");
-        if (para) $("#para-score").textContent = num(para.p_dili, 2);
-        $("#dili-probe-host").innerHTML = `<h4>Probe scores</h4>
-          <p class="card-note">Predicted probability of hepatic liability, with the
-          applicability domain beside it.</p>
-          <div class="table-wrap" style="margin-top:10px">
-          <table><thead><tr>
-            <th scope="col">Compound</th><th scope="col" class="num">p(DILI)</th>
-            <th scope="col" class="num">AD</th><th scope="col">In benchmark?</th>
-          </tr></thead><tbody>
-          ${probes.map((p) => {
-            const high = p.p_dili >= 0.5;
-            const outOfDomain = p.ad < 0.4;
-            return `<tr>
-              <th scope="row" style="font-weight:500">${esc(p.name)}</th>
-              <td class="num">${num(p.p_dili, 3)}</td>
-              <td class="num ${outOfDomain ? "dim" : ""}">${num(p.ad, 2)}</td>
-              <td><span class="badge ${p.note.indexOf("absent") === 0 ? "badge-critical" : ""}">${esc(p.note)}</span></td>
-            </tr>`;
-          }).join("")}
-          </tbody></table></div>`;
-      } else {
-        $("#dili-probe-host").innerHTML = `<div class="empty">
-          Probe scores not computed.<br>Run <code>python scripts/make_dili_probes.py</code>.</div>`;
-      }
     } catch (e) { errorBox($("#split-chart"), e); }
   }
 
@@ -501,7 +468,7 @@
       const t = c.tests || {};
       const thr = c.threshold_experiment || null;
 
-      renderPubChem(v.pubchem || {});
+      renderPubChem(v.pubchem || {}, v.expanded || {});
 
       $("#validation-stats").innerHTML = [
         stat("Fair denominator", int(c.fair_denominator),
@@ -515,43 +482,9 @@
       ].join("");
 
       const ex = c.excluded || [];
-      $("#excluded-table").innerHTML = `<div class="table-wrap"><table>
-        <thead><tr><th scope="col">Compound</th><th scope="col" class="num">Reported</th>
-        <th scope="col" class="num">Model cut-off</th></tr></thead><tbody>
-        ${ex.map((r) => `<tr>
-          <th scope="row" style="font-weight:500">${esc(r.compound_name)} <span class="dim">${esc(r.target)}</span></th>
-          <td class="num"><strong>${num(r.value_uM, 2)}</strong></td>
-          <td class="num dim">${num(r.model_cut_uM, 0)}</td>
-        </tr>`).join("")}
-        </tbody></table></div>
-        <p class="card-note" style="margin-top:8px">Values in µM. Lower means more potent.</p>`;
 
       const half = c.p_half_is_percentile || {};
-      $("#half-table").innerHTML = `<div class="table-wrap"><table>
-        <thead><tr><th scope="col">Target</th><th scope="col" class="num">A score of 0.5 is the…</th></tr></thead>
-        <tbody>${Object.keys(half).map((k) => `<tr>
-          <th scope="row">${targetBadge(k)}</th>
-          <td class="num"><strong>${num(half[k], 2)}th</strong> percentile</td>
-        </tr>`).join("")}</tbody></table></div>`;
 
-      $("#corrected-verdict").innerHTML = `
-        <div class="callout callout-warning">
-          <h4>Inconclusive — not a failure, and not a success</h4>
-          <p class="card-note">
-            On the ${int(c.fair_denominator)} compounds the models could fairly be asked
-            about, the median library percentile is
-            <strong>${num(c.median_percentile, 1)}</strong> against <strong>50</strong>
-            for chance. A Wilcoxon signed-rank test gives
-            <strong>p = ${num(t.wilcoxon_p, 3)}</strong>, a sign test
-            <strong>p = ${num(t.sign_test_p, 2)}</strong>
-            (${int(t.n_above_chance)} of ${int(c.fair_denominator)} above chance).
-            <br><br>
-            <strong>We cannot reject the null, and we cannot show signal either.</strong>
-            Nine compounds is too few to settle it. The honest conclusion is that we have
-            no evidence the screen generalises to plant chemistry — which is different
-            from evidence that it does not.
-          </p>
-        </div>`;
 
       const cutByTarget = { TRPV1: 1, CB1: 1, FAAH: 10 };
       C.hbar($("#validation-chart"), {
@@ -603,7 +536,7 @@
           </div>`;
       } else {
         $("#threshold-result").innerHTML = `<div class="empty">
-          Not computed. Run <code>python scripts/experiment_threshold.py</code>.</div>`;
+          Not computed for this run.</div>`;
       }
 
       renderValidationTable(v);
@@ -648,63 +581,113 @@
     } catch (e) { errorBox($("#validation-stats"), e); }
   }
 
-  function renderPubChem(pc) {
+  /* The external validation, rewritten after two problems were found in the
+   * first version. Outcomes from PubChem key on the InChIKey skeleton, which
+   * collapses stereoisomers, and the plant library holds several entries per
+   * skeleton - so the set reported as n=71 for CB1 was 31 distinct structures
+   * and its p-value was overstated by about five orders of magnitude. And
+   * requiring the test compound to be in the plant library is what left TRPV1
+   * and FAAH single-class. Both are fixed here, and both numbers are shown. */
+
+  const TARGET_VERDICT = {
+    CB1: ["Validated", "The strongest claim in the project: it holds on chemistry " +
+          "genuinely unlike anything it trained on."],
+    TRPV1: ["Validated near training chemistry only", "Of 88 measured inactives, " +
+            "none survive an AD&nbsp;&lt;&nbsp;0.4 filter, so performance on novel " +
+            "chemistry is untested. Publication bias, not a model fault: nobody " +
+            "publishes a plant compound that failed against the capsaicin receptor."],
+    FAAH: ["Measured, and weak", "0.64 is better than chance and not much more. " +
+           "Its internal score of 0.93 was inflated by decoy negatives; this is " +
+           "the first test that could show that."],
+  };
+
+  function ciCell(d) {
+    if (!d || !d.ci95) return "&mdash;";
+    return "[" + num(d.ci95[0], 3) + ", " + num(d.ci95[1], 3) + "]";
+  }
+  function pCell(d) {
+    if (!d || d.mannwhitney_p == null) return "&mdash;";
+    return d.mannwhitney_p < 0.01
+      ? Number(d.mannwhitney_p).toExponential(1)
+      : Number(d.mannwhitney_p).toFixed(3);
+  }
+
+  function renderPubChem(pc, exp) {
     const host = $("#pubchem-card");
-    const cb = pc.cb1 || {};
-    const all = cb.all, novel = cb["novel_ad_lt_0.5"];
-    if (!all) {
-      host.hidden = true;
+    const targets = (exp || {}).targets || {};
+    if (!Object.keys(targets).length) {
+      // fall back to the old single-target summary if the expanded run is absent
+      host.hidden = !(pc && pc.cb1);
       return;
     }
-    const sep = pc.separation || {};
-    const fmtp = (x) => (x < 0.001 ? Number(x).toExponential(1) : Number(x).toFixed(4));
+    host.hidden = false;
 
-    $("#pubchem-stats").innerHTML = [
-      stat("CB1 · all overlap", num(all.roc_auc, 3),
-           `ROC-AUC · n=${all.n} (${all.n_active} active / ${all.n_inactive} inactive) · p=${fmtp(all.p)}`, 3),
-      novel ? stat("CB1 · novel chemistry", num(novel.roc_auc, 3),
-           `ROC-AUC · n=${novel.n} (${novel.n_active}/${novel.n_inactive}) · p=${fmtp(novel.p)}`, 1) : "",
-      stat("Score separation", `${num(sep.active_median, 3)} vs ${Number(sep.inactive_median).toExponential(0)}`,
-           "median predicted p(CB1): measured active vs measured inactive", 2),
-    ].join("");
+    const SCOPES = [
+      ["external_all", "All untrained structures"],
+      ["external_novel_ad_lt_0.5", "Novel chemistry (AD &lt; 0.5)"],
+      ["external_novel_ad_lt_0.4", "Novel chemistry (AD &lt; 0.4)"],
+      ["in_library", "Plant library only"],
+    ];
 
-    const rej = (pc.notable_correct_rejections || []).map((r) =>
-      `<tr><th scope="row" style="font-weight:500">${esc(r.compound_name)}</th>
-       <td class="num">${Number(r.model_score).toExponential(1)}</td>
-       <td class="num dim">${num(r.ad, 2)}</td></tr>`).join("");
-    const un = pc.unscorable || {};
-    const unrows = Object.keys(un).map((k) =>
-      `<tr><th scope="row">${targetBadge(k)}</th>
-       <td class="num">${int(un[k].n)}</td>
-       <td class="num">${int(un[k].n_active)} / ${int(un[k].n_inactive)}</td>
-       <td class="card-note">${esc(un[k].reason)}</td></tr>`).join("");
+    const cards = ["CB1", "TRPV1", "FAAH"].filter(function (k) { return targets[k]; })
+      .map(function (tn) {
+        const blocks = targets[tn];
+        const a = blocks.external_all || {};
+        const v = TARGET_VERDICT[tn] || ["", ""];
+        const rows = SCOPES.map(function (s) {
+          const d = blocks[s[0]];
+          if (!d) return "";
+          if (!d.scoreable) {
+            return "<tr><td>" + s[1] + "</td><td class='num'>" + int(d.n) + "</td>" +
+              "<td class='num dim'>" + int(d.n_active) + " / " + int(d.n_inactive) + "</td>" +
+              "<td colspan='3' class='dim'>single-class &mdash; ROC-AUC undefined</td></tr>";
+          }
+          return "<tr><td>" + s[1] + "</td><td class='num'>" + int(d.n) + "</td>" +
+            "<td class='num dim'>" + int(d.n_active) + " / " + int(d.n_inactive) + "</td>" +
+            "<td class='num'><strong>" + num(d.roc_auc, 3) + "</strong></td>" +
+            "<td>" + ciCell(d) + "</td><td class='num'>" + pCell(d) + "</td></tr>";
+        }).join("");
 
-    $("#pubchem-detail").innerHTML = `
-      <div class="grid grid-2">
-        <div>
-          <h4>Correctly rejected — the convincing part</h4>
-          <p class="card-note">Measured <strong>inactive</strong> at CB1, and the model
-          said so. β-caryophyllene is the trap: widely called a &#8220;dietary
-          cannabinoid&#8221; because it hits CB2, but it is not a CB1 ligand.</p>
-          <div class="table-wrap" style="margin-top:9px"><table>
-            <thead><tr><th scope="col">Compound</th><th scope="col" class="num">p(CB1)</th>
-            <th scope="col" class="num">AD</th></tr></thead><tbody>${rej}</tbody></table></div>
-        </div>
-        <div>
-          <h4>What could not be scored</h4>
-          <p class="card-note">Both overlaps were single-class, so ROC-AUC is undefined.
-          <strong>The result is CB1 only</strong> — do not generalise it.</p>
-          <div class="table-wrap" style="margin-top:9px"><table>
-            <thead><tr><th scope="col">Target</th><th scope="col" class="num">n</th>
-            <th scope="col" class="num">act/inact</th><th scope="col">Why</th></tr></thead>
-            <tbody>${unrows}</tbody></table></div>
-          <div class="callout callout-warning" style="margin-top:12px;font-size:0.82rem">
-            PubChem skews active (74.6% base rate here), so enrichment factors are
-            meaningless. ROC-AUC is base-rate independent — quote that. And this is
-            retrospective: a blind test, not a prospective one.
-          </div>
-        </div>
-      </div>`;
+        return '<div class="card" style="margin-top:14px">' +
+          '<div class="card-head"><div><h3>' + targetBadge(tn) + " &nbsp;" +
+          esc(v[0]) + "</h3>" +
+          '<p class="card-note">' + v[1] + "</p></div>" +
+          '<div class="stat-value" style="color:var(' + TARGET_COLORS[tn] + ')">' +
+          (a.scoreable ? num(a.roc_auc, 3) : "&mdash;") + "</div></div>" +
+          '<div class="table-wrap" style="margin-top:10px"><table><thead><tr>' +
+          '<th scope="col">Test set</th><th scope="col" class="num">n</th>' +
+          '<th scope="col" class="num">act / inact</th>' +
+          '<th scope="col" class="num">ROC-AUC</th><th scope="col">95% CI</th>' +
+          '<th scope="col" class="num">p</th></tr></thead><tbody>' + rows +
+          "</tbody></table></div></div>";
+      }).join("");
+
+    host.innerHTML =
+      '<div class="card-head"><div>' +
+      "<h2>All three targets, tested against measured outcomes</h2>" +
+      '<p class="card-note">PubChem BioAssay records <em>Inactive</em> as well as ' +
+      "<em>Active</em>, so compounds that were screened and did nothing are in the " +
+      "data. That gives a real denominator. Every structure here was measured by " +
+      "somebody else and appears in no training set, and the table is deduplicated " +
+      "to one row per chemical skeleton.</p></div></div>" +
+      cards +
+      '<div class="callout callout-warning" style="margin-top:14px">' +
+      "<h4>Two corrections we made to our own result</h4>" +
+      "<p><strong>We were counting molecules twice.</strong> Outcomes key on the " +
+      "InChIKey skeleton, which collapses stereoisomers and salts, and the library " +
+      "holds several entries per skeleton. The CB1 set we first reported as n=71 is " +
+      "31 distinct structures. The effect size barely moved (0.952 &rarr; 0.946) but " +
+      "the p-value fell about five orders of magnitude, from 5&times;10<sup>&minus;9</sup> " +
+      "to 2.5&times;10<sup>&minus;4</sup>. Everything above is deduplicated.</p>" +
+      "<p style='margin-top:10px'><strong>We were over-constraining the test.</strong> " +
+      "Requiring test compounds to be plant natural products is what left TRPV1 and " +
+      "FAAH single-class. The question &ldquo;does this rank real actives above real " +
+      "inactives&rdquo; never needed that. Dropping it took TRPV1 from 11 scoreable " +
+      "structures to 966 and FAAH from 2 to 621.</p>" +
+      "<p style='margin-top:10px'>The external set is drug-like, not plant-like, so it " +
+      "validates <em>the models</em> rather than the library. Both scopes are in the " +
+      "tables. And this is retrospective throughout: a blind test, not a prospective " +
+      "one. No compound was assayed by this team.</p></div>";
   }
 
   function renderValidationTable(v) {
@@ -754,7 +737,7 @@
         stat("Alert penalty", w.alert_penalty, "per unit of summed severity"),
         stat("AD floor", w.ad_floor, "below this is extrapolation"),
         stat("CNS bonus", w.cns_bonus, "central analgesia is the hypothesis"),
-        stat("DILI weight", w.dili_weight, "deliberately small"),
+        stat("Hepatic weight", w.dili_weight, "raised from 0.30; capped by a 0.65 external score"),
       ].join("");
 
       $("#alert-count").textContent = (s.alerts || []).length;
@@ -989,10 +972,166 @@
     { file: "FAAH_all_label.pkl", task: "P(acts on FAAH)", rows: "+ rat and mouse", thr: "1 µM" },
     { file: "FAAH_human_label_10um.pkl", task: "P(acts on FAAH)", rows: "Human FAAH measurements", thr: "10 µM" },
     { file: "FAAH_all_label_10um.pkl", task: "P(acts on FAAH)", rows: "+ rat and mouse", thr: "10 µM" },
-    { file: "dili.pkl", task: "P(causes liver injury)", rows: "462 marketed drugs (TDC)", thr: "n/a — given label" },
+    { file: "hepatic_panel.pkl", task: "P(hepatic liability) \u00d7 3 heads", rows: "12,125 (DILIrank 2.0 + Tox21)", thr: "n/a \u2014 given label" },
   ];
 
   let decoderBound = false;
+  /* ------------------------------------------------------------- 08 demo */
+  /* The only view that runs a model. Everything else reads a file the
+   * pipeline already wrote; this one posts a structure and waits. The first
+   * call loads the models server-side, so it is slow once and fast after. */
+
+  const DEMO_GRADE = {
+    "validated": "validated externally, including on novel chemistry",
+    "near-training only": "validated near training chemistry only",
+    "weak": "weak - treat as a hint, not a result",
+  };
+
+  function demoBar(p, tone) {
+    var pct = Math.max(0, Math.min(100, Number(p) * 100));
+    return '<div style="height:10px;border-radius:999px;background:var(--surface-3);overflow:hidden;margin-top:8px">'
+      + '<div style="height:100%;width:' + pct.toFixed(1) + '%;border-radius:999px;background:var(' + tone + ')"></div>'
+      + '</div>';
+  }
+
+  function demoReading(p, ad) {
+    if (ad < 0.25) return ["OUT OF DOMAIN", "bad"];
+    if (p >= 0.5) return ["ACTIVE", "ok"];
+    if (p >= 0.15) return ["BORDERLINE", "warn"];
+    return ["INACTIVE", "muted"];
+  }
+
+  function renderDemoResult(r) {
+    var host = $("#demo-out");
+    var acts = r.activity || {};
+    var order = ["TRPV1", "CB1", "FAAH"].filter(function (k) { return acts[k]; });
+
+    var cards = order.map(function (tname) {
+      var a = acts[tname];
+      var rd = demoReading(a.p, a.ad);
+      var grade = (a.validation || {}).grade || "";
+      return '<div class="card" style="flex:1;min-width:232px">'
+        + '<div class="stat-label">' + esc(tname) + '</div>'
+        + '<div class="stat-value" style="color:var(' + TARGET_COLORS[tname] + ')">' + num(a.p, 3) + '</div>'
+        + demoBar(a.p, TARGET_COLORS[tname])
+        + '<p style="margin:10px 0 4px;font-weight:680;letter-spacing:0.02em">' + esc(rd[0]) + '</p>'
+        + '<p class="card-note" style="margin:0">applicability domain ' + num(a.ad, 2) + '</p>'
+        + '<p class="card-note" style="margin:6px 0 0">' + esc(DEMO_GRADE[grade] || grade) + '</p>'
+        + '</div>';
+    }).join("");
+
+    var s = r.safety || {};
+    var alerts = s.alerts || [];
+    var sev = s.severities || [];
+    var alertRows = alerts.length
+      ? alerts.map(function (nm, i) {
+          return '<li><b>severity ' + sev[i] + '</b> &mdash; ' + esc(String(nm).replace(/_/g, " ")) + '</li>';
+        }).join("")
+      : '<li>no reactive-metabolite alerts</li>';
+
+    var h = r.hepatic || {};
+    var heads = h.heads || {};
+    var headRows = Object.keys(heads).map(function (k) {
+      return '<tr><td>' + esc(k) + '</td><td class="num">' + num(heads[k].p, 3) + '</td>'
+        + '<td class="card-note">' + esc(heads[k].measures || "") + '</td></tr>';
+    }).join("");
+    var hepHigh = Number(h.p_hepatic) >= 0.6;
+
+    var c = r.composite || {};
+    var terms = c.terms || {};
+    var termRows = Object.keys(terms).map(function (k) {
+      return '<tr><td>' + esc(titleCase(k)) + '</td><td class="num">' + num(terms[k], 4) + '</td></tr>';
+    }).join("");
+
+    host.innerHTML =
+      '<div class="card" style="margin-top:18px">'
+      + '<h3>Stage 1 &mdash; the standardised structure</h3>'
+      + '<p style="word-break:break-all;margin:6px 0"><code>' + esc(r.std_smiles) + '</code></p>'
+      + '<p class="card-note">InChIKey ' + esc(r.inchikey) + '</p></div>'
+
+      + '<h3 style="margin:22px 0 10px">Stage 2 &mdash; active or inactive, on each target</h3>'
+      + '<div style="display:flex;gap:14px;flex-wrap:wrap">' + cards + '</div>'
+
+      + '<div class="card" style="margin-top:18px">'
+      + '<h3>Stage 3 &mdash; structural alerts <span class="card-note">(this layer holds the veto)</span></h3>'
+      + '<ul style="margin:8px 0 0 18px">' + alertRows + '</ul>'
+      + '<p class="card-note" style="margin-top:8px">PAINS patterns: ' + int(s.n_pains) + '</p>'
+      + (s.disqualified
+          ? '<p style="font-weight:680;margin-top:10px">DISQUALIFIED from the shortlist &mdash; ' + esc(s.reason || "") + '</p>'
+          : '<p style="font-weight:680;margin-top:10px">No disqualifying alert.</p>')
+      + '</div>'
+
+      + '<div class="card" style="margin-top:18px">'
+      + '<h3>Stage 4 &mdash; hepatic liability</h3>'
+      + '<div class="stat-value">' + num(h.p_hepatic, 3) + '</div>'
+      + demoBar(h.p_hepatic, hepHigh ? "--series-4" : "--series-3")
+      + '<table class="table" style="margin-top:12px"><thead><tr><th>Head</th>'
+      + '<th class="num">Score</th><th>What it measures</th></tr></thead><tbody>'
+      + headRows + '</tbody></table>'
+      + '<p class="card-note" style="margin-top:10px">Combined as the maximum over the three heads. '
+      + esc(h.note || "") + '</p></div>'
+
+      + '<div class="card" style="margin-top:18px">'
+      + '<h3>Stage 5 &mdash; composite rank</h3>'
+      + '<div class="stat-value">' + num(c.score, 5) + '</div>'
+      + '<table class="table" style="margin-top:12px"><tbody>' + termRows + '</tbody></table>'
+      + '<p style="margin-top:12px;font-weight:680">'
+      + (c.shortlist_eligible ? 'Shortlist eligible.' : 'Not shortlist eligible.') + '</p>'
+      + '<p class="card-note">A ranking, not a verdict: it says where this molecule belongs '
+      + 'in a queue for someone with a laboratory.</p></div>';
+  }
+
+  async function runDemo(smiles, note) {
+    var out = $("#demo-out");
+    $("#demo-note").textContent = "Running the pipeline on this structure...";
+    out.innerHTML = '<div class="card" style="margin-top:18px">Scoring. The first run loads '
+      + 'the models and can take a few seconds; later runs are immediate.</div>';
+    try {
+      var r = await api("/api/predict?smiles=" + encodeURIComponent(smiles));
+      renderDemoResult(r);
+      $("#demo-note").textContent = note || "";
+    } catch (e) {
+      out.innerHTML = '<div class="card empty" style="margin-top:18px">Could not score that structure.<br>'
+        + esc(String((e && e.message) || e)) + '</div>';
+      $("#demo-note").textContent = "";
+    }
+  }
+
+  async function renderDemo() {
+    var sel = $("#demo-pick");
+    var mols = [];
+    try {
+      mols = await api("/api/demo_molecules");
+    } catch (e) {
+      mols = [];
+    }
+    state.demoMols = mols;
+    sel.innerHTML = mols.length
+      ? mols.map(function (m, i) {
+          return '<option value="' + i + '">' + esc(m.label) + '</option>';
+        }).join("")
+      : '<option value="">none available</option>';
+
+    function pick() {
+      var m = state.demoMols[Number(sel.value)];
+      if (!m) return;
+      $("#demo-smiles").value = m.smiles;
+      runDemo(m.smiles, m.note);
+    }
+    sel.onchange = pick;
+    $("#demo-run").onclick = function () {
+      var raw = String($("#demo-smiles").value || "").trim();
+      if (raw) runDemo(raw, "Custom structure.");
+    };
+    $("#demo-smiles").onkeydown = function (ev) {
+      if (ev.key === "Enter") $("#demo-run").click();
+    };
+    if (mols.length) {
+      sel.value = "0";
+      pick();
+    }
+  }
+
   async function renderDecoder() {
     renderGlossary();
     if (!decoderBound) {
@@ -1028,7 +1167,6 @@
       const v = await api("/api/interpretation");
       const m = await api("/api/models");
       renderConclusions(v, m);
-      renderAttacks(v, m);
     } catch (e) { errorBox($("#conclusions"), e); }
   }
 
@@ -1147,23 +1285,35 @@
           ["Overlap with ChEMBL FAAH set", `${rescue.overlap_with_chembl} compounds`],
         ])),
 
-      claim(5, "not",
-        "The DILI model cannot be used as a safety filter",
-        `It misses the project's own index compound. Paracetamol and isoniazid — two of
-         the most famous hepatotoxins in medicine — are absent from the training
-         benchmark entirely, and the model calls paracetamol low-risk. Worse, it is
-         <em>confidently wrong in the other direction</em> on natural products: kaempferol
-         scores ${num(kaem.p_dili, 2)} at an applicability domain of only
-         ${num(kaem.ad, 2)}, meaning that score is extrapolation dressed up as a
-         prediction.
-         <br><br><strong>The project handles this correctly</strong> by weighting it at
-         0.30 against the structural alerts, which do flag paracetamol at maximum
-         severity. Keeping a model you have shown to be unreliable, at a reduced weight,
-         with the reason documented, is a better answer than deleting it or trusting it.`,
+      claim(5, "partial",
+        "The hepatic layer is a weak prior, and we rebuilt it to find that out",
+        `The old model was trained on TDC's 475-drug benchmark, which contains neither
+         paracetamol nor isoniazid, and it scored paracetamol 0.37 &mdash; low risk, for
+         the index compound of this project. We replaced it with three heads over
+         <strong>12,125 compounds</strong>: FDA DILIrank 2.0 for the clinical signal, and
+         two Tox21 HepG2 assays &mdash; mitochondrial membrane potential and
+         cytotoxicity &mdash; measured directly in liver cells. Paracetamol is now scored
+         ${num(para.p_hepatic || para.p_dili, 2)}.
+         <br><br><strong>That is a closed data gap, not a validated prediction.</strong>
+         Paracetamol is inside the training set now, so scoring it correctly proves
+         nothing; resubstitution on that head is 0.998, which is what memorisation looks
+         like. Tested properly &mdash; train on DILIrank v1, test on the drugs the FDA
+         added afterwards &mdash; it reaches <strong>0.68</strong>, and 0.65 on new
+         scaffolds with a confidence interval that touches chance. We also tried adding
+         ten Tox21 mechanism endpoints as features, with the target fixed in advance.
+         It made things worse, and we report that.
+         <br><br><strong>So it is weighted 0.35</strong>, not the 0.45 the internal
+         numbers first suggested. The structural alerts keep the hard veto: they flag
+         paracetamol at maximum severity on the exact aminophenol chemistry, and they are
+         the only layer that can see metabolism-dependent toxicity at all &mdash; HepG2
+         cells barely express CYP2E1, so paracetamol is measured <em>inactive</em> in both
+         Tox21 heads.`,
         ev([
-          ["paracetamol", `p = ${num(para.p_dili, 3)} <span class="dim">(absent from benchmark)</span>`],
-          ["kaempferol", `p = ${num(kaem.p_dili, 3)} at AD ${num(kaem.ad, 2)} <span class="dim">(extrapolation)</span>`],
-          ["Weight in composite", "0.30, versus an exponential penalty on alerts"],
+          ["Training compounds", "<strong>12,125</strong> <span class=\"dim\">(was 462)</span>"],
+          ["paracetamol", `p = ${num(para.p_hepatic || para.p_dili, 3)} <span class="dim">(in training &mdash; not a test)</span>`],
+          ["kaempferol", `p = ${num(kaem.p_hepatic || kaem.p_dili, 3)} <span class="dim">(matches its measured Tox21 outcome)</span>`],
+          ["Temporal holdout", "<strong>0.68</strong> <span class=\"dim\">(0.65 on new scaffolds)</span>"],
+          ["Weight in composite", "0.35, versus an exponential penalty on alerts"],
         ])),
 
       claim(6, "partial",
@@ -1183,64 +1333,6 @@
     ].join("");
   }
 
-  function renderAttacks(v, m) {
-    const metrics = (m.metrics || []).filter((r) => r.split === "scaffold");
-    const weakest = metrics.length
-      ? metrics.reduce((a, b) => (a.pr_auc < b.pr_auc ? a : b)) : null;
-    const en = v.enrichment || {};
-
-    const items = [
-      {
-        q: "Your scaffold-split PR-AUC is 0.88–0.98. That is too good. What is inflating it?",
-        a: `<strong>The decoys are easy negatives.</strong> They are random drug-like
-            molecules, so the model is mostly separating "real ligand" from "arbitrary
-            molecule" — a much easier task than ranking among plausible candidates, which
-            is what the screen actually faces. The honest answer is that these numbers are
-            an upper bound on screening performance.
-            ${weakest ? `The most realistic row in the table is
-            <code>${esc(weakest.target)}/${esc(weakest.scope)}/${esc(weakest.label)}</code>
-            at PR-AUC ${num(weakest.pr_auc)}, because the 10 µM threshold forces the
-            hardest discrimination.` : ""}`,
-      },
-      {
-        q: "Isn't the seed-list enrichment circular?",
-        a: `<strong>Partly, yes — concede it.</strong> Those plants are on the list because
-            they have documented pain use, and their chemistry resembles the known ligands
-            in training. The ${en.fold}× enrichment shows the pipeline is internally
-            consistent, not that it discovered anything. The genuinely interesting rows are
-            the ${Math.round((1 - (en.shortlist_rate || 0)) * 50)} background-tier compounds
-            that reached the shortlist without any traditional-use prior.`,
-      },
-      {
-        q: "You label 60,000 molecules inactive without measuring them. Isn't that made up?",
-        a: `It is an assumption, stated as one. Real screening hit rates are well under 1%,
-            so a random drug-like molecule is overwhelmingly likely to be inactive against
-            any given target. They are labelled <code>presumed_inactive</code> rather than
-            <code>inactive</code>, so every result can be re-derived without them. The
-            alternative — training on 84%-positive data — is demonstrably worse.`,
-      },
-      {
-        q: "Have you tested any of this in a lab?",
-        a: `<strong>No, and nothing here claims otherwise.</strong> There is no prospective
-            validation. Every number is a computational prediction over compounds that have
-            not been assayed by this project. The deliverable is a ranked, filtered,
-            provenance-tracked hypothesis list for someone with a lab — not a result.`,
-      },
-      {
-        q: "Your positive controls were in the training data. What does recovering them prove?",
-        a: `That the pipeline is wired up correctly — featurisation, model loading, scoring
-            and ranking all work end to end. It is a smoke test, not a performance claim,
-            and it is reported separately from the screen for exactly that reason. The
-            generalisation claim rests on the scaffold split and the FAAH rescue, not on
-            these.`,
-      },
-    ];
-
-    $("#attacks").innerHTML = items.map((it, n) => `<div class="callout" style="margin-bottom:12px">
-      <h4>${n + 1}. ${esc(it.q)}</h4>
-      <p class="card-note">${it.a}</p>
-    </div>`).join("");
-  }
 
   /* --------------------------------------------------------------- modal */
   function wireRowClicks(root) {

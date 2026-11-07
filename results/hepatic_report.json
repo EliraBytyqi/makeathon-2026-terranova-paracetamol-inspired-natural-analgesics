@@ -1,0 +1,378 @@
+{
+  "panel": {
+    "combination": "max over heads",
+    "endpoints": {
+      "clinical": "FDA DILIrank 2.0 concern class (label-derived, human outcome)",
+      "mito": "Tox21 MMP_ratio, mitochondrial membrane potential in HepG2",
+      "hepg2": "Tox21 CellTox Green 40 h cytotoxicity in HepG2"
+    }
+  },
+  "heads": {
+    "clinical": {
+      "endpoint": "clinical",
+      "description": "FDA DILIrank 2.0 concern class (label-derived, human outcome)",
+      "n": 506,
+      "n_positive": 199,
+      "positive_rate": 0.3933,
+      "n_scaffolds": 389,
+      "repeats": 10,
+      "candidates": {
+        "random_forest": {
+          "scaffold": {
+            "pr_auc": 0.7457,
+            "pr_auc_sd": 0.0545,
+            "roc_auc": 0.7865,
+            "roc_auc_sd": 0.0382,
+            "mcc": 0.4621,
+            "mcc_sd": 0.0733,
+            "balanced_acc": 0.7269,
+            "balanced_acc_sd": 0.0407
+          },
+          "random": {
+            "pr_auc": 0.7558,
+            "pr_auc_sd": 0.0371,
+            "roc_auc": 0.8231,
+            "roc_auc_sd": 0.0301,
+            "mcc": 0.5019,
+            "mcc_sd": 0.0616,
+            "balanced_acc": 0.7481,
+            "balanced_acc_sd": 0.0305
+          }
+        },
+        "lightgbm": {
+          "scaffold": {
+            "pr_auc": 0.7197,
+            "pr_auc_sd": 0.0628,
+            "roc_auc": 0.7569,
+            "roc_auc_sd": 0.042,
+            "mcc": 0.3838,
+            "mcc_sd": 0.0699,
+            "balanced_acc": 0.6875,
+            "balanced_acc_sd": 0.0341
+          },
+          "random": {
+            "pr_auc": 0.7327,
+            "pr_auc_sd": 0.0423,
+            "roc_auc": 0.8011,
+            "roc_auc_sd": 0.0293,
+            "mcc": 0.4447,
+            "mcc_sd": 0.0737,
+            "balanced_acc": 0.7155,
+            "balanced_acc_sd": 0.0357
+          }
+        }
+      },
+      "selected": "random_forest",
+      "scaffold": {
+        "pr_auc": 0.7457,
+        "pr_auc_sd": 0.0545,
+        "roc_auc": 0.7865,
+        "roc_auc_sd": 0.0382,
+        "mcc": 0.4621,
+        "mcc_sd": 0.0733,
+        "balanced_acc": 0.7269,
+        "balanced_acc_sd": 0.0407
+      },
+      "random": {
+        "pr_auc": 0.7558,
+        "pr_auc_sd": 0.0371,
+        "roc_auc": 0.8231,
+        "roc_auc_sd": 0.0301,
+        "mcc": 0.5019,
+        "mcc_sd": 0.0616,
+        "balanced_acc": 0.7481,
+        "balanced_acc_sd": 0.0305
+      },
+      "generalisation_gap_roc_auc": 0.0366,
+      "splits": {
+        "scaffold_5x": {
+          "pr_auc": 0.7457,
+          "pr_auc_sd": 0.0545,
+          "roc_auc": 0.7865,
+          "roc_auc_sd": 0.0382,
+          "mcc": 0.4621,
+          "mcc_sd": 0.0733,
+          "balanced_acc": 0.7269,
+          "balanced_acc_sd": 0.0407
+        },
+        "random_5x": {
+          "pr_auc": 0.7558,
+          "pr_auc_sd": 0.0371,
+          "roc_auc": 0.8231,
+          "roc_auc_sd": 0.0301,
+          "mcc": 0.5019,
+          "mcc_sd": 0.0616,
+          "balanced_acc": 0.7481,
+          "balanced_acc_sd": 0.0305
+        }
+      },
+      "label_convention": "most_vs_none",
+      "dilist_convention_for_comparison": {
+        "n": 825,
+        "positive_rate": 0.6279,
+        "scaffold_roc_auc": 0.7541,
+        "note": "most + less concern vs none; rejected because it puts severity-0 aspirin in the same class as severity-8 troglitazone"
+      }
+    },
+    "mito": {
+      "endpoint": "mito",
+      "description": "Tox21 MMP_ratio, mitochondrial membrane potential in HepG2",
+      "n": 7173,
+      "n_positive": 1180,
+      "positive_rate": 0.1645,
+      "n_scaffolds": 3714,
+      "repeats": 5,
+      "candidates": {
+        "random_forest": {
+          "scaffold": {
+            "pr_auc": 0.5521,
+            "pr_auc_sd": 0.0296,
+            "roc_auc": 0.8604,
+            "roc_auc_sd": 0.0113,
+            "mcc": 0.4219,
+            "mcc_sd": 0.038,
+            "balanced_acc": 0.6874,
+            "balanced_acc_sd": 0.033
+          },
+          "random": {
+            "pr_auc": 0.6545,
+            "pr_auc_sd": 0.0302,
+            "roc_auc": 0.8855,
+            "roc_auc_sd": 0.009,
+            "mcc": 0.512,
+            "mcc_sd": 0.0241,
+            "balanced_acc": 0.7421,
+            "balanced_acc_sd": 0.0105
+          }
+        },
+        "lightgbm": {
+          "scaffold": {
+            "pr_auc": 0.5557,
+            "pr_auc_sd": 0.0212,
+            "roc_auc": 0.8518,
+            "roc_auc_sd": 0.0066,
+            "mcc": 0.4187,
+            "mcc_sd": 0.0213,
+            "balanced_acc": 0.6883,
+            "balanced_acc_sd": 0.0227
+          },
+          "random": {
+            "pr_auc": 0.6559,
+            "pr_auc_sd": 0.0211,
+            "roc_auc": 0.8809,
+            "roc_auc_sd": 0.0056,
+            "mcc": 0.5357,
+            "mcc_sd": 0.0325,
+            "balanced_acc": 0.7492,
+            "balanced_acc_sd": 0.0102
+          }
+        }
+      },
+      "selected": "random_forest",
+      "scaffold": {
+        "pr_auc": 0.5521,
+        "pr_auc_sd": 0.0296,
+        "roc_auc": 0.8604,
+        "roc_auc_sd": 0.0113,
+        "mcc": 0.4219,
+        "mcc_sd": 0.038,
+        "balanced_acc": 0.6874,
+        "balanced_acc_sd": 0.033
+      },
+      "random": {
+        "pr_auc": 0.6545,
+        "pr_auc_sd": 0.0302,
+        "roc_auc": 0.8855,
+        "roc_auc_sd": 0.009,
+        "mcc": 0.512,
+        "mcc_sd": 0.0241,
+        "balanced_acc": 0.7421,
+        "balanced_acc_sd": 0.0105
+      },
+      "generalisation_gap_roc_auc": 0.0251,
+      "splits": {
+        "scaffold_5x": {
+          "pr_auc": 0.5521,
+          "pr_auc_sd": 0.0296,
+          "roc_auc": 0.8604,
+          "roc_auc_sd": 0.0113,
+          "mcc": 0.4219,
+          "mcc_sd": 0.038,
+          "balanced_acc": 0.6874,
+          "balanced_acc_sd": 0.033
+        },
+        "random_5x": {
+          "pr_auc": 0.6545,
+          "pr_auc_sd": 0.0302,
+          "roc_auc": 0.8855,
+          "roc_auc_sd": 0.009,
+          "mcc": 0.512,
+          "mcc_sd": 0.0241,
+          "balanced_acc": 0.7421,
+          "balanced_acc_sd": 0.0105
+        }
+      }
+    },
+    "hepg2": {
+      "endpoint": "hepg2",
+      "description": "Tox21 CellTox Green 40 h cytotoxicity in HepG2",
+      "n": 4446,
+      "n_positive": 1232,
+      "positive_rate": 0.2771,
+      "n_scaffolds": 2350,
+      "repeats": 5,
+      "candidates": {
+        "random_forest": {
+          "scaffold": {
+            "pr_auc": 0.6144,
+            "pr_auc_sd": 0.0615,
+            "roc_auc": 0.7695,
+            "roc_auc_sd": 0.0282,
+            "mcc": 0.4003,
+            "mcc_sd": 0.0467,
+            "balanced_acc": 0.6813,
+            "balanced_acc_sd": 0.0331
+          },
+          "random": {
+            "pr_auc": 0.6022,
+            "pr_auc_sd": 0.0195,
+            "roc_auc": 0.7643,
+            "roc_auc_sd": 0.0103,
+            "mcc": 0.3957,
+            "mcc_sd": 0.0173,
+            "balanced_acc": 0.6899,
+            "balanced_acc_sd": 0.0081
+          }
+        },
+        "lightgbm": {
+          "scaffold": {
+            "pr_auc": 0.5816,
+            "pr_auc_sd": 0.053,
+            "roc_auc": 0.7557,
+            "roc_auc_sd": 0.0254,
+            "mcc": 0.3808,
+            "mcc_sd": 0.0388,
+            "balanced_acc": 0.6735,
+            "balanced_acc_sd": 0.0242
+          },
+          "random": {
+            "pr_auc": 0.5661,
+            "pr_auc_sd": 0.017,
+            "roc_auc": 0.746,
+            "roc_auc_sd": 0.016,
+            "mcc": 0.3583,
+            "mcc_sd": 0.0406,
+            "balanced_acc": 0.6693,
+            "balanced_acc_sd": 0.0163
+          }
+        }
+      },
+      "selected": "random_forest",
+      "scaffold": {
+        "pr_auc": 0.6144,
+        "pr_auc_sd": 0.0615,
+        "roc_auc": 0.7695,
+        "roc_auc_sd": 0.0282,
+        "mcc": 0.4003,
+        "mcc_sd": 0.0467,
+        "balanced_acc": 0.6813,
+        "balanced_acc_sd": 0.0331
+      },
+      "random": {
+        "pr_auc": 0.6022,
+        "pr_auc_sd": 0.0195,
+        "roc_auc": 0.7643,
+        "roc_auc_sd": 0.0103,
+        "mcc": 0.3957,
+        "mcc_sd": 0.0173,
+        "balanced_acc": 0.6899,
+        "balanced_acc_sd": 0.0081
+      },
+      "generalisation_gap_roc_auc": -0.0052,
+      "splits": {
+        "scaffold_5x": {
+          "pr_auc": 0.6144,
+          "pr_auc_sd": 0.0615,
+          "roc_auc": 0.7695,
+          "roc_auc_sd": 0.0282,
+          "mcc": 0.4003,
+          "mcc_sd": 0.0467,
+          "balanced_acc": 0.6813,
+          "balanced_acc_sd": 0.0331
+        },
+        "random_5x": {
+          "pr_auc": 0.6022,
+          "pr_auc_sd": 0.0195,
+          "roc_auc": 0.7643,
+          "roc_auc_sd": 0.0103,
+          "mcc": 0.3957,
+          "mcc_sd": 0.0173,
+          "balanced_acc": 0.6899,
+          "balanced_acc_sd": 0.0081
+        }
+      }
+    }
+  },
+  "probes": {
+    "paracetamol": {
+      "clinical": 0.7100316101913934,
+      "mito": 0.26861518771458165,
+      "hepg2": 0.22630151502800291,
+      "panel": 0.7100316101913934
+    },
+    "isoniazid": {
+      "clinical": 0.6790776109827891,
+      "mito": 0.06128646945685746,
+      "hepg2": 0.09572467601598668,
+      "panel": 0.6790776109827891
+    },
+    "troglitazone": {
+      "clinical": 0.5931215376956053,
+      "mito": 0.7816749558408841,
+      "hepg2": 0.7415908622447909,
+      "panel": 0.7816749558408841
+    },
+    "diclofenac": {
+      "clinical": 0.8710702240861018,
+      "mito": 0.23972051358864022,
+      "hepg2": 0.2484059385381399,
+      "panel": 0.8710702240861018
+    },
+    "ibuprofen": {
+      "clinical": 0.4380705195191395,
+      "mito": 0.058382201359961326,
+      "hepg2": 0.2926292404940412,
+      "panel": 0.4380705195191395
+    },
+    "aspirin": {
+      "clinical": 0.6962522831267083,
+      "mito": 0.03615198481359764,
+      "hepg2": 0.1665618192738289,
+      "panel": 0.6962522831267083
+    },
+    "caffeine": {
+      "clinical": 0.2653957576086075,
+      "mito": 0.08634005665630337,
+      "hepg2": 0.19768236322253524,
+      "panel": 0.2653957576086075
+    },
+    "curcumin": {
+      "clinical": 0.5743219456901009,
+      "mito": 0.7238701998155683,
+      "hepg2": 0.6934913710345227,
+      "panel": 0.7238701998155683
+    },
+    "kaempferol": {
+      "clinical": 0.654419680431201,
+      "mito": 0.931470484867964,
+      "hepg2": 0.5155157166752125,
+      "panel": 0.931470484867964
+    },
+    "capsaicin": {
+      "clinical": 0.41186350601195654,
+      "mito": 0.37521954010390224,
+      "hepg2": 0.3734642671630076,
+      "panel": 0.41186350601195654
+    }
+  }
+}
