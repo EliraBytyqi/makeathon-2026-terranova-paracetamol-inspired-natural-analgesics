@@ -1,0 +1,151 @@
+{
+  "headline": "inconclusive",
+  "raw_claims": 16,
+  "excluded_weaker_than_cut": 7,
+  "fair_denominator": 9,
+  "median_percentile": 55.1,
+  "chance_percentile": 50,
+  "in_top_10pct": 1,
+  "in_top_50pct": 5,
+  "tests": {
+    "wilcoxon_p": 0.3672,
+    "sign_test_p": 0.5,
+    "n_above_chance": 5
+  },
+  "p_half_is_percentile": {
+    "TRPV1": 98.84,
+    "CB1": 99.76,
+    "FAAH": 99.7
+  },
+  "excluded": [
+    {
+      "compound_name": "Eugenol",
+      "target": "TRPV1",
+      "value_uM": 300.0,
+      "model_cut_uM": 1.0,
+      "library_percentile": 94.5
+    },
+    {
+      "compound_name": "Piperine",
+      "target": "TRPV1",
+      "value_uM": 37.9,
+      "model_cut_uM": 1.0,
+      "library_percentile": 88.2
+    },
+    {
+      "compound_name": "Daidzein",
+      "target": "FAAH",
+      "value_uM": 14.0,
+      "model_cut_uM": 10.0,
+      "library_percentile": 36.1
+    },
+    {
+      "compound_name": "6-Gingerol",
+      "target": "TRPV1",
+      "value_uM": 4.55,
+      "model_cut_uM": 1.0,
+      "library_percentile": 98.8
+    },
+    {
+      "compound_name": "Loureirin B",
+      "target": "TRPV1",
+      "value_uM": 4.13,
+      "model_cut_uM": 1.0,
+      "library_percentile": 68.3
+    },
+    {
+      "compound_name": "AM404",
+      "target": "TRPV1",
+      "value_uM": 2.0,
+      "model_cut_uM": 1.0,
+      "library_percentile": 4.4
+    },
+    {
+      "compound_name": "AM404",
+      "target": "CB1",
+      "value_uM": 1.76,
+      "model_cut_uM": 1.0,
+      "library_percentile": 76.6
+    }
+  ],
+  "counted": [
+    {
+      "compound_name": "Curcumin",
+      "target": "TRPV1",
+      "value_uM": 0.067,
+      "library_percentile": 94.6,
+      "ad": 0.6666666865348816
+    },
+    {
+      "compound_name": "Genistein",
+      "target": "FAAH",
+      "value_uM": 8.0,
+      "library_percentile": 74.0,
+      "ad": 0.5686274766921997
+    },
+    {
+      "compound_name": "Biochanin A",
+      "target": "FAAH",
+      "value_uM": 2.1,
+      "library_percentile": 71.4,
+      "ad": 0.5087719559669495
+    },
+    {
+      "compound_name": "Licarin A",
+      "target": "FAAH",
+      "value_uM": 7.02,
+      "library_percentile": 58.3,
+      "ad": 0.37931033968925476
+    },
+    {
+      "compound_name": "7-Hydroxyflavone",
+      "target": "FAAH",
+      "value_uM": 2.04,
+      "library_percentile": 55.1,
+      "ad": 0.4000000059604645
+    },
+    {
+      "compound_name": "Eriodictyol",
+      "target": "TRPV1",
+      "value_uM": 0.044,
+      "library_percentile": 44.5,
+      "ad": 0.3529411852359772
+    },
+    {
+      "compound_name": "Kaempferol",
+      "target": "FAAH",
+      "value_uM": 5.0,
+      "library_percentile": 37.7,
+      "ad": 0.4137931168079376
+    },
+    {
+      "compound_name": "N-benzyl-linoleamide",
+      "target": "FAAH",
+      "value_uM": 7.2,
+      "library_percentile": 34.7,
+      "ad": 0.23880596458911896
+    },
+    {
+      "compound_name": "Silybin",
+      "target": "FAAH",
+      "value_uM": 5.08,
+      "library_percentile": 14.4,
+      "ad": 0.2804878056049347
+    }
+  ],
+  "threshold_experiment": {
+    "tested": "TRPV1 and CB1 retrained at the 10 uM cut, decoys matched",
+    "n": 8,
+    "median_pct_1um": 82.3,
+    "median_pct_10um": 86.2,
+    "median_gain": 4.6,
+    "n_improved": 7,
+    "top10pct_before": 3,
+    "top10pct_after": 3,
+    "true_actives_median_before": 72.5,
+    "true_actives_median_after": 79.0,
+    "too_weak_median_before": 91.3,
+    "too_weak_median_after": 97.5,
+    "verdict": "A real but small gain that does not change the top-10% hit rate, and it makes false positives worse: piperine, nearly 4x weaker than the cut, goes to the 100th percentile. The threshold is not the bottleneck."
+  }
+}

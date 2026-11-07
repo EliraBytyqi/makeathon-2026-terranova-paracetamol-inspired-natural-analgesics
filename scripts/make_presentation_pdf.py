@@ -165,6 +165,9 @@ def build():
     rescue = load(RESULTS / "faah_rescue_summary.json", {}) or {}
     dili = load(RESULTS / "dili_report.json", {}) or {}
     probes = (load(RESULTS / "dili_probes.json", {}) or {}).get("probes", [])
+    corrected = load(RESULTS / "validation_corrected.json", {}) or {}
+    thr = corrected.get("threshold_experiment", {}) or {}
+    tests = corrected.get("tests", {}) or {}
     metrics = load(RESULTS / "model_metrics.csv")
     attr = load(PROC / "attrition_audit.csv")
     shortlist = load(RESULTS / "shortlist.csv")
@@ -234,77 +237,94 @@ def build():
     # ======================================================== 1. READ FIRST
     st += [PageBreak(), P("1. Read this first", "h1")]
     st += [P(
-        "The external validation stage ran for the first time today. It is the only "
-        "genuinely held-out test in the project, and <b>it did not go well</b>. You need "
-        "to know this before you plan a single slide, because the honest framing of it "
-        "is far stronger than any attempt to talk around it.", "body")]
+        "The external validation stage ran for the first time late in the build, and the "
+        "first reading of it was <b>wrong in a way worth understanding</b>, because the "
+        "corrected version is both more defensible and more interesting. Read this page "
+        "before you plan a single slide.", "body")]
 
+    st += [callout(
+        "The claim we nearly made, and why it was wrong",
+        "The raw output says: 16 held-out literature actives, none scoring above 0.5. "
+        "Stated like that it sounds like total failure. Two things are wrong with it. "
+        "<b>First the denominator.</b> Seven of those 16 compounds are weaker than the "
+        "potency cut-off their own model was trained on - eugenol is reported at 300 uM "
+        "against a 1 uM bar - so scoring them low is the correct answer, not a miss. "
+        "<b>Second the bar.</b> A probability of 0.5 is not an activity boundary: "
+        "measured against this library it sits near the 99th percentile, so \"none above "
+        "0.5\" really means \"none reached the top 1% of 145,000 compounds\".",
+        RED)]
+
+    st += [P("What the corrected result actually says", "h2")]
     st.append(table([
-        ["What we measured", "Result"],
-        [P("Held-out literature actives (absent from ChEMBL training)", "cell"), P(f"<b>{n_held}</b> compound-target claims", "cell")],
-        [P("How many score above 0.5 on their claimed target", "cell"), P(f"<b>0 of {n_held}</b>", "cell")],
-        [P("Median percentile against the 145k library background", "cell"), P(f"<b>{med_pct}</b> (50 would be chance)", "cell")],
-        [P("How many reach the library's top 10%", "cell"), P(f"<b>{top10} of {n_held}</b>", "cell")],
-        [P("Same models, on compounds they <i>did</i> see in training", "cell"), P(f"median probability <b>{lit.get('seen_median_probability')}</b>", "cell")],
+        ["Measure", "Value"],
+        [P("Held-out claims, raw", "cell"), P(f"{corrected.get('raw_claims', 16)}", "cell")],
+        [P("Excluded: weaker than their model's own cut-off", "cell"),
+         P(f"{corrected.get('excluded_weaker_than_cut', 7)}", "cell")],
+        [P("<b>Fair denominator</b>", "cellb"),
+         P(f"<b>{corrected.get('fair_denominator', 9)}</b>", "cellb")],
+        [P("Median percentile against the 145k library", "cell"),
+         P(f"<b>{corrected.get('median_percentile')}</b> (chance = 50)", "cell")],
+        [P("Wilcoxon signed-rank vs chance", "cell"),
+         P(f"p = <b>{tests.get('wilcoxon_p')}</b>", "cell")],
+        [P("Sign test", "cell"),
+         P(f"p = <b>{tests.get('sign_test_p')}</b> "
+           f"({tests.get('n_above_chance')} of {corrected.get('fair_denominator')} above chance)", "cell")],
+        [P("Reaching the library's top 10%", "cell"),
+         P(f"{corrected.get('in_top_10pct')} of {corrected.get('fair_denominator')}", "cell")],
     ], [105 * mm, 60 * mm]))
 
     st += [
         Spacer(1, 4 * mm),
         callout(
-            "Why this is the strongest thing you have",
-            f"Your scaffold-split PR-AUC runs {pr_lo:.2f} to {pr_hi:.2f}. Most teams would "
-            "put that on a slide and stop. You went one step further, tested against "
-            "compounds from the primary literature that the model had never seen, and "
-            "found the number does not transfer. <b>Almost nobody in the room will have "
-            "done that.</b> Judges reward a team that can find and name its own ceiling "
-            "far more than one quoting a number they cannot interrogate.",
-            GREEN),
-        Spacer(1, 3 * mm),
-        callout(
-            "And you have the diagnosis, not just the failure",
-            "The FAAH rescue experiment answers exactly the question this raises. Adding "
-            "five curated literature actives moves the median prediction on a held-out "
-            f"sixth from {rescue.get('baseline_median_p', 0):.1e} to "
-            f"{rescue.get('loo_median_p', 0):.3f} - four orders of magnitude. "
-            "<b>So the failure is coverage, not capability.</b> The features and the model "
-            "can represent this chemistry; ChEMBL simply does not contain it. That turns a "
-            "negative result into a costed next step: a few hundred curated literature "
-            "actives, not a new architecture.",
-            BLUE),
+            "The word is INCONCLUSIVE, not failed",
+            "We cannot reject the null and we cannot demonstrate signal either. Nine "
+            "compounds was never going to settle the question. <b>Say \"we have no "
+            "evidence the screen generalises to plant chemistry\", never \"our model "
+            "failed\".</b> The first is what the data supports; the second is a claim "
+            "you cannot defend and that a statistician in the room will take apart.",
+            AMBER),
     ]
 
-    st += [P("The pattern inside the failure", "h2")]
+    st += [P("And we diagnosed it rather than shrugging", "h2")]
     st += [P(
-        "It is not random noise, and saying so shows you read your own output. The four "
-        "compounds that do surface are all TRPV1 vanilloids - structurally close to "
-        "capsaicin, which <i>is</i> in training. The FAAH flavonoids all sit mid-pack. "
-        "<b>The models extrapolate a short distance from what they know, and no further.</b>", "body")]
+        "Two explanations were on the table. We tested both, which is the part most "
+        "teams will not have done.", "body")]
+    st.append(table([
+        ["Explanation", "Test", "Result"],
+        [P("<b>Ruled out:</b> our potency cut-off was too strict, so plant compounds "
+           "were inactive by definition", "cell"),
+         P("Retrained TRPV1 and CB1 at the looser 10 uM bar, decoys matched", "cell"),
+         P(f"median {thr.get('median_pct_1um')} to {thr.get('median_pct_10um')} "
+           f"(+{thr.get('median_gain')}). Top-10% hit rate unchanged at "
+           f"{thr.get('top10pct_after')}. It also made a false positive worse.", "cell")],
+        [P("<b>Confirmed:</b> the training set never contained this chemistry", "cellb"),
+         P("Six plant FAAH inhibitors, each scored by a model that saw the other five", "cell"),
+         P(f"median {rescue.get('baseline_median_p', 0):.1e} to "
+           f"{rescue.get('loo_median_p', 0):.3f} - four orders of magnitude", "cellb")],
+    ], [52 * mm, 55 * mm, 58 * mm]))
 
-    if litcsv is not None and len(litcsv):
-        held = litcsv[litcsv["in_chembl_training"] == False].sort_values(
-            "library_percentile", ascending=False)
-        rows = [["Compound", "Target", "Reported", "Library %ile"]]
-        for _, r in held.head(6).iterrows():
-            rows.append([
-                P(str(r["compound_name"]), "cell"),
-                P(str(r["target"]), "cell"),
-                P(f"{r['value_uM']:g} uM", "cellm"),
-                P(f"<b>{r['library_percentile']:.1f}</b>", "cell"),
-            ])
-        rows.append([P("<i>... and the worst case</i>", "cellm"), "", "", ""])
-        worst = held.tail(1).iloc[0]
-        rows.append([
-            P(f"{worst['compound_name']}", "cell"),
-            P(str(worst["target"]), "cell"),
-            P(f"{worst['value_uM']:g} uM", "cellm"),
-            P(f"<b>{worst['library_percentile']:.1f}</b>", "cell"),
-        ])
-        st += [Spacer(1, 2 * mm), table(rows, [70 * mm, 25 * mm, 35 * mm, 35 * mm],
-                                        align_right=(3,))]
-        st += [P(
-            "AM404 is the paracetamol metabolite this entire project is built around, and "
-            "on TRPV1 it lands in the bottom 5% of the library. If you do not say that "
-            "first, somebody may find it and say it for you.", "small")]
+    st += [
+        Spacer(1, 4 * mm),
+        callout(
+            "Why this is still the strongest thing you have",
+            "You ran an external validation, found it inconclusive, refused to spin it "
+            "either way, then ran a second experiment to rule out the cheap explanation "
+            "and a third to confirm the real one. That is a team debugging its own "
+            "result in public. It is worth far more than a PR-AUC nobody can "
+            "interrogate - and unlike a number, it cannot be produced in the last hour.",
+            GREEN),
+    ]
+
+    st += [P("The honest three-line summary", "h2")]
+    st += [
+        P("1. Inside its training distribution the screen works: measured actives score "
+          "a median 0.9988, measured inactives 0.0004.", "body"),
+        P("2. On genuinely new plant chemistry we cannot yet say. Nine usable compounds, "
+          f"median percentile {corrected.get('median_percentile')}, p = "
+          f"{tests.get('wilcoxon_p')}.", "body"),
+        P("3. The limit is data coverage, not the model, the features or the threshold - "
+          "and we measured each of those rather than assuming.", "body"),
+    ]
 
     # ======================================================== 2. THE ARC
     st += [PageBreak(), P("2. Why the order is the argument", "h1")]
@@ -323,9 +343,11 @@ def build():
         [P("<b>It works</b>", "cellb"),
          P("Positive controls: 38 measured actives, median 0.9988; 47 measured inactives, median 0.0004", "cell"),
          P("The machine is built correctly", "cell")],
-        [P("<b>Where it breaks</b>", "cellb"),
-         P(f"External literature set: 0 of {n_held} above 0.5, median percentile {med_pct}", "cell"),
-         P("The boundary of competence", "cell")],
+        [P("<b>Where it stops</b>", "cellb"),
+         P("External literature set: 9 usable compounds, median percentile "
+           f"{corrected.get('median_percentile')} against 50 for chance, p = "
+           f"{tests.get('wilcoxon_p')}", "cell"),
+         P("The limit of what we can claim", "cell")],
         [P("<b>Why</b>", "cellb"),
          P(f"FAAH rescue: median moves {rescue.get('baseline_median_p', 0):.1e} to {rescue.get('loo_median_p', 0):.3f}", "cell"),
          P("The mechanism of the failure", "cell")],
@@ -353,9 +375,9 @@ def build():
         Spacer(1, 3 * mm),
         callout("The hinge is step three",
                 "This is not four nice things stacked up. Without the rescue experiment, "
-                f"\"0 of {n_held}\" is simply bad news. With it, the same number becomes "
-                "evidence for a specific, testable claim about why - and the argument "
-                "survives.",
+                "an inconclusive test is simply a shrug. With it, the same result "
+                "becomes evidence for a specific, testable claim about why - and the "
+                "argument survives.",
                 BLUE, "small"),
     ]
 
@@ -462,21 +484,25 @@ def build():
          "peaked near zero, so it is not simply calling everything active.",
          "Screen explorer -> Positive controls tab. Scroll the top rows."),
 
-        ("2:30-3:45", "But here is what we actually found", RED,
-         "Then we ran the test most screens skip. We took compounds whose activity is reported "
-         f"in the primary literature but which are absent from ChEMBL, and scored them. <b>Not "
-         f"one of the {n_held} scores above 0.5.</b> The median sits at the "
-         f"{med_pct}th percentile of our own library. Our scaffold-split number was "
-         f"{pr_hi:.2f}. It did not transfer.",
-         "External validation view. Stop on the red card. Let it land."),
+        ("2:30-3:45", "But here is where it stops", AMBER,
+         "Then we ran the test most screens skip: compounds reported active in the primary "
+         "literature but absent from ChEMBL. And be careful here, because the first reading "
+         "of this was wrong. Seven of the sixteen are weaker than the cut-off our own model "
+         "was trained on - eugenol is 300 uM against a 1 uM bar - so scoring those low is "
+         f"correct. On the {corrected.get('fair_denominator')} we can fairly ask about, the "
+         f"median lands at the {corrected.get('median_percentile')}th percentile. Chance is "
+         f"50. p = {tests.get('wilcoxon_p')}. <b>We cannot claim it works, and we cannot "
+         "claim it failed.</b>",
+         "External validation view. Stop on the amber card. Let it land."),
 
-        ("3:45-4:45", "And we know why", BLUE,
-         "We isolated it. Take six known plant FAAH inhibitors, none in ChEMBL. Score each with "
-         "a model that saw the other five but never that one. The median prediction moves four "
-         "orders of magnitude. So the representation is fine and the model is fine - the "
-         "training set has simply never seen this kind of molecule. That is a data problem with "
-         "a price tag, not an architecture problem.",
-         "Models view -> FAAH rescue dumbbell chart."),
+        ("3:45-4:45", "So we found out why", BLUE,
+         "Two explanations. One: our potency cut-off was too strict. We retrained at the looser "
+         f"bar - it bought {thr.get('median_gain')} percentile points, left the hit rate "
+         "unchanged, and made a false positive worse. Ruled out. Two: the training set has "
+         "never seen plant chemistry. Six plant FAAH inhibitors, each scored by a model that "
+         "saw the other five - the prediction moves four orders of magnitude. The model is "
+         "fine. The database is the gap.",
+         "The diagnosis slide: ruled out on the left, confirmed on the right."),
 
         ("4:45-6:00", "What it is for, and what is next", AQUA,
          "What we hand over is not a discovery, it is a prioritised, filtered, "
@@ -579,8 +605,17 @@ def build():
         ["Scaffold-split PR-AUC, across all models", f"{pr_lo:.3f} - {pr_hi:.3f}"],
         ["Positive controls, measured active: median score", "0.9988 (34 of 38 above 0.9)"],
         ["Positive controls, measured inactive: median score", "0.0004"],
-        [P("<b>Held-out literature actives above 0.5</b>", "cellb"), P(f"<b>0 of {n_held}</b>", "cellb")],
-        [P("<b>Their median library percentile</b>", "cellb"), P(f"<b>{med_pct}</b>", "cellb")],
+        [P("<b>External validation, fair denominator</b>", "cellb"),
+         P(f"<b>{corrected.get('fair_denominator')}</b> of {corrected.get('raw_claims')} "
+           f"({corrected.get('excluded_weaker_than_cut')} below their model's cut-off)", "cellb")],
+        [P("<b>Their median library percentile</b>", "cellb"),
+         P(f"<b>{corrected.get('median_percentile')}</b> vs 50 for chance", "cellb")],
+        [P("<b>Separable from chance?</b>", "cellb"),
+         P(f"<b>No</b> - Wilcoxon p = {tests.get('wilcoxon_p')}, sign test p = {tests.get('sign_test_p')}", "cellb")],
+        ["Threshold experiment (10 uM retrain)",
+         f"+{thr.get('median_gain')} percentile, top-10% hit rate unchanged - ruled out"],
+        ["What 0.5 actually is, as a percentile",
+         "98.8 (TRPV1) / 99.8 (CB1) / 99.7 (FAAH)"],
         ["FAAH rescue: median before / after", f"{rescue.get('baseline_median_p', 0):.1e} -> {rescue.get('loo_median_p', 0):.3f}"],
         ["DILI model ROC-AUC (scaffold, 5 repeats)", f"{dili.get('splits', {}).get('scaffold_5x', {}).get('roc_auc', 0):.3f}"],
         ["DILI model on paracetamol", f"{para.get('p_dili', 0):.3f} - i.e. low risk, and wrong"],
@@ -611,17 +646,23 @@ def build():
     qa = [
         ("Your scaffold-split PR-AUC is 0.98. Isn't that suspiciously high?",
          "Yes, and we can tell you why. The decoys are easy negatives - random drug-like "
-         "molecules, so the model is mostly separating 'real ligand' from 'arbitrary "
-         "molecule', which is much easier than ranking among plausible candidates. That is "
-         "exactly why we ran the external literature validation, and there the number did "
-         "not hold. We treat the scaffold figure as an upper bound, not a result."),
+         "molecules - so the model is mostly separating 'real ligand' from 'arbitrary "
+         "molecule', which is far easier than ranking among plausible candidates. That is "
+         "exactly why we ran an external validation, and there we could not reproduce it. "
+         "We treat the scaffold figure as an upper bound, not a result."),
         ("So your model doesn't work?",
-         "It works inside its applicability domain and fails outside it, and we can show "
-         "you precisely where the boundary is. It recovers known ligands, it separates "
-         "measured actives from measured inactives, and it extrapolates a short way - the "
-         "TRPV1 vanilloids surface. It does not reach chemistry ChEMBL has never contained. "
-         "We measured that rather than assuming it, and the FAAH rescue shows it is fixable "
-         "with data."),
+         "We do not know yet, and we are not going to pretend either way. It demonstrably "
+         "works inside its training distribution - measured actives 0.9988, measured "
+         "inactives 0.0004. On genuinely new plant chemistry our test came back "
+         f"inconclusive: {corrected.get('fair_denominator')} usable compounds, median "
+         f"percentile {corrected.get('median_percentile')} against 50 for chance, p = "
+         f"{tests.get('wilcoxon_p')}. That is too few to settle it. What we did establish "
+         "is why it is hard, and what it would cost to find out."),
+        ("Nine compounds is a tiny validation set. Isn't that the real problem?",
+         "It is, and we say so on the slide. It is also why we did not report the raw "
+         "'none above 0.5' number: with nine points that framing dresses up an "
+         "underpowered test as a finding. A properly powered validation set is the second "
+         "item on our next-steps list, immediately after the curated training actives."),
         ("What would you do with another week?",
          "Curate several hundred literature actives for the three targets, the way we did "
          "the six in the rescue experiment, and retrain. The rescue tells us what that buys: "
@@ -707,8 +748,10 @@ def build():
          "Insurance if the server dies"],
         ["[ ]", "Everything committed and pushed",
          "git status is clean; git push has finished"],
-        ["[ ]", "You can say the AM404 percentile out loud without flinching",
-         "It is 4.4. Practise it."],
+        ["[ ]", "You can say the word INCONCLUSIVE without flinching",
+         "Not 'it failed', not 'it works'. Practise the exact sentence."],
+        ["[ ]", "You know the fair denominator and why it is 9, not 16",
+         "7 compounds are weaker than their model's own cut-off."],
     ], [9 * mm, 62 * mm, 94 * mm]))
 
     st += [

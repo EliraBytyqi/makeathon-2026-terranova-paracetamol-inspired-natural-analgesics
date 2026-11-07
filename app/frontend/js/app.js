@@ -495,46 +495,114 @@
   async function renderValidation() {
     try {
       const v = await api("/api/validation");
-      const s = v.summary || {};
+      const c = v.corrected || {};
       const held = v.held_out || [];
       const kg = v.kg || {};
+      const t = c.tests || {};
+      const thr = c.threshold_experiment || null;
 
-      const topDecile = Math.round((s["held_out_frac_top10pct_of_library"] || 0) * (s.n_held_out || 0));
       $("#validation-stats").innerHTML = [
-        stat("Held-out claims", int(s.n_held_out), "absent from ChEMBL training", 1),
-        stat("Scoring above 0.5", `${Math.round((s["held_out_frac_above_0.5"] || 0) * (s.n_held_out || 0))}`,
-             `of ${int(s.n_held_out)} — the headline failure`, 2),
-        stat("Median library percentile", num(s.held_out_median_library_percentile, 1),
-             "50 would be chance", 2),
-        stat("Reaching the top 10%", `${topDecile}`,
-             `${((s["held_out_frac_top10pct_of_library"] || 0) * 100).toFixed(0)}% of held-out actives`, 3),
+        stat("Fair denominator", int(c.fair_denominator),
+             `${int(c.raw_claims)} claims, ${int(c.excluded_weaker_than_cut)} below their model&rsquo;s cut-off`, 1),
+        stat("Median percentile", num(c.median_percentile, 1),
+             "against 50 for chance", 2),
+        stat("Not separable from chance", `p = ${num(t.wilcoxon_p, 2)}`,
+             `Wilcoxon; sign test p = ${num(t.sign_test_p, 2)}`, 2),
+        stat("Reaching the top 10%", `${int(c.in_top_10pct)} of ${int(c.fair_denominator)}`,
+             "of the 145k library", 3),
       ].join("");
 
-      // percentile against the library background - the real screening question
+      const ex = c.excluded || [];
+      $("#excluded-table").innerHTML = `<div class="table-wrap"><table>
+        <thead><tr><th scope="col">Compound</th><th scope="col" class="num">Reported</th>
+        <th scope="col" class="num">Model cut-off</th></tr></thead><tbody>
+        ${ex.map((r) => `<tr>
+          <th scope="row" style="font-weight:500">${esc(r.compound_name)} <span class="dim">${esc(r.target)}</span></th>
+          <td class="num"><strong>${num(r.value_uM, 2)}</strong></td>
+          <td class="num dim">${num(r.model_cut_uM, 0)}</td>
+        </tr>`).join("")}
+        </tbody></table></div>
+        <p class="card-note" style="margin-top:8px">Values in µM. Lower means more potent.</p>`;
+
+      const half = c.p_half_is_percentile || {};
+      $("#half-table").innerHTML = `<div class="table-wrap"><table>
+        <thead><tr><th scope="col">Target</th><th scope="col" class="num">A score of 0.5 is the…</th></tr></thead>
+        <tbody>${Object.keys(half).map((k) => `<tr>
+          <th scope="row">${targetBadge(k)}</th>
+          <td class="num"><strong>${num(half[k], 2)}th</strong> percentile</td>
+        </tr>`).join("")}</tbody></table></div>`;
+
+      $("#corrected-verdict").innerHTML = `
+        <div class="callout callout-warning">
+          <h4>Inconclusive — not a failure, and not a success</h4>
+          <p class="card-note">
+            On the ${int(c.fair_denominator)} compounds the models could fairly be asked
+            about, the median library percentile is
+            <strong>${num(c.median_percentile, 1)}</strong> against <strong>50</strong>
+            for chance. A Wilcoxon signed-rank test gives
+            <strong>p = ${num(t.wilcoxon_p, 3)}</strong>, a sign test
+            <strong>p = ${num(t.sign_test_p, 2)}</strong>
+            (${int(t.n_above_chance)} of ${int(c.fair_denominator)} above chance).
+            <br><br>
+            <strong>We cannot reject the null, and we cannot show signal either.</strong>
+            Nine compounds is too few to settle it. The honest conclusion is that we have
+            no evidence the screen generalises to plant chemistry — which is different
+            from evidence that it does not.
+          </p>
+        </div>`;
+
+      const cutByTarget = { TRPV1: 1, CB1: 1, FAAH: 10 };
       C.hbar($("#validation-chart"), {
         title: "Held-out literature actives: percentile against the 145k library",
         ariaLabel: "Library percentile for each held-out literature active",
-        labelWidth: 190,
+        labelWidth: 250,
         labelHeader: "Compound (claimed target)",
         valueHeader: "Library percentile",
         max: 100,
-        data: held.map((r) => ({
-          label: `${(r.compound_name || "?").slice(0, 24)} · ${r.target}`,
-          value: r.library_percentile == null ? 0 : r.library_percentile,
-          display: r.library_percentile == null ? "—" : num(r.library_percentile, 1),
-          color: C.cssVar(TARGET_COLORS[r.target] || "--series-neutral"),
-          emphasis: (r.library_percentile || 0) >= 90,
-          tip: [
-            ["claimed target", r.target],
-            ["interaction", r.interaction || "—"],
-            ["reported potency", r.value_uM == null ? "—" : r.value_uM + " µM"],
-            ["model probability", r.p_claimed_target == null ? "—" : Number(r.p_claimed_target).toExponential(2)],
-            ["library percentile", num(r.library_percentile, 1)],
-            ["applicability domain", num(r.ad_claimed_target, 2)],
-          ],
-        })),
-        legend: ["TRPV1", "CB1", "FAAH"].map((t) => ({ label: t, color: C.cssVar(TARGET_COLORS[t]) })),
+        data: held.map((r) => {
+          const fair = r.value_uM <= (cutByTarget[r.target] || 1);
+          return {
+            label: `${(r.compound_name || "?").slice(0, 20)} · ${r.target}${fair ? "" : " (below cut)"}`,
+            value: r.library_percentile == null ? 0 : r.library_percentile,
+            display: r.library_percentile == null ? "—" : num(r.library_percentile, 1),
+            color: C.cssVar(TARGET_COLORS[r.target] || "--series-neutral"),
+            muted: !fair,
+            emphasis: fair && (r.library_percentile || 0) >= 90,
+            tip: [
+              ["claimed target", r.target],
+              ["reported potency", r.value_uM == null ? "—" : r.value_uM + " µM"],
+              ["model's cut-off", (cutByTarget[r.target] || 1) + " µM"],
+              ["counted in the test?", fair ? "yes" : "no — weaker than the cut"],
+              ["model probability", r.p_claimed_target == null ? "—" : Number(r.p_claimed_target).toExponential(2)],
+              ["library percentile", num(r.library_percentile, 1)],
+              ["applicability domain", num(r.ad_claimed_target, 2)],
+            ],
+          };
+        }),
+        legend: ["TRPV1", "CB1", "FAAH"].map((x) => ({ label: x, color: C.cssVar(TARGET_COLORS[x]) }))
+          .concat([{ label: "faded = below its model's cut-off, excluded", color: C.cssVar("--series-neutral") }]),
       });
+
+      if (thr) {
+        $("#threshold-result").innerHTML = `
+          <div class="grid grid-4" style="margin-bottom:14px">
+            ${stat("Median percentile", `${num(thr.median_pct_1um, 1)} → ${num(thr.median_pct_10um, 1)}`,
+                   `${thr.n_improved} of ${thr.n} compounds improved`, 1)}
+            ${stat("True actives", `${num(thr.true_actives_median_before, 1)} → ${num(thr.true_actives_median_after, 1)}`,
+                   "the ones it should rank highly", 3)}
+            ${stat("Too-weak compounds", `${num(thr.too_weak_median_before, 1)} → ${num(thr.too_weak_median_after, 1)}`,
+                   "should rank LOW — this got worse", 2)}
+            ${stat("Reaching top 10%", `${int(thr.top10pct_before)} → ${int(thr.top10pct_after)}`,
+                   "unchanged", 2)}
+          </div>
+          <div class="callout callout-warning">
+            <h4>Verdict: a real gain, but not the bottleneck</h4>
+            <p class="card-note">${esc(thr.verdict)}</p>
+          </div>`;
+      } else {
+        $("#threshold-result").innerHTML = `<div class="empty">
+          Not computed. Run <code>python scripts/experiment_threshold.py</code>.</div>`;
+      }
 
       renderValidationTable(v);
       if (!valBound) {
@@ -549,7 +617,6 @@
         });
       }
 
-      // knowledge graph
       const byType = kg.nodes_by_type || {};
       const byEv = kg.edges_by_evidence || {};
       $("#kg-stats").innerHTML = [

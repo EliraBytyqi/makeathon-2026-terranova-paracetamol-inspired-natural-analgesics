@@ -256,6 +256,19 @@ def literature_validation() -> dict:
 
 
 @lru_cache(maxsize=1)
+def validation_corrected() -> dict:
+    """Corrected reading of the external validation.
+
+    The raw summary counts all 16 held-out claims against a 0.5 probability
+    threshold. Seven of those compounds are weaker than the cut their model was
+    trained on, so a low score is correct rather than a miss, and 0.5 sits near
+    the 99th percentile of the library rather than at any natural boundary.
+    scripts/make_validation_summary.py recomputes both.
+    """
+    return _read_json(RESULTS / "validation_corrected.json")
+
+
+@lru_cache(maxsize=1)
 def kg_stats() -> dict:
     return _read_json(RESULTS / "kg_stats.json")
 
@@ -365,6 +378,7 @@ def availability() -> dict:
         "attrition_audit": PROC / "attrition_audit.csv",
         "dataset_summary": PROC / "dataset_summary.csv",
         "literature_validation": RESULTS / "literature_validation.csv",
+        "validation_corrected": RESULTS / "validation_corrected.json",
         "knowledge_graph": RESULTS / "knowledge_graph.html",
         "report": RESULTS / "REPORT.md",
     }

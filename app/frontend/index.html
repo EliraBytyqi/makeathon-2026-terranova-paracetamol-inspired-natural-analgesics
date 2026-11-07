@@ -429,28 +429,48 @@
         <div class="eyebrow">External validation</div>
         <h1 id="h-validation">The only genuinely held-out test</h1>
         <p class="lede">
-          26 compound–target claims from the primary literature, 16 of them absent from
-          ChEMBL training entirely. Scored by models that have never seen them. This is
-          the honest test, and it is the most important result in the project.
+          Compounds whose activity is reported in the primary literature but which are
+          absent from ChEMBL training, scored by models that never saw them. The result
+          is <strong>inconclusive</strong> — and the reason why turned out to be the most
+          useful thing we learned.
         </p>
       </div>
 
       <div class="grid grid-4" id="validation-stats"></div>
 
-      <div class="card callout-critical">
-        <h2>Read this before you read anything else</h2>
+      <div class="card callout-warning">
+        <h2>Read the denominator before you read the result</h2>
         <p class="card-note">
-          <strong>Not one held-out literature active scores above 0.5.</strong> The median
-          predicted probability is effectively zero, and the median library percentile is
-          63 — barely above the 50 you would get by chance. The scaffold-split PR-AUC of
-          0.88–0.98 did <em>not</em> transfer to real plant chemistry.
+          The raw run reports 16 held-out claims and that none scored above 0.5. Both
+          halves of that sentence are misleading, and we corrected them.
         </p>
-        <p class="card-note" style="margin-top:10px">
-          This is the number most projects never compute, and reporting it is the point.
-          The scaffold split controls for memorising chemical series; it does not control
-          for the training set never having contained this kind of molecule at all.
-          Only an external set exposes that, and it did.
-        </p>
+        <div class="grid grid-2" style="margin-top:14px">
+          <div>
+            <h4>7 of 16 are weaker than the model&#8217;s own cut-off</h4>
+            <p class="card-note">
+              Each model is trained on a potency threshold — 1 µM for TRPV1 and CB1,
+              10 µM for FAAH. Eugenol is reported at <strong>300 µM</strong>. Scoring it
+              low is the <em>correct</em> answer, not a miss. Excluding those leaves a
+              fair denominator of <strong>9</strong>.
+            </p>
+            <div id="excluded-table" style="margin-top:10px"></div>
+          </div>
+          <div>
+            <h4>&#8220;Above 0.5&#8221; is not an activity boundary</h4>
+            <p class="card-note">
+              Measured against this library, a probability of 0.5 sits near the 99th
+              percentile. So &#8220;none scored above 0.5&#8221; really means
+              &#8220;none reached the top 1% of 145,164 compounds&#8221; — a far weaker
+              claim than failure.
+            </p>
+            <div id="half-table" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>What the corrected result says</h2>
+        <div id="corrected-verdict"></div>
       </div>
 
       <div class="card">
@@ -458,18 +478,34 @@
           <div>
             <h2>Where the models do and do not generalise</h2>
             <p class="card-note">
-              Ranked by percentile against the full 145k library background — the actual
-              screening question. Hover any bar for the reported potency.
+              All 16 held-out claims by percentile against the full 145k library — the
+              actual screening question. Compounds below their model&#8217;s own cut-off
+              are marked; the model is right to score those low.
             </p>
           </div>
         </div>
         <div id="validation-chart"></div>
         <div class="callout">
-          <strong>The pattern is not random.</strong> The four compounds that do surface —
-          6-gingerol, curcumin, eugenol, piperine — are all TRPV1 vanilloids, structurally
-          close to capsaicin, which <em>is</em> in training. The FAAH flavonoids all sit
-          mid-pack. The models extrapolate a little way from what they know, and no further.
+          <strong>The pattern is not random.</strong> The compounds that do surface —
+          6-gingerol, curcumin, eugenol, piperine — are all TRPV1 vanilloids,
+          structurally close to capsaicin, which <em>is</em> in training. The FAAH
+          flavonoids sit mid-pack. The models extrapolate a short way from what they
+          know, and no further.
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>We tested the obvious explanation, and ruled it out</h2>
+            <p class="card-note">
+              FAAH carries a 10 µM label variant because plant inhibitors sit at 1–15 µM.
+              TRPV1 and CB1 never got one — so we built them, with decoys matched, and
+              re-scored.
+            </p>
+          </div>
+        </div>
+        <div id="threshold-result"></div>
       </div>
 
       <div class="card">
@@ -480,24 +516,23 @@
         </div>
         <div id="validation-table"></div>
         <p class="card-note" style="margin-top:10px">
-          The "seen in training" group is a wiring check, not evidence: median probability
-          0.9996 confirms the pipeline scores known ligands correctly end to end.
+          The &#8220;seen in training&#8221; group is a wiring check, not evidence: median
+          probability 0.9996 confirms the pipeline scores known ligands correctly end to end.
         </p>
       </div>
 
-      <div class="card callout-warning">
-        <h2>The diagnosis, and why the project is not sunk by this</h2>
+      <div class="card callout-good">
+        <h2>The diagnosis: coverage, not capability</h2>
         <p class="card-note">
-          The FAAH rescue experiment answers exactly the question this result raises.
-          Adding five curated literature actives moves the median prediction on a held-out
-          sixth from 3.5e-5 to 0.33 — four orders of magnitude. <strong>So the failure is
-          coverage, not capability.</strong> ECFP4 plus a gradient-boosted tree can
-          represent this chemistry; ChEMBL simply does not contain it.
+          The FAAH rescue answers the question this result raises. Adding five curated
+          literature actives moves the median prediction on a held-out sixth from
+          3.5e-5 to 0.330 — four orders of magnitude. <strong>The features and the model
+          can represent this chemistry; ChEMBL does not contain it.</strong>
         </p>
         <p class="card-note" style="margin-top:10px">
-          That turns a negative result into a concrete, costed next step: the fix is a few
-          hundred curated literature actives, not a new architecture. Stating that is worth
-          more than a PR-AUC nobody can reproduce.
+          That turns an inconclusive test into a costed next step: a few hundred curated
+          literature actives, plus a validation set large enough to actually settle the
+          question. Nine compounds never could.
         </p>
       </div>
 

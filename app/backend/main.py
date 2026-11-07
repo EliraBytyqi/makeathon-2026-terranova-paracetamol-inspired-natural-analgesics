@@ -113,6 +113,7 @@ def validation() -> dict:
     """External validation plus knowledge-graph statistics."""
     out = data.literature_validation()
     out["kg"] = data.kg_stats()
+    out["corrected"] = data.validation_corrected()
     return out
 
 
