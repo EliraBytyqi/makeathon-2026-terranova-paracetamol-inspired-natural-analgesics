@@ -1,17 +1,16 @@
-"""How many decoys do we actually need?
+"""How many presumed-inactive decoys improve external ranking?
 
-The pipeline adds three property-matched presumed-inactive decoys per active.
-That number was a design choice, not a measurement: the comment in train.py
-says it "brings a ~75% active rate down to roughly 20%", which is a reason to
-pick some number but not a reason to pick three.
+The original production setting used three property-matched presumed-inactive
+decoys per active, justified by an assumed class-balance target. This
+experiment compared ratios 0, 1, 2, 3 and 5 against external PubChem assay
+outcomes. The current production setting is one decoy per active, with sample
+weight 0.4; three is a historical comparison, not the current setting.
 
-Decoys are the biggest assumption in the project - 60,000 molecules labelled
-inactive because nothing says otherwise - so the honest thing is to find out
-how much of that assumption is load-bearing. If one decoy per active scores
-the same externally as three, two thirds of the assumption is waste and
-should go.
+The candidate pool contains 60,000 ChEMBL molecules sampled across the ID
+range. They are presumed inactive because no target activity was found, not
+because every molecule was experimentally confirmed inactive.
 
-Ratios tested: 0 (measured data only), 1, 2, 3 (production), 5.
+Ratios tested: 0 (measured data only), 1, 2, 3 (historical setting), 5.
 
 Each is judged on two numbers that disagree on purpose:
 

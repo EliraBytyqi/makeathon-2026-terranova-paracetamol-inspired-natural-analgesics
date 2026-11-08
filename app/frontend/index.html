@@ -30,7 +30,7 @@
       <button class="nav-btn" data-view="safety"><span class="nav-num">06</span> Safety layers</button>
       <button class="nav-btn" data-view="screen"><span class="nav-num">07</span> Screen explorer</button>
       <button class="nav-btn" data-view="demo"><span class="nav-num">08</span> Live demo</button>
-      <button class="nav-btn" data-view="decoder"><span class="nav-num">09</span> ML decoder</button>
+      <button class="nav-btn" data-view="glossary"><span class="nav-num">09</span> Glossary</button>
     </nav>
 
     <div class="sidebar-foot">
@@ -260,19 +260,20 @@
         <h2>The active rate is publication bias, not biology</h2>
         <div class="grid grid-3" style="margin-top:12px" id="bias-stats"></div>
         <p class="card-note" style="margin-top:14px">
-          ChEMBL is assembled from medicinal-chemistry papers, and people publish
-          compounds that worked. A classifier trained on 84% actives learns that
-          nearly everything is active, and its ranking over 145k natural products is
-          then driven by noise. Class weighting does not fix this: the model has simply
-          never been shown what a non-ligand looks like.
+          The curated ChEMBL measurements are enriched for actives because medicinal-
+          chemistry studies often focus on compounds that worked. Training on these
+          measured records alone would leave too few negatives for a useful ranking,
+          so we supplement them with carefully selected presumed-inactive decoys.
         </p>
         <div class="callout">
-          <strong>The fix:</strong> 60,000 drug-like molecules sampled across ChEMBL's
-          whole ID range as presumed inactives, property-matched to each target's
-          actives on MW and cLogP (DUD-E style), excluding anything sharing a scaffold
-          with a known active. Three decoys per active brings ~75% down to ~20%. They
-          stay labelled <code>presumed_inactive</code> so results can be re-derived
-          without the assumption.
+          <strong>How we handle the imbalance:</strong> training uses one
+          property-matched presumed-inactive decoy per active, with decoy examples
+          weighted at 0.4 because they were not experimentally confirmed inactive.
+          Decoys are excluded if they share a Bemis–Murcko scaffold with a known active,
+          and remain labelled <code>presumed_inactive</code> so their contribution is
+          explicit. We chose this setting after comparing decoy ratios against external
+          PubChem measurements; three decoys per active is a historical experiment,
+          not the current setting.
         </div>
       </div>
 
@@ -679,14 +680,13 @@
       <div id="demo-out" aria-live="polite"></div>
     </section>
     <!-- ============================================================ 09 -->
-    <section class="view" id="view-decoder" aria-labelledby="h-decoder">
+    <section class="view" id="view-glossary" aria-labelledby="h-glossary">
       <div class="view-head">
-        <div class="eyebrow">ML decoder</div>
-        <h1 id="h-decoder">This project, in terms you already know</h1>
+        <div class="eyebrow">Reference</div>
+        <h1 id="h-glossary">Glossary</h1>
         <p class="lede">
-          Written for an ML engineer with no biology background. Every piece of
-          chemistry here maps onto something standard — grouped splits, negative
-          sampling, OOD detection, lift@k. The domain words are the only new part.
+          Search project terms and compare their plain-language meaning with the
+          related machine-learning concept.
         </p>
       </div>
 
@@ -719,38 +719,40 @@
         <div id="glossary-table"></div>
       </div>
 
-      <div class="card">
+      <div class="card" style="margin-top:16px">
         <h2>What each model is for</h2>
         <p class="card-note">
-          Nine pickles in <code>models/</code>. Eight are target classifiers, one is the
-          toxicity model. They differ only in which rows of the same table they were
-          trained on.
+          The activity models estimate whether a molecule is active on a target.
+          The hepatic panel estimates liver-liability signals from three different
+          datasets. Scope indicates which species' measurements were included.
         </p>
-        <div id="model-purpose-table" style="margin-top:12px"></div>
-        <div class="callout">
-          <strong>Why two scopes.</strong> <code>human</code> trains only on human-protein
-          measurements; <code>all</code> adds rat and mouse. More data versus a cleaner
-          label — the classic trade. Both are trained and reported rather than picking one
-          on a hunch.
-          <br><br>
-          <strong>Why FAAH has two label sets.</strong> The decision threshold on the
-          continuous potency value is normally 1 µM. The plant compounds we are hunting sit
-          at 1–15 µM, so a 1 µM threshold labels almost all of them negative — training the
-          model to reject precisely the chemistry we want. The <code>label_10um</code>
-          variant moves the threshold. This is threshold selection driven by the
-          deployment distribution, not by the training distribution.
+        <div class="table-wrap" style="margin-top:12px">
+          <table>
+            <thead><tr>
+              <th scope="col">Model file</th><th scope="col">Predicts</th>
+              <th scope="col">Measurement scope</th><th scope="col">Positive threshold</th>
+            </tr></thead>
+            <tbody>
+              <tr><th scope="row" class="mono" style="font-weight:500">TRPV1_human_label.pkl</th><td>Activity on TRPV1</td><td>Human measurements</td><td>≤ 1 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">TRPV1_all_label.pkl</th><td>Activity on TRPV1</td><td>Human, rat and mouse measurements</td><td>≤ 1 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">CB1_human_label.pkl</th><td>Activity on CB1</td><td>Human measurements</td><td>≤ 1 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">CB1_all_label.pkl</th><td>Activity on CB1</td><td>Human, rat and mouse measurements</td><td>≤ 1 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">FAAH_human_label.pkl</th><td>Activity on FAAH</td><td>Human measurements</td><td>≤ 1 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">FAAH_all_label.pkl</th><td>Activity on FAAH</td><td>Human, rat and mouse measurements</td><td>≤ 1 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">FAAH_human_label_10um.pkl</th><td>Activity on FAAH</td><td>Human measurements</td><td>≤ 10 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">FAAH_all_label_10um.pkl</th><td>Activity on FAAH</td><td>Human, rat and mouse measurements</td><td>≤ 10 µM</td></tr>
+              <tr><th scope="row" class="mono" style="font-weight:500">hepatic_panel.pkl</th><td>Hepatic liability (three heads)</td><td>DILIrank 2.0 and two Tox21 HepG2 assays</td><td>Dataset-specific labels</td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <div class="card">
-        <h2>What these numbers actually support</h2>
-        <p class="card-note">
-          Five claims the evidence carries, and what each one does <em>not</em> establish.
+        <p class="card-note" style="margin-top:10px">
+          The broader <code>all</code> scope adds rat and mouse measurements to human
+          data. FAAH also has a 10 µM activity-label variant for compounds with weaker
+          measured potency. Presumed-inactive decoys are described separately in the
+          Data section; they are not a model variant.
         </p>
-        <div id="conclusions" style="margin-top:14px"></div>
       </div>
 
-      
     </section>
   </main>
 </div>

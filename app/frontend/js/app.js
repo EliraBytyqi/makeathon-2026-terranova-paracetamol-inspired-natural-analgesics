@@ -114,7 +114,7 @@
       safety: renderSafety,
       screen: renderScreen,
       demo: renderDemo,
-      decoder: renderDecoder,
+      glossary: renderGlossaryPage,
     }[view];
     if (fn) fn();
   }
@@ -959,23 +959,11 @@
     }
   }
 
-  /* ------------------------------------------------------------ 07 decoder */
+  /* ------------------------------------------------------------ 09 glossary */
   let glossaryCat = "";
   let glossaryQ = "";
 
-  const MODEL_PURPOSE = [
-    { file: "TRPV1_human_label.pkl", task: "P(acts on TRPV1)", rows: "Human TRPV1 measurements", thr: "1 µM" },
-    { file: "TRPV1_all_label.pkl", task: "P(acts on TRPV1)", rows: "+ rat and mouse", thr: "1 µM" },
-    { file: "CB1_human_label.pkl", task: "P(acts on CB1)", rows: "Human CB1 measurements", thr: "1 µM" },
-    { file: "CB1_all_label.pkl", task: "P(acts on CB1)", rows: "+ rat and mouse", thr: "1 µM" },
-    { file: "FAAH_human_label.pkl", task: "P(acts on FAAH)", rows: "Human FAAH measurements", thr: "1 µM" },
-    { file: "FAAH_all_label.pkl", task: "P(acts on FAAH)", rows: "+ rat and mouse", thr: "1 µM" },
-    { file: "FAAH_human_label_10um.pkl", task: "P(acts on FAAH)", rows: "Human FAAH measurements", thr: "10 µM" },
-    { file: "FAAH_all_label_10um.pkl", task: "P(acts on FAAH)", rows: "+ rat and mouse", thr: "10 µM" },
-    { file: "hepatic_panel.pkl", task: "P(hepatic liability) \u00d7 3 heads", rows: "12,125 (DILIrank 2.0 + Tox21)", thr: "n/a \u2014 given label" },
-  ];
-
-  let decoderBound = false;
+  let glossaryBound = false;
   /* ------------------------------------------------------------- 08 demo */
   /* The only view that runs a model. Everything else reads a file the
    * pipeline already wrote; this one posts a structure and waits. The first
@@ -1132,44 +1120,23 @@
     }
   }
 
-  async function renderDecoder() {
+  function renderGlossaryPage() {
     renderGlossary();
-    if (!decoderBound) {
-      decoderBound = true;
-      $("#g-q").addEventListener("input", (e) => {
-        glossaryQ = e.target.value.trim().toLowerCase();
+    if (glossaryBound) return;
+    glossaryBound = true;
+    $("#g-q").addEventListener("input", (e) => {
+      glossaryQ = e.target.value.trim().toLowerCase();
+      renderGlossary();
+    });
+    $$("#view-glossary [data-gcat]").forEach((b) => {
+      b.addEventListener("click", () => {
+        glossaryCat = b.dataset.gcat;
+        $$("#view-glossary [data-gcat]").forEach((x) =>
+          x.setAttribute("aria-pressed", String(x === b)));
         renderGlossary();
       });
-      $$("#view-decoder [data-gcat]").forEach((b) => {
-        b.addEventListener("click", () => {
-          glossaryCat = b.dataset.gcat;
-          $$("#view-decoder [data-gcat]").forEach((x) =>
-            x.setAttribute("aria-pressed", String(x === b)));
-          renderGlossary();
-        });
-      });
-    }
-
-    $("#model-purpose-table").innerHTML = `<div class="table-wrap"><table>
-      <thead><tr>
-        <th scope="col">File</th><th scope="col">Predicts</th>
-        <th scope="col">Trained on</th><th scope="col">Positive threshold</th>
-      </tr></thead><tbody>
-      ${MODEL_PURPOSE.map((m) => `<tr>
-        <th scope="row" class="mono" style="font-weight:500">${esc(m.file)}</th>
-        <td>${esc(m.task)}</td>
-        <td class="card-note">${esc(m.rows)} <span class="dim">+ 3 decoys per active</span></td>
-        <td>${esc(m.thr)}</td>
-      </tr>`).join("")}
-      </tbody></table></div>`;
-
-    try {
-      const v = await api("/api/interpretation");
-      const m = await api("/api/models");
-      renderConclusions(v, m);
-    } catch (e) { errorBox($("#conclusions"), e); }
+    });
   }
-
   function renderGlossary() {
     const all = window.GLOSSARY || [];
     const rows = all.filter((g) => {
@@ -1195,142 +1162,6 @@
       </tr>`).join("")}
       </tbody></table></div>
       <p class="card-note" style="margin-top:9px">${rows.length} of ${all.length} terms.</p>`;
-  }
-
-  function claim(n, verdict, title, body, evidence) {
-    const cls = verdict === "supported" ? "callout-good"
-      : verdict === "partial" ? "callout-warning" : "callout-critical";
-    const badge = verdict === "supported" ? '<span class="badge badge-good">supported</span>'
-      : verdict === "partial" ? '<span class="badge badge-warning">supported with a caveat</span>'
-      : '<span class="badge badge-critical">not supported</span>';
-    return `<div class="callout ${cls}" style="margin-bottom:14px">
-      <h4>${n}. ${esc(title)} ${badge}</h4>
-      <p class="card-note" style="margin-bottom:8px">${body}</p>
-      ${evidence ? `<dl class="kv" style="margin-top:8px">${evidence}</dl>` : ""}
-    </div>`;
-  }
-  const ev = (pairs) => pairs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join("");
-
-  function renderConclusions(v, m) {
-    const c = v.controls || {};
-    const a = c.measured_active || {};
-    const i = c.measured_inactive || {};
-    const d = v.domain || {};
-    const en = v.enrichment || {};
-    const disc = v.discrimination || {};
-    const rescue = (m.faah_rescue || {}).summary || {};
-    const probes = m.dili_probes || [];
-    const para = probes.find((p) => p.name === "paracetamol") || {};
-    const kaem = probes.find((p) => p.name === "kaempferol") || {};
-
-    $("#conclusions").innerHTML = [
-      claim(1, "supported",
-        "The models separate known actives from known inactives",
-        `Of the ${int(c.total_held_out)} library compounds removed for leakage control,
-         ${int(c.matched_in_curated_table)} appear in the curated activity table — and
-         <strong>most of those were measured <em>inactive</em></strong>, not active. Split
-         by what the data actually says, the separation is clean.
-         <br><br><strong>What it does not establish:</strong> these compounds were in
-         training. This is a memorisation check that confirms the pipeline is wired up
-         correctly — not evidence of generalisation.`,
-        ev([
-          ["Measured active", `n = ${int(a.n)} · median score <strong>${num(a.median_score, 4)}</strong> · ${a.above_90 || 0}/${int(a.n)} above 0.9`],
-          ["Measured inactive", `n = ${int(i.n)} · median score <strong>${num(i.median_score, 4)}</strong> · ${i.above_50 || 0}/${int(i.n)} above 0.5`],
-        ])),
-
-      claim(2, "supported",
-        "The decoys fixed the everything-is-active failure",
-        `This was the specific risk of training on 84%-positive data: a model that
-         returns high probabilities across the whole library, producing a ranking driven
-         by noise. It did not happen. The score distributions are sharply peaked near
-         zero with a thin tail, which is what a discriminating ranker looks like.`,
-        ev(Object.keys(disc).map((t) => [t,
-          `median <strong>${Number(disc[t].median).toExponential(1)}</strong> ·
-           99th pct ${num(disc[t].p99, 3)} ·
-           ${(disc[t].frac_above_half * 100).toFixed(2)}% above 0.5`]))),
-
-      claim(3, "partial",
-        "The shortlist is enriched in traditional pain plants",
-        `Compounds from the hand-curated ethnopharmacology seed list make up
-         ${((en.library_base_rate || 0) * 100).toFixed(1)}% of the library but
-         <strong>${((en.shortlist_rate || 0) * 100).toFixed(0)}% of the shortlist</strong> —
-         a ${en.fold}× enrichment. The base rate is identical in the filtered pool the
-         shortlist was drawn from, so this is not an artefact of the safety filters.
-         <br><br><strong>The caveat, and it is a real one:</strong> this is partly
-         circular. Those plants were put on the seed list <em>because</em> they have
-         documented pain use, and their compounds (capsaicinoids, cannabinoids,
-         sanshools) are chemically close to the known ligands in ChEMBL. The models are
-         rediscovering a relationship the seed list already encodes. Treat it as a
-         consistency check, not as independent validation.`,
-        ev([
-          ["Library base rate", `${((en.library_base_rate || 0) * 100).toFixed(2)}%`],
-          ["Eligible pool", `${int(en.eligible_pool)} compounds, ${((en.eligible_base_rate || 0) * 100).toFixed(2)}% seed`],
-          ["Shortlist", `${((en.shortlist_rate || 0) * 100).toFixed(0)}% seed`],
-          ["Enrichment", `<strong>${en.fold}×</strong>`],
-        ])),
-
-      claim(4, "supported",
-        "The FAAH blind spot is a data-coverage problem, not a representation problem",
-        `This is the strongest methodological result in the project, and the one most
-         worth presenting. Six known plant FAAH inhibitors, none in ChEMBL's FAAH set.
-         Each is scored by a model that never saw it. Adding just five curated literature
-         actives moves the median prediction by four orders of magnitude.
-         <br><br><strong>Why it matters:</strong> it cleanly separates two hypotheses
-         that usually get confused — "the features cannot express this chemistry" versus
-         "the training set has never seen this chemistry". It is the latter, and that is
-         fixable with data rather than with a new architecture.`,
-        ev([
-          ["Median p, ChEMBL-only model", `<strong>${Number(rescue.baseline_median_p).toExponential(1)}</strong>`],
-          ["Median p, +5 literature actives", `<strong>${num(rescue.loo_median_p, 3)}</strong>`],
-          ["Overlap with ChEMBL FAAH set", `${rescue.overlap_with_chembl} compounds`],
-        ])),
-
-      claim(5, "partial",
-        "The hepatic layer is a weak prior, and we rebuilt it to find that out",
-        `The old model was trained on TDC's 475-drug benchmark, which contains neither
-         paracetamol nor isoniazid, and it scored paracetamol 0.37 &mdash; low risk, for
-         the index compound of this project. We replaced it with three heads over
-         <strong>12,125 compounds</strong>: FDA DILIrank 2.0 for the clinical signal, and
-         two Tox21 HepG2 assays &mdash; mitochondrial membrane potential and
-         cytotoxicity &mdash; measured directly in liver cells. Paracetamol is now scored
-         ${num(para.p_hepatic || para.p_dili, 2)}.
-         <br><br><strong>That is a closed data gap, not a validated prediction.</strong>
-         Paracetamol is inside the training set now, so scoring it correctly proves
-         nothing; resubstitution on that head is 0.998, which is what memorisation looks
-         like. Tested properly &mdash; train on DILIrank v1, test on the drugs the FDA
-         added afterwards &mdash; it reaches <strong>0.68</strong>, and 0.65 on new
-         scaffolds with a confidence interval that touches chance. We also tried adding
-         ten Tox21 mechanism endpoints as features, with the target fixed in advance.
-         It made things worse, and we report that.
-         <br><br><strong>So it is weighted 0.35</strong>, not the 0.45 the internal
-         numbers first suggested. The structural alerts keep the hard veto: they flag
-         paracetamol at maximum severity on the exact aminophenol chemistry, and they are
-         the only layer that can see metabolism-dependent toxicity at all &mdash; HepG2
-         cells barely express CYP2E1, so paracetamol is measured <em>inactive</em> in both
-         Tox21 heads.`,
-        ev([
-          ["Training compounds", "<strong>12,125</strong> <span class=\"dim\">(was 462)</span>"],
-          ["paracetamol", `p = ${num(para.p_hepatic || para.p_dili, 3)} <span class="dim">(in training &mdash; not a test)</span>`],
-          ["kaempferol", `p = ${num(kaem.p_hepatic || kaem.p_dili, 3)} <span class="dim">(matches its measured Tox21 outcome)</span>`],
-          ["Temporal holdout", "<strong>0.68</strong> <span class=\"dim\">(0.65 on new scaffolds)</span>"],
-          ["Weight in composite", "0.35, versus an exponential penalty on alerts"],
-        ])),
-
-      claim(6, "partial",
-        "One fifth of the library is outside the models' competence",
-        `The applicability domain is doing real work rather than decorating the output.
-         A median max-similarity of ${num(d.median_ad, 2)} means the typical plant
-         compound is only loosely related to anything in the training set — which is the
-         expected consequence of training on synthetic drug chemistry and deploying on
-         plant chemistry.
-         <br><br><strong>Read this as a scope limit:</strong> for ${int(d.extrapolating)}
-         compounds the model is guessing, and the shortlist correctly excludes them.`,
-        ev([
-          ["In domain", `${int(d.in_domain)} (${((d.in_domain_rate || 0) * 100).toFixed(1)}%)`],
-          ["Extrapolating", `${int(d.extrapolating)} (${(100 - (d.in_domain_rate || 0) * 100).toFixed(1)}%)`],
-          ["Median max-similarity", num(d.median_ad, 3)],
-        ])),
-    ].join("");
   }
 
 
@@ -1480,7 +1311,7 @@
 
     checkArtefacts();
     const initial = location.hash.slice(1);
-    go(["overview", "science", "data", "models", "validation", "safety", "screen", "decoder"]
+    go(["overview", "science", "data", "models", "validation", "safety", "screen", "glossary"]
        .indexOf(initial) >= 0 ? initial : "overview");
   }
 
