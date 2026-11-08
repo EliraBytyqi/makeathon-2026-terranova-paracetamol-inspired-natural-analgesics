@@ -200,22 +200,3 @@ docs/           presentation documents
 ```
 
 ---
-
-## Scope and limitations
-
-Stated plainly, because they matter more than the headline numbers:
-
-- **Nothing here has been tested in a laboratory.** Every figure is a
-  computational prediction or a retrospective comparison against published
-  measurements.
-- **The three target models are not equally trustworthy.** CB1 is validated
-  including on novel chemistry; TRPV1 only near its training set; FAAH is weak
-  at 0.625 and should not be used to rank on its own.
-- **The hepatic panel is a weak statistical prior** (≈0.65 on a temporal
-  holdout of marketed drugs, 0.74–0.88 on held-out plant natural products). The
-  25 mechanism-based structural alerts, not the model, hold the veto — no
-  cell-based assay can see paracetamol's toxicity, because HepG2 cells barely
-  express CYP2E1.
-- **Roughly 60–80% of each model's negative class is presumed, not measured.**
-  Decoys are labelled `presumed_inactive` and carried at sample weight 0.4 so
-  the loss does not treat an assumption as a measurement.
