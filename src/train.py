@@ -170,21 +170,36 @@ def query_fingerprints(smiles_list) -> tuple[np.ndarray, np.ndarray]:
 
 
 def max_similarity_from_fps(Q: np.ndarray, q_idx: np.ndarray, n_total: int,
-                            train_fps, batch: int = 4096) -> np.ndarray:
-    """max_similarity for an already-fingerprinted query set."""
+                            train_fps, batch: int = 1024) -> np.ndarray:
+    """Max Tanimoto for pre-fingerprinted queries, in bounded-memory blocks.
+
+    Model bundles store training fingerprints as uint8. Casting the entire
+    matrix to float32 here needlessly multiplies its memory use by four on
+    every live prediction. Convert only a small block at a time instead.
+    """
     sims = np.zeros(n_total, dtype=np.float32)
-    T = np.asarray(train_fps, dtype=np.float32)
+    T = np.asarray(train_fps)
     if T.size == 0 or Q.size == 0:
         return sims
-    t_pop = T.sum(axis=1)
-    Tt = T.T
+
+    query_pop = Q.sum(axis=1)[:, None]
+    best = np.zeros(len(Q), dtype=np.float32)
     for start in range(0, len(Q), batch):
         qb = Q[start:start + batch]
-        inter = qb @ Tt
-        union = qb.sum(axis=1)[:, None] + t_pop[None, :] - inter
-        with np.errstate(divide="ignore", invalid="ignore"):
-            tan = np.where(union > 0, inter / union, 0.0)
-        sims[q_idx[start:start + batch]] = tan.max(axis=1)
+        qb_pop = query_pop[start:start + batch]
+        for t_start in range(0, len(T), batch):
+            # Limit the float32 working copy and similarity matrices to 1024
+            # training structures at a time (about 8 MiB for 2048-bit FPs).
+            tb = T[t_start:t_start + batch].astype(np.float32, copy=False)
+            t_pop = tb.sum(axis=1)[None, :]
+            inter = qb @ tb.T
+            union = qb_pop + t_pop - inter
+            with np.errstate(divide="ignore", invalid="ignore"):
+                tan = np.divide(inter, union, out=np.zeros_like(inter),
+                                where=union > 0)
+            best[start:start + len(qb)] = np.maximum(
+                best[start:start + len(qb)], tan.max(axis=1))
+    sims[q_idx] = best
     return sims
 
 
