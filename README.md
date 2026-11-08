@@ -8,6 +8,12 @@ Elira Bytyqi · Shkurta Jashari · Fjolla Nebihi
 
 ---
 
+## AI tools
+
+We used **Claude** as a coding assistant during development. It helped us write,
+review and debug parts of the project code. We reviewed and tested the code and
+remain responsible for the implementation and results.
+
 ## Project description
 
 ### The chosen challenge
