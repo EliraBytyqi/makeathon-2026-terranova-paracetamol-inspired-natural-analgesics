@@ -187,53 +187,6 @@ The project's own HTTP API is served by the dashboard and is also unauthenticate
 
 ---
 
-## Presentation
-
-### Live demo
-
-Start the dashboard and open **http://127.0.0.1:8000**. Nine views:
-
-1. **Overview** — headline numbers
-2. **The hypothesis** — the biochemistry
-3. **Data & provenance** — sources and curation attrition
-4. **Models** — architecture, features, performance
-5. **External validation** — the held-out test on measured outcomes
-6. **Safety layers** — structural alerts and PAINS
-7. **Screen explorer** — the candidate list and the full 145k screen
-8. **Live demo** — *paste any molecule and watch all five pipeline stages run*
-9. **ML decoder** — the project in machine-learning terms
-
-View 08 is the one to show first: pick **Hydroxy-α-sanshool** (our top hit —
-CB1 0.991, no alerts, shortlisted), then **Paracetamol** (inactive on all three
-targets, severity-3 reactive alert, disqualified). Nothing is precomputed; the
-models load and score on request in under a second.
-
-### Documents
-
-| Document | Path |
-|---|---|
-| Slide deck (10 slides) | `docs/` — exported from the presentation artifact |
-| 10-minute video script, two presenters | `docs/Terranova_Video_Script.pdf` |
-| Presentation plan and Q&A preparation | `docs/Terranova_Presentation_Plan.pdf` |
-| Written technical report | `results/REPORT.md` |
-
-### Screenshots
-
-Place exported images in `docs/screenshots/` and reference them here:
-
-```
-docs/screenshots/01-overview.png
-docs/screenshots/02-live-demo.png
-docs/screenshots/03-candidates.png
-docs/screenshots/04-knowledge-graph.png
-```
-
-### Video
-
-> Link to be added once the recording is uploaded.
-
----
-
 ## Repository layout
 
 ```
