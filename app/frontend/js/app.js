@@ -1071,6 +1071,8 @@
 
   async function runDemo(smiles, note) {
     var out = $("#demo-out");
+    var runButton = $("#demo-run");
+    if (runButton) runButton.disabled = true;
     $("#demo-note").textContent = "Running the pipeline on this structure...";
     out.innerHTML = '<div class="card" style="margin-top:18px">Scoring. The first run loads '
       + 'the models and can take a few seconds; later runs are immediate.</div>';
@@ -1082,6 +1084,8 @@
       out.innerHTML = '<div class="card empty" style="margin-top:18px">Could not score that structure.<br>'
         + esc(String((e && e.message) || e)) + '</div>';
       $("#demo-note").textContent = "";
+    } finally {
+      if (runButton) runButton.disabled = false;
     }
   }
 
@@ -1116,7 +1120,10 @@
     };
     if (mols.length) {
       sel.value = "0";
-      pick();
+      // Populate the default structure without running a costly prediction
+      // just from opening the page. Prediction starts on an explicit action.
+      $("#demo-smiles").value = mols[0].smiles;
+      $("#demo-note").textContent = "Ready. Click Run the pipeline to score this structure.";
     }
   }
 
