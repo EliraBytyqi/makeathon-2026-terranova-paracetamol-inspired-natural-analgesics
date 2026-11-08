@@ -64,7 +64,9 @@ def overview() -> dict:
                 }
 
     attr = data.attrition()
-    short = data.shortlist()
+    # The displayed shortlist is the experiment-ready, skeleton-deduplicated
+    # candidate set. Raw ranked rows remain available in the screen explorer.
+    short = data.candidates()
 
     return {
         "targets": list(data.TARGETS),

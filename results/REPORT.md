@@ -128,7 +128,7 @@ That is precisely why the two layers are not redundant, and why the DILI term is
 - within applicability domain: **95,869** (66.0%)
 - carrying a severity-3 reactive alert: **828**
 - PAINS-flagged: **13,281**
-- final shortlist: **50**
+- final distinct-candidate shortlist: **50**
 
 Composite score, with weights stated so the ranking is falsifiable:
 
@@ -140,35 +140,37 @@ composite = target_score
             × (1 - 0.35 × p_DILI)
 ```
 
-### Top candidates
+Target distribution among the 50 distinct candidates: TRPV1 35 / CB1 11 / FAAH 4.
 
-| compound_name | best_target | target_score | ad_best | n_reactive_alerts | p_dili | cns_like | composite_score | source_genera | npclass_class |
-|---|---|---|---|---|---|---|---|---|---|
-| Hydroxy alpha sanshool | CB1 | 0.991 | 1.000 | 0 | 0.377 | 1 | 0.990 | Zanthoxylum | N-acyl amines |
-| Hydroxy-Alpha-Sanshool | CB1 | 0.991 | 1.000 | 0 | 0.377 | 1 | 0.990 | Zanthoxylum | N-acyl amines |
-| (2E,6Z,8E,10Z)-N-(2-hydroxy-2-methylpropyl)d | CB1 | 0.991 | 1.000 | 0 | 0.377 | 1 | 0.990 | Zanthoxylum | N-acyl amines |
-| (8E)-N-(2-hydroxy-2-methylpropyl)dodeca-2,6, | CB1 | 0.991 | 1.000 | 0 | 0.377 | 1 | 0.990 | Zanthoxylum | N-acyl amines |
-| N-[(4-hydroxy-3-methoxyphenyl)methyl]-7-meth | TRPV1 | 1.000 | 0.935 | 0 | 0.418 | 1 | 0.982 | Capsicum | Capsaicins and Capsaicinoids $ Phenylalanine |
-| N-(4-aminobutyl)-3-(4-hydroxy-3-methoxypheny | TRPV1 | 0.973 | 0.653 | 0 | 0.374 | 1 | 0.969 | Iochroma|Magnolia|Nicotiana|Solanum | Polyamines |
-| Feruloylputrescine | TRPV1 | 0.973 | 0.653 | 0 | 0.374 | 1 | 0.969 | Colocasia|Iochroma|Nicotiana|Remusatia|Solan | Polyamines |
-| N-[(4-hydroxy-3-methoxyphenyl)methyl]-6-meth | TRPV1 | 1.000 | 0.851 | 0 | 0.451 | 1 | 0.968 | Capsicum | Capsaicins and Capsaicinoids $ Phenylalanine |
-| Nornorcapsaicin | TRPV1 | 1.000 | 0.851 | 0 | 0.451 | 1 | 0.968 | Capsicum | Capsaicins and Capsaicinoids $ Phenylalanine |
-| 3-(4-Hydroxy-3-methoxyphenyl)-1-(piperidin-1 | TRPV1 | 1.000 | 1.000 | 0 | 0.455 | 1 | 0.967 | Piper | Piperidine alkaloids |
-| (2E,4E,8Z,10E,12E)-N-(2-hydroxypropan-2-yl)t | CB1 | 0.985 | 0.676 | 0 | 0.405 | 1 | 0.966 | Zanthoxylum | N-acyl amines |
-| (2Z,6E,8E,10E)-N-(2-methylpropyl)dodeca-2,6, | CB1 | 0.957 | 0.879 | 0 | 0.372 | 1 | 0.952 | Zanthoxylum | N-acyl amines |
-| beta-Sanshool | CB1 | 0.957 | 0.879 | 0 | 0.372 | 1 | 0.952 | Zanthoxylum | N-acyl amines |
-| (E,E,Z,E)-N-(2-Methylpropyl)-2,6,8,10-dodeca | CB1 | 0.957 | 0.879 | 0 | 0.372 | 1 | 0.952 | Zanthoxylum | N-acyl amines |
-| Sanshool | CB1 | 0.957 | 0.879 | 0 | 0.372 | 1 | 0.952 | Echinacea|Zanthoxylum | N-acyl amines |
-| 2,6,8,10-Dodecatetraenamide, N-(2-methylprop | CB1 | 0.957 | 0.879 | 0 | 0.372 | 1 | 0.952 | Zanthoxylum | N-acyl amines |
-| 5-(1,3-benzodioxol-5-yl)-N-isobutyl-penta-2, | TRPV1 | 1.000 | 1.000 | 0 | 0.494 | 1 | 0.951 | Piper | nan |
-| Isopiperlonguminine | TRPV1 | 1.000 | 1.000 | 0 | 0.494 | 1 | 0.951 | Piper | nan |
-| Scutifolamide A | TRPV1 | 1.000 | 1.000 | 0 | 0.494 | 1 | 0.951 | Piper | nan |
-| (E)-5-(4-hydroxy-3-methoxy-phenyl)-1-(1-pipe | TRPV1 | 0.990 | 0.620 | 0 | 0.404 | 1 | 0.951 | Piper | Piperidine alkaloids |
-| 5-(4-Hydroxy-3-methoxyphenyl)-1-piperidin-1- | TRPV1 | 0.990 | 0.620 | 0 | 0.404 | 1 | 0.951 | Piper | Piperidine alkaloids |
-| (2E,4E)-5-(1,3-benzodioxol-5-yl)-N-[(2S)-but | TRPV1 | 0.989 | 0.700 | 0 | 0.471 | 1 | 0.949 | Piper | nan |
-| 3-(4-Hydroxy-3-methoxyphenyl)prop-2-enyl 3-m | TRPV1 | 0.982 | 0.549 | 0 | 0.479 | 1 | 0.940 | Coreopsis|Eremanthus|Lychnophora | Cinnamic acids and derivatives |
-| Coniferyl isovalerate | TRPV1 | 0.982 | 0.549 | 0 | 0.479 | 1 | 0.940 | Coreopsis|Eremanthus|Lychnophora | Cinnamic acids and derivatives |
-| nan | TRPV1 | 0.996 | 0.660 | 0 | 0.522 | 1 | 0.936 | Asarum|Piper | nan |
+### Top distinct candidates
+
+| compound_name | best_target | target_score | ad_best | cns_like | composite_score | source_genera | npclass_class | n_variants_collapsed |
+|---|---|---|---|---|---|---|---|---|
+| Hydroxy alpha sanshool | CB1 | 0.991 | 1.000 | 1 | 0.990 | Zanthoxylum | N-acyl amines | 4 |
+| N-[(4-hydroxy-3-methoxyphenyl)methyl]-7-meth | TRPV1 | 1.000 | 0.935 | 1 | 0.982 | Capsicum | Capsaicins and Capsaicinoids $ Phenylalanine | 1 |
+| N-(4-aminobutyl)-3-(4-hydroxy-3-methoxypheny | TRPV1 | 0.973 | 0.653 | 1 | 0.969 | Iochroma|Magnolia|Nicotiana|Solanum | Polyamines | 2 |
+| N-[(4-hydroxy-3-methoxyphenyl)methyl]-6-meth | TRPV1 | 1.000 | 0.851 | 1 | 0.968 | Capsicum | Capsaicins and Capsaicinoids $ Phenylalanine | 2 |
+| 3-(4-Hydroxy-3-methoxyphenyl)-1-(piperidin-1 | TRPV1 | 1.000 | 1.000 | 1 | 0.967 | Piper | Piperidine alkaloids | 1 |
+| (2E,4E,8Z,10E,12E)-N-(2-hydroxypropan-2-yl)t | CB1 | 0.985 | 0.676 | 1 | 0.966 | Zanthoxylum | N-acyl amines | 1 |
+| (2Z,6E,8E,10E)-N-(2-methylpropyl)dodeca-2,6, | CB1 | 0.957 | 0.879 | 1 | 0.952 | Zanthoxylum | N-acyl amines | 5 |
+| 5-(1,3-benzodioxol-5-yl)-N-isobutyl-penta-2, | TRPV1 | 1.000 | 1.000 | 1 | 0.951 | Piper | nan | 3 |
+| (E)-5-(4-hydroxy-3-methoxy-phenyl)-1-(1-pipe | TRPV1 | 0.990 | 0.620 | 1 | 0.951 | Piper | Piperidine alkaloids | 2 |
+| (2E,4E)-5-(1,3-benzodioxol-5-yl)-N-[(2S)-but | TRPV1 | 0.989 | 0.700 | 1 | 0.949 | Piper | nan | 1 |
+| 3-(4-Hydroxy-3-methoxyphenyl)prop-2-enyl 3-m | TRPV1 | 0.982 | 0.549 | 1 | 0.940 | Coreopsis|Eremanthus|Lychnophora | Cinnamic acids and derivatives | 2 |
+| nan | TRPV1 | 0.996 | 0.660 | 1 | 0.936 | Asarum|Piper | nan | 4 |
+| 5-(1,3-benzodioxol-5-yl)-N-(3-methylbutyl)pe | TRPV1 | 0.984 | 0.792 | 1 | 0.935 | Piper | nan | 2 |
+| (2E,4E)-5-(1,3-benzodioxol-5-yl)-N-[(2R)-2-m | TRPV1 | 0.993 | 0.812 | 1 | 0.934 | Piper | nan | 1 |
+| Methyl 17-ethyl-14-hydroxy-6-methoxy-3,13-di | CB1 | 0.948 | 0.570 | 1 | 0.931 | Tabernaemontana | Iboga type | 1 |
+| (2E,4E)-5-(4-hydroxy-3-methoxyphenyl)-1-(pip | TRPV1 | 0.996 | 0.837 | 1 | 0.921 | Piper | Piperidine alkaloids | 2 |
+| (6aS,9S,10S,10aS)-6,6,9-trimethyl-3-pentyl-7 | CB1 | 0.987 | 0.727 | 1 | 0.913 | Cannabis | Cannabinoids | 2 |
+| methyl (1S,11R,13R,15S,16S,18S)-15-ethyl-19- | CB1 | 0.935 | 0.794 | 1 | 0.912 | Tabernaemontana | Iboga type | 1 |
+| 3-(4-hydroxy-3-methoxyphenyl)-N-[2-(3-hydrox | TRPV1 | 0.972 | 0.627 | 1 | 0.902 | Chenopodium|Pisonia | Cinnamic acid amides | 2 |
+| (E)-3-(3-hydroxy-4-methoxyphenyl)-N-[2-(4-hy | TRPV1 | 0.969 | 0.596 | 1 | 0.901 | Chenopodium | Cinnamic acid amides | 2 |
+| 3-(4-hydroxy-3-methoxyphenyl)-N-(2-phenyleth | TRPV1 | 0.986 | 0.640 | 1 | 0.899 | Annona|Solanum | Cinnamic acid amides | 2 |
+| Cannabitriol | CB1 | 0.983 | 0.768 | 1 | 0.895 | Cannabis | Cannabinoids | 1 |
+| Ethyl palmitate | FAAH | 0.976 | 0.720 | 0 | 0.892 | Achillea|Aloe|Aristolochia|Artemisia|Azadira | Wax monoesters | 1 |
+| 1-(4'-Hydroxy-3'-methoxyphenyl)-7-octen-3-on | TRPV1 | 0.924 | 0.608 | 1 | 0.887 | Zingiber | nan | 1 |
+| 2-Hydroxyethyl octadeca-9,12-dienoate | TRPV1 | 0.999 | 0.581 | 0 | 0.885 | Tagetes | Wax monoesters | 2 |
 
 ## External validation
 
@@ -189,7 +191,7 @@ Per-compound detail: `results/literature_validation.csv`.
 
 A smoke test showed the FAAH model assigning near-zero probability to kaempferol and genistein — the very natural-product FAAH inhibitors that motivated this project.
 
-We checked why, rather than assuming (`src/check_faah_flavonoids.py`):
+We checked why, rather than assuming:
 
 ```
 FAAH rows in curated ChEMBL data:     4,979  (4,257 compounds)

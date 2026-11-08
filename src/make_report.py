@@ -194,6 +194,8 @@ def main():
 
     # ---------------- screening -----------------
     st = read_json(RESULTS / "screening_stats.json")
+    candidate_path = RESULTS / "candidates_top50.csv"
+    candidate_df = pd.read_csv(candidate_path) if candidate_path.exists() else None
     if st:
         A("## Screening\n")
         A(f"- library screened: **{st['library_size']:,}** unique plant compounds")
@@ -203,7 +205,8 @@ def main():
           f"({st['in_domain_rate']:.1%})")
         A(f"- carrying a severity-3 reactive alert: **{st['severity3_flagged']:,}**")
         A(f"- PAINS-flagged: **{st['pains_flagged']:,}**")
-        A(f"- final shortlist: **{st['shortlist_size']}**\n")
+        n_candidates = len(candidate_df) if candidate_df is not None else st["shortlist_size"]
+        A(f"- final distinct-candidate shortlist: **{n_candidates}**\n")
         A("Composite score, with weights stated so the ranking is falsifiable:\n")
         A("```\ncomposite = target_score\n            × exp(-%.2f × alert_severity_sum)\n"
           "            × ad_confidence\n            × cns_bonus (%.2f if CNS-like)\n"
@@ -211,15 +214,17 @@ def main():
           % (st["weights"]["alert_penalty"], st["weights"]["cns_bonus"],
              st["weights"].get("dili_weight", 0)))
 
-    sl = RESULTS / "shortlist.csv"
-    if sl.exists():
-        df = pd.read_csv(sl)
+    if candidate_df is not None:
+        by_target = candidate_df["best_target"].value_counts()
+        A(f"Target distribution among the {len(candidate_df)} distinct candidates: "
+          + " / ".join(f"{t} {int(by_target.get(t, 0))}"
+                       for t in ("TRPV1", "CB1", "FAAH")) + ".\n")
         cols = [c for c in ["compound_name", "best_target", "target_score",
                             "ad_best", "n_reactive_alerts", "p_dili",
                             "cns_like", "composite_score", "source_genera",
-                            "npclass_class"] if c in df.columns]
-        A("### Top candidates\n")
-        A(md_table(df[cols], max_rows=25))
+                            "npclass_class", "n_variants_collapsed"] if c in candidate_df.columns]
+        A("### Top distinct candidates\n")
+        A(md_table(candidate_df[cols], max_rows=25))
 
     # ---------------- validation -----------------
     lv = read_json(RESULTS / "literature_validation_summary.json")

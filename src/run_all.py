@@ -27,6 +27,7 @@ STAGES = [
     ("train_hepatic.py", ROOT / "models/hepatic_panel.pkl"),
     ("train.py", ROOT / "results/training_report.json"),
     ("screen.py", ROOT / "results/screening_all.csv.gz"),
+    ("../scripts/make_candidate_list.py", ROOT / "results/candidates_top50.csv"),
     ("validate_literature.py", ROOT / "results/literature_validation.csv"),
     ("kg.py", ROOT / "results/knowledge_graph.graphml"),
     ("make_report.py", ROOT / "results/REPORT.md"),

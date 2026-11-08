@@ -147,7 +147,7 @@
           { label: "After leakage control", value: s.screened, note: "training overlap removed" },
           { label: "Within applicability domain", value: s.in_domain, note: "max Tanimoto ≥ 0.25" },
           { label: "No PAINS flag", value: Math.max(0, (s.in_domain || 0) - (s.pains_flagged || 0)), note: "assay-interference filter" },
-          { label: "Final shortlist", value: s.shortlist_size, note: "top 50 by composite score" },
+          { label: "Final shortlist", value: o.shortlist_size, note: "top 50 distinct chemical skeletons" },
         ],
       });
 
@@ -173,7 +173,7 @@
       const ctl = await api("/api/compounds/controls?page_size=8&sort=target_score&desc=true");
       $("#controls-preview").innerHTML = controlsTable(ctl.rows);
 
-      const sl = await api("/api/compounds/shortlist?page_size=10");
+      const sl = await api("/api/compounds/candidates?page_size=10");
       $("#overview-shortlist").innerHTML = shortlistTable(sl.rows);
       wireRowClicks($("#overview-shortlist"));
     } catch (e) { errorBox($("#overview-stats"), e); }
